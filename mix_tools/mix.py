@@ -16,34 +16,8 @@ import json
 
 import xml.etree.ElementTree as ET
 
-import siptools.xml.xmlutil
-
 MIX_NS = 'http://www.loc.gov/mix/v20'
 XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance'
-
-
-def serialize(root_element):
-    """Serialize ElementTree structure with MIX namespace mapping.
-
-    This modifies the default "ns0:tag" style prefixes to "mix:tag"
-    prefixes.
-
-    :element: Starting element to serialize
-    :returns: Serialized XML as string
-
-    """
-
-    def register_namespace(prefix, uri):
-        """foo"""
-        ns_map = getattr(ET, '_namespace_map')
-        ns_map[uri] = prefix
-
-    register_namespace('mix', MIX_NS)
-    register_namespace('xsi', XSI_NS)
-
-    siptools.xml.xmlutil.indent(root_element)
-
-    return ET.tostring(root_element, encoding='utf8')
 
 
 def mix_ns(tag, prefix=""):
