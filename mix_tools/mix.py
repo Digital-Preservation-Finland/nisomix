@@ -12,12 +12,11 @@ References:
 """
 
 
-import json
-
 import xml.etree.ElementTree as ET
+from common_xml_utils.utils import xsi_ns, XSI_NS
+
 
 MIX_NS = 'http://www.loc.gov/mix/v20'
-XSI_NS = 'http://www.w3.org/2001/XMLSchema-instance'
 
 
 def mix_ns(tag, prefix=""):
@@ -33,18 +32,6 @@ def mix_ns(tag, prefix=""):
         tag = tag[0].upper() + tag[1:]
         return '{%s}%s%s' % (MIX_NS, prefix, tag)
     return '{%s}%s' % (MIX_NS, tag)
-
-
-def xsi_ns(tag):
-    """Prefix ElementTree tags with XSI namespace.
-
-    object -> {http://www.loc.gov/mix/v20}object
-
-    :tag: Tag name as string
-    :returns: Prefixed tag
-
-    """
-    return '{%s}%s' % (XSI_NS, tag)
 
 
 def _element(tag, prefix=""):
