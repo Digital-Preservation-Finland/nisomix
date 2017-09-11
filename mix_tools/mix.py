@@ -118,8 +118,10 @@ def mix_BasicDigitalObjectInformation(
     mix_BasicDigitalObjectInformation = _element(
         'BasicDigitalObjectInformation')
 
-    mix_byteorder = _subelement(mix_BasicDigitalObjectInformation, 'byteOrder')
-    mix_byteorder.text = byteOrder
+    if byteOrder:
+        mix_byteorder = _subelement(mix_BasicDigitalObjectInformation,
+                'byteOrder')
+        mix_byteorder.text = byteOrder
     if Compression_elements:
         for element in Compression_elements:
             mix_BasicDigitalObjectInformation.append(element)
