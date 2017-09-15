@@ -13,7 +13,7 @@ References:
 
 
 import xml.etree.ElementTree as ET
-from common_xml_utils.utils import xsi_ns, XSI_NS
+from xml_helpers.utils import xsi_ns, XSI_NS
 
 
 MIX_NS = 'http://www.loc.gov/mix/v20'

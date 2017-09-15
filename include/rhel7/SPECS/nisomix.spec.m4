@@ -12,7 +12,7 @@
 Name:           nisomix
 Version:        %{file_version}
 Release:        %{file_release_number}%{file_release_tag}.%{file_build_number}.git%{file_commit_ref}%{?dist}
-Summary:        MIX tools
+Summary:        NISO MIX tools
 Group:          Applications/Archiving
 License:        LGPLv3+
 URL:            http://www.csc.fi
@@ -20,10 +20,10 @@ Source0:        %{file_prefix}-v%{file_version}%{?file_release_tag}-%{file_build
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:      noarch
 
-Requires:       python python-setuptools common-xml-utils
+Requires:       python python-setuptools xml-helpers
 
 %description
-MIX tools
+NISO MIX tools
 
 %prep
 %setup -n %{file_prefix}-v%{file_version}%{?file_release_tag}-%{file_build_number}-g%{file_commit_ref}
