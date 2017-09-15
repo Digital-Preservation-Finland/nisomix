@@ -1,5 +1,5 @@
 """
-Install mix-tools
+Install nisomix
 """
 
 import os
@@ -7,9 +7,9 @@ from setuptools import setup, find_packages
 
 
 def main():
-    """Install mix-tools"""
+    """Install nisomix"""
     setup(
-        name='mix_tools',
+        name='nisomix',
         packages=find_packages(exclude=['tests', 'tests.*']),
         version='0.1')
 
