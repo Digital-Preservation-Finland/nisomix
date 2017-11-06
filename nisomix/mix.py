@@ -12,7 +12,7 @@ References:
 """
 
 
-import xml.etree.ElementTree as ET
+import lxml.etree as ET
 from xml_helpers.utils import xsi_ns, XSI_NS
 
 
