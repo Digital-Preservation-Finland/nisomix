@@ -88,13 +88,13 @@ def mix_mix(BasicDigitalObjectInformation=None, BasicImageInformation=None,
         'http://www.loc.gov/mix/v20 '
         'http://www.loc.gov/mix/mix.xsd')
 
-    if BasicDigitalObjectInformation:
+    if BasicDigitalObjectInformation is not None:
         mix.append(BasicDigitalObjectInformation)
-    if BasicImageInformation:
+    if BasicImageInformation is not None:
         mix.append(BasicImageInformation)
     if ImageCaptureMetadata:
         mix.append(ImageCaptureMetadata)
-    if ImageAssessmentMetadata:
+    if ImageAssessmentMetadata is not None:
         mix.append(ImageAssessmentMetadata)
 
     return mix
