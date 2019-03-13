@@ -1,3 +1,4 @@
+"""Test nisomix features."""
 import pytest
 from nisomix.mix import (MIX_NS, mix_ns, mix_mix,
                          mix_Compression,
@@ -18,6 +19,7 @@ NAMESPACES = {'mix': MIX_NS}
     ('second', 'myPrefix'),
 ])
 def test_mix_ns(tag, prefix):
+    """Test the namespace usage."""
     new_ns = mix_ns(tag, prefix)
     if prefix:
         assert prefix in new_ns
@@ -39,7 +41,10 @@ def _assert_mix_obj(mix_obj):
         namespaces=NAMESPACES)[0].text == '10'
 
 
+# pylint: disable=invalid-name
+# invalid-name: The names are according to what they are named as XML element.
 def test_mix_ok():
+    """Test that we can initialize and add content to mix."""
     mix1 = mix_mix()
     compression = mix_Compression(
         compressionScheme='JPEG 2000 Lossless',
@@ -72,7 +77,12 @@ def test_mix_ok():
     _assert_mix_obj(mix1)
 
 
+# pylint: disable=invalid-name
+# invalid-name: The names are according to what they are named as XML element.
 def test_mix_mix():
+    """Test that we can pass content upon initializing mix whilst testing
+    to see if any other aspect of mix content generation breaks.
+    """
     compression = mix_Compression(
         compressionScheme='JPEG 2000 Lossless',
         compressionRatio='10'
