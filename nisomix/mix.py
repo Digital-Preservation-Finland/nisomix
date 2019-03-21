@@ -11,10 +11,8 @@ References:
 
 """
 
-
 import lxml.etree as ET
-from xml_helpers.utils import xsi_ns, XSI_NS
-
+from xml_helpers.utils import xsi_ns
 
 MIX_NS = 'http://www.loc.gov/mix/v20'
 
@@ -115,18 +113,16 @@ def mix_BasicDigitalObjectInformation(
 
     """
 
-    mix_BasicDigitalObjectInformation = _element(
-        'BasicDigitalObjectInformation')
+    container = _element('BasicDigitalObjectInformation')
 
     if byteOrder:
-        mix_byteorder = _subelement(mix_BasicDigitalObjectInformation,
-                'byteOrder')
+        mix_byteorder = _subelement(container, 'byteOrder')
         mix_byteorder.text = byteOrder
     if Compression_elements:
         for element in Compression_elements:
-            mix_BasicDigitalObjectInformation.append(element)
+            container.append(element)
 
-    return mix_BasicDigitalObjectInformation
+    return container
 
 
 def mix_Compression(compressionScheme=None, compressionSchemeLocalList=None,
@@ -145,25 +141,25 @@ def mix_Compression(compressionScheme=None, compressionSchemeLocalList=None,
         </mix:Compression>
 
     """
-    mix_compression = _element('Compression')
+    container = _element('Compression')
 
-    mix_compressionScheme = _subelement(mix_compression, 'compressionScheme')
+    mix_compressionScheme = _subelement(container, 'compressionScheme')
     mix_compressionScheme.text = compressionScheme
 
     if compressionScheme == 'enumerated in local list':
         mix_compressionSchemeLocalList = _subelement(
-            mix_compression, 'compressionSchemeLocalList')
+            container, 'compressionSchemeLocalList')
         mix_compressionSchemeLocalList.text = compressionSchemeLocalList
 
     if compressionScheme == 'enumerated in local list':
         mix_compressionSchemeLocalValue = _subelement(
-            mix_compression, 'compressionSchemeLocalValue')
+            container, 'compressionSchemeLocalValue')
         mix_compressionSchemeLocalValue.text = compressionSchemeLocalValue
 
-    mix_compressionRatio = _subelement(mix_compression, 'compressionRatio')
+    mix_compressionRatio = _subelement(container, 'compressionRatio')
     mix_compressionRatio.text = compressionRatio
 
-    return mix_compression
+    return container
 
 
 def mix_BasicImageInformation(
@@ -252,9 +248,9 @@ def mix_BasicImageInformation(
 
     """
 
-    mix_BasicImageInformation = _element('BasicImageInformation')
+    container = _element('BasicImageInformation')
     mix_BasicImageCharacteristics = _subelement(
-        mix_BasicImageInformation, 'BasicImageCharacteristics')
+        container, 'BasicImageCharacteristics')
 
     mix_imageWidth = _subelement(mix_BasicImageCharacteristics, 'imageWidth')
     mix_imageWidth.text = imageWidth
@@ -330,14 +326,18 @@ def mix_BasicImageInformation(
         for element in ReferenceBlackWhite_elements:
             mix_PhotometricInterpretation.append(element)
 
-    if codec or codecVersion or codestreamProfile or complianceClass or tileWidth or tileHeight or qualityLayers or resolutionLevels or zoomLevels or djvuFormat:
-        mix_SpecialFormatCharacteristics = _subelement(mix_BasicImageInformation,
-                                                       'SpecialFormatCharacteristics')
-    if codec or codecVersion or codestreamProfile or complianceClass or tileWidth or tileHeight or qualityLayers or resolutionLevels:
+    if any((codec, codecVersion, codestreamProfile, complianceClass, tileWidth,
+            tileHeight, qualityLayers, resolutionLevels, zoomLevels,
+            djvuFormat)):
+        mix_SpecialFormatCharacteristics = _subelement(
+            container,
+            'SpecialFormatCharacteristics')
+    if any((codec, codecVersion, codestreamProfile, complianceClass, tileWidth,
+            tileHeight, qualityLayers, resolutionLevels)):
         mix_JPEG2000 = _subelement(
             mix_SpecialFormatCharacteristics, 'JPEG2000')
 
-    if codec or codecVersion or codestreamProfile or complianceClass:
+    if any((codec, codecVersion, codestreamProfile, complianceClass)):
         mix_CodecCompliance = _subelement(mix_JPEG2000, 'CodecCompliance')
 
     if codec:
@@ -391,7 +391,7 @@ def mix_BasicImageInformation(
         mix_djvuFormat = _subelement(mix_Djvu, 'djvuFormat')
         mix_djvuFormat.text = djvuFormat
 
-    return mix_BasicImageInformation
+    return container
 
 
 def mix_Component(
@@ -410,26 +410,27 @@ def mix_Component(
 
     """
 
-    mix_Component = _element('Component')
+    container = _element('Component')
 
-    mix_componentPhotometricInterpretation = _subelement(mix_Component,
-                                                         'componentPhotometricInterpretation')
-    mix_componentPhotometricInterpretation.text = componentPhotometricInterpretation
+    cpi_element = _subelement(
+        container, 'componentPhotometricInterpretation'
+    )
+    cpi_element.text = componentPhotometricInterpretation
 
-    mix_footroom = _subelement(mix_Component, 'footroom')
+    mix_footroom = _subelement(container, 'footroom')
     mix_footroom.text = footroom
 
-    mix_headroom = _subelement(mix_Component, 'headroom')
+    mix_headroom = _subelement(container, 'headroom')
     mix_headroom.text = headroom
 
-    return mix_Component
+    return container
 
 
 def mix_ReferenceBlackWhite(child_elements=None):
     """Returns MIX ReferenceBlackWhite element
 
     :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
-    :child_elements: Any child elements appended to the ReferenceBlackWhite (default=None) 
+    :child_elements: Any child elements appended to the ReferenceBlackWhite (default=None)
 
     Returns the following ElementTree structure::
 
@@ -438,47 +439,74 @@ def mix_ReferenceBlackWhite(child_elements=None):
         </mix:ReferenceBlackWhite>
 
     """
-    mix_ReferenceBlackWhite = _element('ReferenceBlackWhite')
+    container = _element('ReferenceBlackWhite')
 
     if child_elements:
         for element in child_elements:
-            mix_ReferenceBlackWhite.append(element)
+            container.append(element)
 
-    return mix_ReferenceBlackWhite
+    return container
 
 
 def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
-                             sourceXDimensionValue=None, sourceXDimensionUnit=None,
-                             sourceYDimensionValue=None, sourceYDimensionUnit=None,
-                             sourceZDimensionValue=None, sourceZDimensionUnit=None,
-                             dateTimeCreated=None, imageProducer_elements=None, captureDevice=None,
+                             sourceXDimensionValue=None,
+                             sourceXDimensionUnit=None,
+                             sourceYDimensionValue=None,
+                             sourceYDimensionUnit=None,
+                             sourceZDimensionValue=None,
+                             sourceZDimensionUnit=None,
+                             dateTimeCreated=None, imageProducer_elements=None,
+                             captureDevice=None,
                              scannerManufacturer=None, scannerModelName=None,
                              scannerModelNumber=None, scannerModelSerialNo=None,
                              xOpticalResolution=None, yOpticalResolution=None,
-                             opticalResolutionUnit=None, scannerSensor=None, scanningSoftwareName=None,
-                             scanningSoftwareVersionNo=None, digitalCameraManufacturer=None,
-                             DigitalCameraModelName=None, DigitalCameraModelNumber=None,
-                             DigitalCameraModelSerialNo=None, cameraSensor=None, fNumber=None,
-                             exposureTime=None, exposureProgram=None, spectralSensitivity_elements=None,
-                             isoSpeedRatings=None, oECF=None, rationalType=None, exifVersion=None,
-                             shutterSpeedValue=None, apertureValue=None, brightnessValue=None,
-                             exposureBiasValue=None, maxApertureValue=None, distance=None,
-                             minDistance=None, maxDistance=None, meteringMode=None,
-                             lightSource=None, flash=None, focalLength=None, flashEnergy=None,
-                             backLight=None, exposureIndex=None, sensingMethod=None,
-                             cfaPattern=None, autoFocus=None, xPrintAspectRatio=None,
-                             yPrintAspectRatio=None, gpsVersionID=None, gpsLatitudeRef=None,
+                             opticalResolutionUnit=None, scannerSensor=None,
+                             scanningSoftwareName=None,
+                             scanningSoftwareVersionNo=None,
+                             digitalCameraManufacturer=None,
+                             DigitalCameraModelName=None,
+                             DigitalCameraModelNumber=None,
+                             DigitalCameraModelSerialNo=None, cameraSensor=None,
+                             fNumber=None,
+                             exposureTime=None, exposureProgram=None,
+                             spectralSensitivity_elements=None,
+                             isoSpeedRatings=None, oECF=None, rationalType=None,
+                             exifVersion=None,
+                             shutterSpeedValue=None, apertureValue=None,
+                             brightnessValue=None,
+                             exposureBiasValue=None, maxApertureValue=None,
+                             distance=None,
+                             minDistance=None, maxDistance=None,
+                             meteringMode=None,
+                             lightSource=None, flash=None, focalLength=None,
+                             flashEnergy=None,
+                             backLight=None, exposureIndex=None,
+                             sensingMethod=None,
+                             cfaPattern=None, autoFocus=None,
+                             xPrintAspectRatio=None,
+                             yPrintAspectRatio=None, gpsVersionID=None,
+                             gpsLatitudeRef=None,
                              GPSLatitude_element=None, gpsLongitudeRef=None,
-                             GPSLongitude_element=None, gpsAltitudeRef=None, gpsAltitude=None,
-                             gpsTimeStamp=None, gpsSatellites=None, gpsStatus=None,
-                             gpsMeasureMode=None, gpsDOP=None, gpsSpeedRef=None, gpsSpeed=None,
-                             gpsTrackRef=None, gpsTrack=None, gpsImgDirectionRef=None,
-                             gpsImgDirection=None, gpsMapDatum=None, gpsDestLatitudeRef=None,
-                             GPSDestLatitude_element=None, gpsDestLongitudeRef=None,
-                             GPSDestLongitude_element=None, gpsDestBearingRef=None,
-                             gpsDestBearing=None, gpsDestDistanceRef=None, gpsDestDistance=None,
-                             gpsProcessingMethod=None, gpsAreaInformation=None, gpsDateStamp=None,
-                             gpsDifferential=None, typeOfOrientationType=None, methodology=None):
+                             GPSLongitude_element=None, gpsAltitudeRef=None,
+                             gpsAltitude=None,
+                             gpsTimeStamp=None, gpsSatellites=None,
+                             gpsStatus=None,
+                             gpsMeasureMode=None, gpsDOP=None, gpsSpeedRef=None,
+                             gpsSpeed=None,
+                             gpsTrackRef=None, gpsTrack=None,
+                             gpsImgDirectionRef=None,
+                             gpsImgDirection=None, gpsMapDatum=None,
+                             gpsDestLatitudeRef=None,
+                             GPSDestLatitude_element=None,
+                             gpsDestLongitudeRef=None,
+                             GPSDestLongitude_element=None,
+                             gpsDestBearingRef=None,
+                             gpsDestBearing=None, gpsDestDistanceRef=None,
+                             gpsDestDistance=None,
+                             gpsProcessingMethod=None, gpsAreaInformation=None,
+                             gpsDateStamp=None,
+                             gpsDifferential=None, typeOfOrientationType=None,
+                             methodology=None):
     """Returns MIX ImageCaptureMetadata element
 
     :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
@@ -616,9 +644,9 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
         </mix:ImageCaptureMetadata>
 
     """
-    mix_ImageCaptureMetadata = _element('ImageCaptureMetadata')
+    container = _element('ImageCaptureMetadata')
     mix_SourceInformation = _subelement(
-        mix_ImageCaptureMetadata, 'SourceInformation')
+        container, 'SourceInformation')
     mix_sourceType = _subelement(mix_SourceInformation, 'sourceType')
     mix_sourceType.text = sourceType
 
@@ -654,7 +682,7 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
                                            'sourceZDimensionUnit')
     mix_sourceZDimensionUnit.text = sourceZDimensionUnit
 
-    mix_GeneralCaptureInformation = _subelement(mix_ImageCaptureMetadata,
+    mix_GeneralCaptureInformation = _subelement(container,
                                                 'GeneralCaptureInformation')
     mix_dateTimeCreated = _subelement(
         mix_GeneralCaptureInformation, 'dateTimeCreated')
@@ -671,7 +699,7 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
     mix_captureDevice.text = captureDevice
 
     mix_ScannerCapture = _subelement(
-        mix_ImageCaptureMetadata, 'ScannerCapture')
+        container, 'ScannerCapture')
     mix_scannerManufacturer = _subelement(mix_ScannerCapture,
                                           'scannerManufacturer')
     mix_scannerManufacturer.text = scannerManufacturer
@@ -710,7 +738,7 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
     mix_scanningSoftwareVersionNo = _subelement(mix_ScannerCapture,
                                                 'scanningSoftwareVersionNo')
 
-    mix_DigitalCameraCapture = _subelement(mix_ImageCaptureMetadata,
+    mix_DigitalCameraCapture = _subelement(container,
                                            'DigitalCameraCapture')
     mix_digitalCameraManufacturer = _subelement(mix_DigitalCameraCapture,
                                                 'digitalCameraManufacturer')
@@ -730,11 +758,11 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
                                                  'DigitalCameraModelSerialNo')
     mix_digitalCameraModelSerialNo.text = digitalCameraModelSerialNo
 
-    mix_cameraSensor = _subelement(mix_ImageCaptureMetadata,
+    mix_cameraSensor = _subelement(container,
                                    'cameraSensor')
     mix_cameraSensor.text = cameraSensor
 
-    mix_CameraCaptureSettings = _subelement(mix_ImageCaptureMetadata,
+    mix_CameraCaptureSettings = _subelement(container,
                                             'CameraCaptureSettings')
     mix_ImageData = _subelement(mix_CameraCaptureSettings,
                                 'ImageData')
@@ -921,7 +949,7 @@ def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
     mix_methodology = _subelement(mix_ImageData, 'methodology')
     mix_methodology.text = methodology
 
-    return mix_ImageCaptureMetadata
+    return container
 
 
 def mix_SourceID(sourceIDType=None, sourceIDValue=None):
@@ -961,28 +989,34 @@ def mix_gpsGroup(degrees=None, minutes=None, seconds=None):
         </mix:sourceID>
 
     """
-    mix_gpsGroup = _element('gpsGroup')
-    mix_degrees = _subelement(mix_gpsGroup, 'degrees')
+    elem = _element('gpsGroup')
+    mix_degrees = _subelement(elem, 'degrees')
     mix_degrees.text = degrees
 
-    mix_minutes = _subelement(mix_gpsGroup, 'minutes')
+    mix_minutes = _subelement(elem, 'minutes')
     mix_minutes.text = minutes
 
-    mix_seconds = _subelement(mix_gpsGroup, 'seconds')
+    mix_seconds = _subelement(elem, 'seconds')
     mix_seconds.text = seconds
 
-    return mix_gpsGroup
+    return elem
 
 
 def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
-                                samplingFrequencyUnit=None, xSamplingFrequency=None,
-                                ySamplingFrequency=None, bitsPerSampleValue_elements=None,
-                                bitsPerSampleUnit=None, samplesPerPixel=None, extraSamples_elements=None,
+                                samplingFrequencyUnit=None,
+                                xSamplingFrequency=None,
+                                ySamplingFrequency=None,
+                                bitsPerSampleValue_elements=None,
+                                bitsPerSampleUnit=None, samplesPerPixel=None,
+                                extraSamples_elements=None,
                                 colormapReference=None, embeddedColormap=None,
-                                grayResponseCurve_elements=None, grayResponseUnit=None,
+                                grayResponseCurve_elements=None,
+                                grayResponseUnit=None,
                                 WhitePoint_elements=None,
-                                PrimaryChromaticities_elements=None, targetType_elements=None,
-                                TargetID_elements=None, externalTarget_elements=None,
+                                PrimaryChromaticities_elements=None,
+                                targetType_elements=None,
+                                TargetID_elements=None,
+                                externalTarget_elements=None,
                                 performanceData_elements=None):
     """Returns MIX ImageAssessmentMetadata element
 
@@ -1025,9 +1059,9 @@ def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
         </mix:ImageAssessmentMetadata>
 
     """
-    mix_ImageAssessmentMetadata = _element('ImageAssessmentMetadata')
+    container = _element('ImageAssessmentMetadata')
     mix_SpatialMetrics = _subelement(
-        mix_ImageAssessmentMetadata, 'SpatialMetrics')
+        container, 'SpatialMetrics')
 
     if samplingFrequencyPlane:
         mix_samplingFrequencyPlane = _subelement(
@@ -1050,7 +1084,7 @@ def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
         mix_ySamplingFrequency.text = ySamplingFrequency
 
     mix_ImageColorEncoding = _subelement(
-        mix_ImageAssessmentMetadata, 'ImageColorEncoding')
+        container, 'ImageColorEncoding')
     mix_BitsPerSample = _subelement(mix_ImageColorEncoding, 'BitsPerSample')
     if bitsPerSampleValue_elements:
         for element in bitsPerSampleValue_elements:
@@ -1103,7 +1137,7 @@ def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
             mix_ImageColorEncoding.append(element)
 
     if targetType_elements or TargetID_elements or externalTarget_elements or performanceData_elements:
-        mix_TargetData = _subelement(mix_ImageAssessmentMetadata, 'TargetData')
+        mix_TargetData = _subelement(container, 'TargetData')
 
     if targetType_elements:
         for element in targetType_elements:
@@ -1125,7 +1159,7 @@ def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
                 mix_TargetData, 'performanceData')
             mix_performanceData.text = element
 
-    return mix_ImageAssessmentMetadata
+    return container
 
 
 def mix_WhitePoint(whitePointXValue=None, whitePointYValue=None):
@@ -1141,19 +1175,21 @@ def mix_WhitePoint(whitePointXValue=None, whitePointYValue=None):
         </mix:WhitePoint>
 
     """
-    mix_WhitePoint = _element('WhitePoint')
-    mix_whitePointXValue = _subelement(mix_WhitePoint, 'whitePointXValue')
+    container = _element('WhitePoint')
+    mix_whitePointXValue = _subelement(container, 'whitePointXValue')
     mix_whitePointXValue.text = whitePointXValue
 
-    mix_whitePointYValue = _subelement(mix_WhitePoint, 'whitePointYValue')
+    mix_whitePointYValue = _subelement(container, 'whitePointYValue')
     mix_whitePointYValue.text = whitePointYValue
 
-    return mix_WhitePoint
+    return container
 
 
 def mix_PrimaryChromaticities(primaryChromaticitiesRedX=None,
-                              primaryChromaticitiesRedY=None, primaryChromaticitiesGreenX=None,
-                              primaryChromaticitiesGreenY=None, primaryChromaticitiesBlueX=None,
+                              primaryChromaticitiesRedY=None,
+                              primaryChromaticitiesGreenX=None,
+                              primaryChromaticitiesGreenY=None,
+                              primaryChromaticitiesBlueX=None,
                               primaryChromaticitiesBlueY=None):
     """Returns MIX PrimaryChromaticities element
 
@@ -1171,32 +1207,32 @@ def mix_PrimaryChromaticities(primaryChromaticitiesRedX=None,
         </mix:PrimaryChromaticities>
 
     """
-    mix_PrimaryChromaticities = _element('PrimaryChromaticities')
-    mix_primaryChromaticitiesRedX = _subelement(mix_PrimaryChromaticities,
+    container = _element('PrimaryChromaticities')
+    mix_primaryChromaticitiesRedX = _subelement(container,
                                                 'primaryChromaticitiesRedX')
     mix_primaryChromaticitiesRedX.text = primaryChromaticitiesRedX
 
-    mix_primaryChromaticitiesRedY = _subelement(mix_PrimaryChromaticities,
+    mix_primaryChromaticitiesRedY = _subelement(container,
                                                 'primaryChromaticitiesRedY')
     mix_primaryChromaticitiesRedY.text = primaryChromaticitiesRedY
 
     mix_primaryChromaticitiesGreenX = _subelement(
-        mix_PrimaryChromaticities, 'primaryChromaticitiesGreenX')
+        container, 'primaryChromaticitiesGreenX')
     mix_primaryChromaticitiesGreenX.text = primaryChromaticitiesGreenX
 
     mix_primaryChromaticitiesGreenY = _subelement(
-        mix_PrimaryChromaticities, 'primaryChromaticitiesGreenY')
+        container, 'primaryChromaticitiesGreenY')
     mix_primaryChromaticitiesGreenY.text = primaryChromaticitiesGreenY
 
-    mix_primaryChromaticitiesBlueX = _subelement(mix_PrimaryChromaticities,
+    mix_primaryChromaticitiesBlueX = _subelement(container,
                                                  'primaryChromaticitiesBlueX')
     mix_primaryChromaticitiesBlueX.text = primaryChromaticitiesBlueX
 
-    mix_primaryChromaticitiesBlueY = _subelement(mix_PrimaryChromaticities,
+    mix_primaryChromaticitiesBlueY = _subelement(container,
                                                  'primaryChromaticitiesBlueY')
     mix_primaryChromaticitiesBlueY.text = primaryChromaticitiesBlueY
 
-    return mix_PrimaryChromaticities
+    return container
 
 
 def mix_TargetID(targetManufacturer=None, targetName=None, targetNo=None,
@@ -1215,17 +1251,17 @@ def mix_TargetID(targetManufacturer=None, targetName=None, targetNo=None,
         </mix:TargetID>
 
     """
-    mix_TargetID = _element('TargetID')
-    mix_targetManufacturer = _subelement(mix_TargetID, 'targetManufacturer')
+    container = _element('TargetID')
+    mix_targetManufacturer = _subelement(container, 'targetManufacturer')
     mix_targetManufacturer.text = targetManufacturer
 
-    mix_targetName = _subelement(mix_TargetID, 'targetName')
+    mix_targetName = _subelement(container, 'targetName')
     mix_targetName.text = targetName
 
-    mix_targetNo = _subelement(mix_TargetID, 'targetNo')
+    mix_targetNo = _subelement(container, 'targetNo')
     mix_targetNo.text = targetNo
 
-    mix_targetMedia = _subelement(mix_TargetID, 'targetMedia')
+    mix_targetMedia = _subelement(container, 'targetMedia')
     mix_targetMedia.text = targetMedia
 
-    return mix_TargetID
+    return container
