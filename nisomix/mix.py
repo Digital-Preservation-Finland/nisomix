@@ -47,7 +47,7 @@ def _element(tag, prefix=""):
     :returns: ElementTree element object
 
     """
-    return ET.Element(mix_ns(tag, prefix))
+    return ET.Element(mix_ns(tag, prefix), nsmap={'mix': MIX_NS})
 
 
 def _subelement(parent, tag, prefix=""):
@@ -60,7 +60,7 @@ def _subelement(parent, tag, prefix=""):
     :returns: Created subelement
 
     """
-    return ET.SubElement(parent, mix_ns(tag, prefix))
+    return ET.SubElement(parent, mix_ns(tag, prefix), nsmap={'mix': MIX_NS})
 
 
 def mix_mix(BasicDigitalObjectInformation=None, BasicImageInformation=None,
