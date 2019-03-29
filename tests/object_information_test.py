@@ -1,9 +1,11 @@
 """Test nisomix features."""
+import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
 from nisomix.object_information import (digital_object_information, identifier,
                                         compression, format_designation,
-                                        format_registry, fixity)
+                                        format_registry, fixity,
+                                        normalized_byteorder, ByteOrderError)
 
 
 def test_digitalobjectinformation():
@@ -97,3 +99,25 @@ def test_fixity():
                '</mix:Fixity>')
 
     assert h.compare_trees(fix, ET.fromstring(xml_str))
+
+
+@pytest.mark.parametrize(('input_str', 'expected_output'), [
+    ('big endian', 'big endian'),
+    ('little endian', 'little endian'),
+    ('Little endian', 'little endian'),
+    ('big_endian', 'big endian'),
+    ('Big-endian (something)', 'big endian'),
+    ('foo', None),
+])
+def test_normalized_byteorder(input_str, expected_output):
+    """
+    Tests the normalized_byteorder function by asserting that it outputs
+    allowed values from different srings, or raises an exception if it
+    couldn't determine the value.
+    """
+    if expected_output:
+        assert normalized_byteorder(input_str) == expected_output
+    else:
+        with pytest.raises(ByteOrderError):
+            normalized_byteorder(input_str)
+

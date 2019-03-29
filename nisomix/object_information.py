@@ -7,6 +7,11 @@ from nisomix.mix import _element, _subelement
 from nisomix.utils import basic_do_order
 
 
+class ByteOrderError(Exception):
+    """Raised when byte order is invalid."""
+    pass
+
+
 def digital_object_information(byte_order=None, file_size=None,
                                child_elements=None):
     """Returns MIX BasicDigitalObjectInformation element
@@ -33,7 +38,7 @@ def digital_object_information(byte_order=None, file_size=None,
         child_elements.append(file_size_el)
     if byte_order:
         byte_order_el = _element('byteOrder')
-        byte_order_el.text = byte_order
+        byte_order_el.text = normalized_byteorder(byte_order)
         child_elements.append(byte_order_el)
 
     child_elements.sort(key=basic_do_order)
@@ -188,3 +193,27 @@ def fixity(algorithm=None, digest=None, originator=None):
         originator_el.text = originator
 
     return container
+
+
+def normalized_byteorder(byte_order):
+    """
+    Tries to fix the byte_order so that the value corresponds to the
+    values allowed in the MIX schema. Normalizes hyphens, underscores
+    and capitalized letters.
+
+    :returns: The (fixed) byte order as a string
+    """
+    allowed_values = ['big endian', 'little endian']
+    byte_order = byte_order.replace('-', ' ').replace('_', ' ')
+    byte_order = byte_order.lower()
+
+    if byte_order in allowed_values:
+        return byte_order
+
+    if 'big' in byte_order and 'endian' in byte_order:
+        return 'big endian'
+
+    if 'little' in byte_order and 'endian' in byte_order:
+        return 'little endian'
+
+    raise ByteOrderError
