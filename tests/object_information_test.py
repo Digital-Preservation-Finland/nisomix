@@ -120,4 +120,3 @@ def test_normalized_byteorder(input_str, expected_output):
     else:
         with pytest.raises(ByteOrderError):
             normalized_byteorder(input_str)
-
