@@ -1,17 +1,7 @@
 """Test nisomix features."""
 import pytest
-from nisomix.mix import (MIX_NS, mix_ns, mix_mix,
-                         mix_Compression,
-                         mix_BasicDigitalObjectInformation,
-                         mix_BasicImageInformation,
-                         mix_Component,
-                         mix_ImageAssessmentMetadata,
-                         mix_PrimaryChromaticities,
-                         mix_ReferenceBlackWhite,
-                         mix_TargetID,
-                         mix_WhitePoint)
-
-NAMESPACES = {'mix': MIX_NS}
+import lxml.etree as ET
+from nisomix.mix import MIX_NS, mix_ns, mix_mix, _element, _subelement
 
 
 @pytest.mark.parametrize(('tag', 'prefix'), [
@@ -22,152 +12,67 @@ def test_mix_ns(tag, prefix):
     """Test the namespace usage."""
     new_ns = mix_ns(tag, prefix)
     if prefix:
-        assert prefix in new_ns
-        tag = tag[0].upper() + tag[1:]
-    assert tag in new_ns
+        tag = prefix + tag[0].upper() + tag[1:]
+    assert new_ns == '{%s}%s' % (MIX_NS, tag)
 
 
-def _assert_mix_obj(mix_obj):
-    assert mix_obj.xpath(
-        "/mix:mix/mix:BasicDigitalObjectInformation/mix:byteOrder",
-        namespaces=NAMESPACES)[0].text == 'big endian'
-    assert mix_obj.xpath(
-        ("/mix:mix/mix:BasicDigitalObjectInformation/mix:Compression/"
-         "mix:compressionScheme"),
-        namespaces=NAMESPACES)[0].text == 'JPEG 2000 Lossless'
-    assert mix_obj.xpath(
-        ("/mix:mix/mix:BasicDigitalObjectInformation/mix:Compression/"
-         "mix:compressionRatio"),
-        namespaces=NAMESPACES)[0].text == '10'
-
-
-# pylint: disable=invalid-name
-# invalid-name: The names are according to what they are named as XML element.
-def test_mix_ok():
-    """Test that we can initialize and add content to mix."""
-    mix1 = mix_mix()
-    compression = mix_Compression(
-        compressionScheme='JPEG 2000 Lossless',
-        compressionRatio='10'
-    )
-
-    basicDigitalObjectInformation = mix_BasicDigitalObjectInformation(
-        byteOrder='big endian',
-        Compression_elements=[compression]
-    )
-
-    basicImageInformation = mix_BasicImageInformation(
-        imageWidth='1024',
-        imageHeight='768', colorSpace='ICCBased', iccProfileName='Adobe RGB',
-        iccProfileVersion='1998',
-        iccProfileURI='http://www.adobe.com/digitalimag/adobergb.html',
-        qualityLayers='12', resolutionLevels='6'
-    )
-
-    imageAssessmentMetadata = mix_ImageAssessmentMetadata(
-        bitsPerSampleValue_elements=['16, 16, 16'],
-        bitsPerSampleUnit='integer', samplesPerPixel='4',
-        extraSamples_elements=['unspecified data'],
-        colormapReference='http://foo.bar'
-    )
-
-    mix1.append(basicDigitalObjectInformation)
-    mix1.append(basicImageInformation)
-    mix1.append(imageAssessmentMetadata)
-    _assert_mix_obj(mix1)
-
-
-# pylint: disable=invalid-name
-# invalid-name: The names are according to what they are named as XML element.
-def test_mix_mix():
-    """Test that we can pass content upon initializing mix whilst testing
-    to see if any other aspect of mix content generation breaks.
+def test_element():
     """
-    compression = mix_Compression(
-        compressionScheme='JPEG 2000 Lossless',
-        compressionRatio='10'
-    )
+    Tests the _element function by asserting that the element is created
+    correctly both with and without a prefix. Also tests that the
+    correct namespace is used in the element and that the namespace is
+    mapped to the intended prefix when serializing the XML to string.
+    """
+    elem1 = _element('test')
+    assert elem1.tag == '{http://www.loc.gov/mix/v20}test'
+    assert ET.tostring(elem1) == \
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20"/>'
 
-    compression2 = mix_Compression(
-        compressionScheme='enumerated in local list',
-        compressionSchemeLocalList='file:///tmp/tmpschemelist',
-        compressionSchemeLocalValue='JPEG 2000 Lossless',
-        compressionRatio='10'
-    )
-    basicDigitalObjectInformation = mix_BasicDigitalObjectInformation(
-        byteOrder='big endian',
-        Compression_elements=[compression, compression2]
-    )
+    elem2 = _element('test', 'pre')
+    assert elem2.tag == '{http://www.loc.gov/mix/v20}preTest'
 
-    basicImageInformation = mix_BasicImageInformation(
-        imageWidth='1024',
-        imageHeight='768', colorSpace='ICCBased', iccProfileName='Adobe RGB',
-        iccProfileVersion='1998',
-        iccProfileURI='http://www.adobe.com/digitalimag/adobergb.html',
-        localProfileName='Adobe RGB',
-        localProfileURL='http://www.adobe.com/digitalimag/adobergb.html',
-        embeddedProfile='QWRvYmUgUkdC',  # Base64 encoded.
-        yCbCrSubsampleHoriz='1', yCbCrSubsampleVert='2', yCbCrPositioning='1',
-        lumaRed='1', lumaGreen='1', lumaBlue='1',
-        ReferenceBlackWhite_elements=[
-            mix_ReferenceBlackWhite([
-                mix_Component(
-                    componentPhotometricInterpretation='R',
-                    headroom='1',
-                    footroom='1'
-                )
-            ])
-        ],
-        codec='OpenJPEG', codecVersion='2.3.0', codestreamProfile='P0',
-        complianceClass='C0',
-        tileWidth='1', tileHeight='1',
-        zoomLevels='1',
-        djvuFormat='bundled',
-        qualityLayers='12', resolutionLevels='6'
-    )
 
-    imageAssessmentMetadata = mix_ImageAssessmentMetadata(
-        bitsPerSampleValue_elements=['16, 16, 16'],
-        bitsPerSampleUnit='integer', samplesPerPixel='4',
-        extraSamples_elements=[
-            'unspecified data'],
-        colormapReference='http://foo.bar',
-        samplingFrequencyPlane='camera/scanner focal plane',
-        samplingFrequencyUnit='no absolute unit of measurement',
-        xSamplingFrequency='1',
-        ySamplingFrequency='1',
-        embeddedColormap='d2hpdGU=',  # Base64 encoded.
-        grayResponseCurve_elements=['64'],
-        grayResponseUnit='3',
-        WhitePoint_elements=[
-            mix_WhitePoint(whitePointXValue='1', whitePointYValue='1')
-        ],
-        PrimaryChromaticities_elements=[
-            mix_PrimaryChromaticities(
-                primaryChromaticitiesRedX='1',
-                primaryChromaticitiesRedY='1',
-                primaryChromaticitiesGreenX='1',
-                primaryChromaticitiesGreenY='1',
-                primaryChromaticitiesBlueX='1',
-                primaryChromaticitiesBlueY='1'
-            )
-        ],
-        targetType_elements=['0'],
-        TargetID_elements=[
-            mix_TargetID(
-                targetManufacturer='Foobar Inc',
-                targetName='Foo',
-                targetNo='Version 1',
-                targetMedia='Ektachrome Transparency'
-            )
-        ],
-        externalTarget_elements=['foobar.jpg'],
-        performanceData_elements=['foobar.txt']
+def test_subelement():
+    """
+    Tests the _subelement function by asserting that the element was
+    created correctly as a child element of its given parent element
+    and that the parent element contains the created subelement.
+    """
+    elem = _element('test')
+    subelem = _subelement(elem, 'test', 'pre')
 
-    )
+    assert subelem.tag == '{http://www.loc.gov/mix/v20}preTest'
+    assert subelem.getparent() == elem
+    assert elem.xpath('./*')[0] == subelem
+    assert len(elem) == 1
+    assert ET.tostring(elem) == (
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
+        '<mix:preTest/></mix:test>')
 
-    mix2 = mix_mix(BasicDigitalObjectInformation=basicDigitalObjectInformation,
-                   BasicImageInformation=basicImageInformation,
-                   ImageAssessmentMetadata=imageAssessmentMetadata)
 
-    _assert_mix_obj(mix2)
+def test_mix():
+    """
+    Tests that the mix root element is created and tests that the child
+    elements in the mix root are sorted properly.
+    """
+    mix1 = mix_mix()
+
+    assert mix1.xpath('.')[0].tag == '{http://www.loc.gov/mix/v20}mix'
+    assert len(mix1) == 0
+
+    child_elems = []
+    information = _element('BasicDigitalObjectInformation')
+    child_elems.append(information)
+    history = _element('ChangeHistory')
+    child_elems.append(history)
+    capture = _element('ImageCaptureMetadata')
+    child_elems.append(capture)
+
+    mix2 = mix_mix(child_elements=child_elems)
+    assert len(mix2) == 3
+    assert mix2.xpath('./*')[0].tag == \
+        '{http://www.loc.gov/mix/v20}BasicDigitalObjectInformation'
+    assert mix2.xpath('./*')[1].tag == \
+        '{http://www.loc.gov/mix/v20}ImageCaptureMetadata'
+    assert mix2.xpath('./*')[2].tag == \
+        '{http://www.loc.gov/mix/v20}ChangeHistory'
