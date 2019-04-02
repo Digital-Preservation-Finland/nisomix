@@ -7,6 +7,7 @@ from nisomix.utils import RestrictedElementError
 from nisomix.capture_metadata import (image_capture_metadata,
                                       source_information, source_id,
                                       source_size, capture_information,
+                                      device_capture,
                                       gps_data,
                                       _gps_group)
 
@@ -132,6 +133,52 @@ def test_capture_information_error():
 
     with pytest.raises(RestrictedElementError):
         capture_information(device='foo')
+
+
+def test_device_capture_scanner():
+    """
+    Tests that the element ScannerCapture is created correctly using
+    the device_capture function.
+    """
+    model = _element('ScannerModel')
+    max_res = _element('MaximumOpticalResolution')
+    software = _element('ScanningSystemSoftware')
+    mix = device_capture(device_type='scanner', manufacturer='acme',
+                         sensor='undefined',
+                         child_elements=[software, model, max_res])
+
+    xml_str = ('<mix:ScannerCapture '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:scannerManufacturer>acme</mix:scannerManufacturer>'
+               '<mix:ScannerModel/><mix:MaximumOpticalResolution/>'
+               '<mix:scannerSensor>undefined</mix:scannerSensor>'
+               '<mix:ScanningSystemSoftware/>'
+               '</mix:ScannerCapture>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_device_capture_camer():
+    """
+    Tests that the element DigitalCameraCapture is created correctly
+    using the device_capture function.
+    """
+    model = _element('DigitalCameraModel')
+    settings = _element('CameraCaptureSettings')
+    mix = device_capture(device_type='camera', manufacturer='acme',
+                         sensor='undefined',
+                         child_elements=[settings, model])
+
+    xml_str = ('<mix:DigitalCameraCapture '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:digitalCameraManufacturer>acme'
+               '</mix:digitalCameraManufacturer>'
+               '<mix:DigitalCameraModel/>'
+               '<mix:cameraSensor>undefined</mix:cameraSensor>'
+               '<mix:CameraCaptureSettings/>'
+               '</mix:DigitalCameraCapture>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
 
 
 def test_gps_group():

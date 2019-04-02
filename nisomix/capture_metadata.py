@@ -225,19 +225,23 @@ def device_capture(device_type, manufacturer=None, sensor=None,
 
     if not child_elements:
         child_elements = []
-    container = _element('capture', prefix=prefixes[device_type])
+
+    container = _element(
+        'capture',
+        prefix=prefixes[device_type][0].capitalize()
+        + prefixes[device_type][1:])
 
     if manufacturer:
         manufacturer_el = _element('manufacturer',
                                    prefix=prefixes[device_type])
         manufacturer_el.text = manufacturer
-        child_elements.append(manufacturer)
+        child_elements.append(manufacturer_el)
 
     if sensor and device_type == 'scanner':
         if sensor in SCANNER_SENSOR_TYPES:
             sensor_el = _element('scannerSensor')
             sensor_el.text = sensor
-            child_elements.append(sensor)
+            child_elements.append(sensor_el)
         else:
             raise RestrictedElementError(
                 'The value "%s" is invalid for scannerSensor, accepted '
@@ -248,7 +252,7 @@ def device_capture(device_type, manufacturer=None, sensor=None,
         if sensor in CAMERA_SENSOR_TYPES:
             sensor_el = _element('cameraSensor')
             sensor_el.text = sensor
-            child_elements.append(sensor)
+            child_elements.append(sensor_el)
         else:
             raise RestrictedElementError(
                 'The value "%s" is invalid for cameraSensor, accepted '
