@@ -1,570 +1,574 @@
 """Functions for reading and generating MIX Data Dictionaries as
 xml.etree.ElementTree data structures.
-
-References:
-
-    * MIX http://www.loc.gov/standards/mix/
-    * Schema documentation: Data Dictionary - Technical Metadata for
-                            Digital Still Images (ANSI/NISO Z39.87-2006)
-    * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
-
 """
 
-import lxml.etree as ET
-from xml_helpers.utils import xsi_ns
-from nisomix.utils import MIX_NS, NAMESPACES
+from nisomix.mix import _element, _subelement, _rationale_element
+from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
+                           CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
+                           OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
+                           image_capture_order, scanner_capture_order,
+                           camera_capture_order, RestrictedElementError,
+                           image_data_order, gps_data_order)
 
 
-def mix_ImageCaptureMetadata(sourceType=None, SourceID_elements=None,
-                             sourceXDimensionValue=None,
-                             sourceXDimensionUnit=None,
-                             sourceYDimensionValue=None,
-                             sourceYDimensionUnit=None,
-                             sourceZDimensionValue=None,
-                             sourceZDimensionUnit=None,
-                             dateTimeCreated=None, imageProducer_elements=None,
-                             captureDevice=None,
-                             scannerManufacturer=None, scannerModelName=None,
-                             scannerModelNumber=None, scannerModelSerialNo=None,
-                             xOpticalResolution=None, yOpticalResolution=None,
-                             opticalResolutionUnit=None, scannerSensor=None,
-                             scanningSoftwareName=None,
-                             scanningSoftwareVersionNo=None,
-                             digitalCameraManufacturer=None,
-                             DigitalCameraModelName=None,
-                             DigitalCameraModelNumber=None,
-                             DigitalCameraModelSerialNo=None, cameraSensor=None,
-                             fNumber=None,
-                             exposureTime=None, exposureProgram=None,
-                             spectralSensitivity_elements=None,
-                             isoSpeedRatings=None, oECF=None, rationalType=None,
-                             exifVersion=None,
-                             shutterSpeedValue=None, apertureValue=None,
-                             brightnessValue=None,
-                             exposureBiasValue=None, maxApertureValue=None,
-                             distance=None,
-                             minDistance=None, maxDistance=None,
-                             meteringMode=None,
-                             lightSource=None, flash=None, focalLength=None,
-                             flashEnergy=None,
-                             backLight=None, exposureIndex=None,
-                             sensingMethod=None,
-                             cfaPattern=None, autoFocus=None,
-                             xPrintAspectRatio=None,
-                             yPrintAspectRatio=None, gpsVersionID=None,
-                             gpsLatitudeRef=None,
-                             GPSLatitude_element=None, gpsLongitudeRef=None,
-                             GPSLongitude_element=None, gpsAltitudeRef=None,
-                             gpsAltitude=None,
-                             gpsTimeStamp=None, gpsSatellites=None,
-                             gpsStatus=None,
-                             gpsMeasureMode=None, gpsDOP=None, gpsSpeedRef=None,
-                             gpsSpeed=None,
-                             gpsTrackRef=None, gpsTrack=None,
-                             gpsImgDirectionRef=None,
-                             gpsImgDirection=None, gpsMapDatum=None,
-                             gpsDestLatitudeRef=None,
-                             GPSDestLatitude_element=None,
-                             gpsDestLongitudeRef=None,
-                             GPSDestLongitude_element=None,
-                             gpsDestBearingRef=None,
-                             gpsDestBearing=None, gpsDestDistanceRef=None,
-                             gpsDestDistance=None,
-                             gpsProcessingMethod=None, gpsAreaInformation=None,
-                             gpsDateStamp=None,
-                             gpsDifferential=None, typeOfOrientationType=None,
-                             methodology=None):
+def image_capture_metadata(orientation=None, methodology=None,
+                           child_elements=None):
     """Returns MIX ImageCaptureMetadata element
 
-    :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
-
-    Returns the following ElementTree structure::
+    Returns the following sorted ElementTree structure::
 
         <mix:ImageCaptureMetadata>
-            <mix:SourceInformation>
-                <mix:sourceType></mix:sourceType>
-                {{ SourceID elements }}
-                <mix:SourceSize>
-                    <mix:SourceXDimension>
-                        <mix:sourceXDimensionValue></mix:sourceXDimensionValue>
-                        <mix:sourceXDimensionUnit></mix:sourceXDimensionUnit>
-                    </mix:SourceXDimension>
-                    <mix:SourceYDimension>
-                        <mix:sourceYDimensionValue></mix:sourceYDimensionValue>
-                        <mix:sourceYDimensionUnit></mix:sourceYDimensionUnit>
-                    </mix:SourceYDimension>
-                    <mix:SourceZDimension>
-                        <mix:sourceZDimensionValue></mix:sourceZDimensionValue>
-                        <mix:sourceZDimensionUnit></mix:sourceZDimensionUnit>
-                    </mix:SourceZDimension>
-                </mix:SourceSize>
-            </mix:SourceInformation>
-            <mix:GeneralCaptureInformation>
-                <mix:dateTimeCreated></mix:dateTimeCreated>
-                {{ imageProducer elements }}
-                <mix:captureDevice></mix:captureDevice>
-            </mix:GeneralCaptureInformation>
-            <mix:ScannerCapture>
-                <mix:scannerManufacturer></mix:scannerManufacturer>
-                <mix:scannerModel>
-                    <mix:scannerModelName></mix:scannerModelName>
-                    <mix:scannerModelNumber></mix:scannerModelNumber>
-                    <mix:scannerModelSerialNo></mix:scannerModelSerialNo>
-                </mix:scannerModel>
-                <mix:MaximumOpticalResolution>
-                    <mix:xOpticalResolution></mix:xOpticalResolution>
-                    <mix:yOpticalResolution></mix:yOpticalResolution>
-                    <mix:opticalResolutionUnit></mix:opticalResolutionUnit>
-                </mix:MaximumOpticalResolution>
-                <mix:scannerSensor></mix:scannerSensor>
-                <mix:ScanningSystemSoftware>
-                    <mix:scanningSoftwareName></mix:scanningSoftwareName>
-                    <mix:scanningSoftwareVersionNo></mix:scanningSoftwareVersionNo>
-                </mix:ScanningSystemSoftware>
-            </mix:ScannerCapture>
-            <mix:DigitalCameraCapture>
-                <mix:digitalCameraManufacturer></mix:digitalCameraManufacturer>
-                <mix:DigitalCameraModel>
-                    <mix:DigitalCameraModelName></mix:DigitalCameraModelName>
-                    <mix:DigitalCameraModelNumber></mix:DigitalCameraModelNumber>
-                    <mix:DigitalCameraModelSerialNo></mix:DigitalCameraModelSerialNo>
-                </mix:DigitalCameraModel>
-                <mix:cameraSensor></mix:cameraSensor>
-                <mix:CameraCaptureSettings>
-                    <mix:ImageData>
-                        <mix:fNumber></mix:fNumber>
-                        <mix:exposureTime></mix:exposureTime>
-                        <mix:spectralSensitivity></mix:spectralSensitivity>
-                        <mix:isoSpeedRatings></mix:isoSpeedRatings>
-                        <mix:oECF></mix:oECF>
-                        <mix:exifVersion></mix:exifVersion>
-                        <mix:shutterSpeedValue></mix:shutterSpeedValue>
-                        <mix:apertureValue></mix:apertureValue>
-                        <mix:brightnessValue></mix:brightnessValue>
-                        <mix:exposureBiasValue></mix:exposureBiasValue>
-                        <mix:maxApertureValue></mix:maxApertureValue>
-                        <mix:SubjectDistance>
-                            <mix:distance></mix:distance>
-                            <mix:MinMaxDistance>
-                                <mix:minDistance></mix:minDistance>
-                                <mix:maxDistance></mix:maxDistance>
-                            </mix:MinMaxDistance>
-                        </mix:SubjectDistance>
-                        <mix:meteringMode></mix:meteringMode>
-                        <mix:lightSource></mix:lightSource>
-                        <mix:flash></mix:flash>
-                        <mix:focalLength></mix:focalLength>
-                        <mix:flashEnergy></mix:flashEnergy>
-                        <mix:backLight></mix:backLight>
-                        <mix:exposureIndex></mix:exposureIndex>
-                        <mix:sensingMethod></mix:sensingMethod>
-                        <mix:cfaPattern></mix:cfaPattern>
-                        <mix:autoFocus></mix:autoFocus>
-                        <mix:PrintAspectRatio>
-                            <mix:xPrintAspectRatio></mix:xPrintAspectRatio>
-                            <mix:yPrintAspectRatio></mix:yPrintAspectRatio>
-                        </mix:PrintAspectRatio>
-                        <mix:GPSData>
-                            <mix:gpsVersionID></mix:gpsVersionID>
-                            <mix:gpsLatitudeRef></mix:gpsLatitudeRef>
-                            {{ GPSLatitude gpsGroup element }}
-                            <mix:gpsLongitudeRef></mix:gpsLongitudeRef>
-                            {{ GPSLongitude gpsGroup element }}
-                            <mix:gpsAltitudeRef></mix:gpsAltitudeRef>
-                            <mix:gpsAltitude></mix:gpsAltitude>
-                            <mix:gpsTimeStamp></mix:gpsTimeStamp>
-                            <mix:gpsSatellites></mix:gpsSatellites>
-                            <mix:gpsStatus></mix:gpsStatus>
-                            <mix:gpsMeasureMode></mix:gpsMeasureMode>
-                            <mix:gpsDOP></mix:gpsDOP>
-                            <mix:gpsSpeedRef></mix:gpsSpeedRef>
-                            <mix:gpsSpeed></mix:gpsSpeed>
-                            <mix:gpsTrackRef></mix:gpsTrackRef>
-                            <mix:gpsTrack></mix:gpsTrack>
-                            <mix:gpsImgDirectionRef></mix:gpsImgDirectionRef>
-                            <mix:gpsImgDirection></mix:gpsImgDirection>
-                            <mix:gpsMapDatum></mix:gpsMapDatum>
-                            <mix:gpsDestLatitudeRef></mix:gpsDestLatitudeRef>
-                            {{ GPSDestLatitude gpsGroup element }}
-                            <mix:gpsDestLongitudeRef></mix:gpsDestLongitudeRef>
-                            {{ GPSDestLongitude gpsGroup element }}
-                            <mix:gpsDestBearingRef></mix:gpsDestBearingRef>
-                            <mix:gpsDestBearing></mix:gpsDestBearing>
-                            <mix:gpsDestDistanceRef></mix:gpsDestDistanceRef>
-                            <mix:gpsDestDistance></mix:gpsDestDistance>
-                            <mix:gpsProcessingMethod></mix:gpsProcessingMethod>
-                            <mix:gpsAreaInformation></mix:gpsAreaInformation>
-                            <mix:gpsDateStamp></mix:gpsDateStamp>
-                            <mix:gpsDifferential></mix:gpsDifferential>
-                        </mix:GPSData>
-
-
-                        <mix:orientation></mix:orientation>
-                        <mix:methodology></mix:methodology>
-
-                    </mix:ImageData>
-
-
-
-                </mix:CameraCaptureSettings>
-            </mix:DigitalCameraCapture>
+          {{ Child elements }}
+          <mix:orientation>unknown</mix:orientation>
+          <mix:methodology>unknown</mix:methodology>
         </mix:ImageCaptureMetadata>
 
     """
+    if child_elements is None:
+        child_elements = []
+
     container = _element('ImageCaptureMetadata')
-    mix_SourceInformation = _subelement(
-        container, 'SourceInformation')
-    mix_sourceType = _subelement(mix_SourceInformation, 'sourceType')
-    mix_sourceType.text = sourceType
 
-    if SourceID_elements:
-        for element in SourceID_elements:
-            mix_SourceInformation.append(element)
-
-    mix_SourceSize = _subelement(mix_SourceInformation, 'SourceSize')
-    mix_SourceXDimension = _subelement(
-        mix_SourceInformation, 'SourceXDimension')
-    mix_sourceXDimensionValue = _subelement(mix_SourceXDimension,
-                                            'sourceXDimensionValue')
-    mix_sourceXDimensionValue.text = sourceXDimensionValue
-    mix_sourceXDimensionUnit = _subelement(mix_SourceXDimension,
-                                           'sourceXDimensionUnit')
-    mix_sourceXDimensionUnit.text = sourceXDimensionUnit
-
-    mix_SourceYDimension = _subelement(
-        mix_SourceInformation, 'SourceYDimension')
-    mix_sourceYDimensionValue = _subelement(mix_SourceYDimension,
-                                            'sourceYDimensionValue')
-    mix_sourceYDimensionValue.text = sourceYDimensionValue
-    mix_sourceYDimensionUnit = _subelement(mix_SourceYDimension,
-                                           'sourceYDimensionUnit')
-    mix_sourceYDimensionUnit.text = sourceYDimensionUnit
-
-    mix_SourceZDimension = _subelement(
-        mix_SourceInformation, 'SourceZDimension')
-    mix_sourceZDimensionValue = _subelement(mix_SourceZDimension,
-                                            'sourceZDimensionValue')
-    mix_sourceZDimensionValue.text = sourceZDimensionValue
-    mix_sourceZDimensionUnit = _subelement(mix_SourceZDimension,
-                                           'sourceZDimensionUnit')
-    mix_sourceZDimensionUnit.text = sourceZDimensionUnit
-
-    mix_GeneralCaptureInformation = _subelement(container,
-                                                'GeneralCaptureInformation')
-    mix_dateTimeCreated = _subelement(
-        mix_GeneralCaptureInformation, 'dateTimeCreated')
-    mix_dateTimeCreated.text = dateTimeCreated
-
-    if imageProducer_elements:
-        for element in imageProducer_elements:
-            mix_imageProducer = _subelement(mix_GeneralCaptureInformation,
-                                            'imageProducer')
-            mix_imageProducer.text = element
-
-    mix_captureDevice = _subelement(mix_GeneralCaptureInformation,
-                                    'captureDevice')
-    mix_captureDevice.text = captureDevice
-
-    mix_ScannerCapture = _subelement(
-        container, 'ScannerCapture')
-    mix_scannerManufacturer = _subelement(mix_ScannerCapture,
-                                          'scannerManufacturer')
-    mix_scannerManufacturer.text = scannerManufacturer
-    mix_scannerModel = _subelement(mix_ScannerCapture, 'scannerModel')
-
-    mix_scannerModelName = _subelement(mix_scannerModel, 'scannerModelName')
-    mix_scannerModelName.text = scannerModelName
-
-    mix_scannerModelNumber = _subelement(
-        mix_scannerModel, 'scannerModelNumber')
-    mix_scannerModelNumber.text = scannerModelNumber
-
-    mix_scannerModelSerialNo = _subelement(mix_scannerModel,
-                                           'scannerModelSerialNo')
-    mix_scannerModelSerialNo.text = scannerModelSerialNo
-
-    mix_MaximumOpticalResolution = _subelement(mix_ScannerCapture,
-                                               'MaximumOpticalResolution')
-    mix_xOpticalResolution = _subelement(
-        mix_MaximumOpticalResolution, 'xOpticalResolution')
-    mix_xOpticalResolution.text = xOpticalResolution
-
-    mix_yOpticalResolution = _subelement(
-        mix_MaximumOpticalResolution, 'yOpticalResolution')
-    mix_yOpticalResolution.text = yOpticalResolution
-
-    mix_opticalResolutionUnit = _subelement(mix_MaximumOpticalResolution,
-                                            'opticalResolutionUnit')
-    mix_opticalResolutionUnit.text = opticalResolutionUnit
-
-    mix_scannerSensor = _subelement(mix_ScannerCapture, 'scannerSensor')
-    mix_scannerSensor.text = scannerSensor
-
-    mix_ScanningSystemSoftware = _subelement(mix_ScannerCapture,
-                                             'ScanningSystemSoftware')
-    mix_scanningSoftwareVersionNo = _subelement(mix_ScannerCapture,
-                                                'scanningSoftwareVersionNo')
-
-    mix_DigitalCameraCapture = _subelement(container,
-                                           'DigitalCameraCapture')
-    mix_digitalCameraManufacturer = _subelement(mix_DigitalCameraCapture,
-                                                'digitalCameraManufacturer')
-    mix_digitalCameraManufacturer.text = digitalCameraManufacturer
-
-    mix_DigitalCameraModel = _subelement(mix_DigitalCameraCapture,
-                                         'DigitalCameraModel')
-    mix_digitalCameraModelName = _subelement(mix_DigitalCameraModel,
-                                             'DigitalCameraModelName')
-    mix_digitalCameraModelName.text = digitalCameraModelName
-
-    mix_digitalCameraModelNumber = _subelement(mix_DigitalCameraModel,
-                                               'DigitalCameraModelNumber')
-    mix_digitalCameraModelNumber.text = digitalCameraModelNumber
-
-    mix_digitalCameraModelSerialNo = _subelement(mix_DigitalCameraModel,
-                                                 'DigitalCameraModelSerialNo')
-    mix_digitalCameraModelSerialNo.text = digitalCameraModelSerialNo
-
-    mix_cameraSensor = _subelement(container,
-                                   'cameraSensor')
-    mix_cameraSensor.text = cameraSensor
-
-    mix_CameraCaptureSettings = _subelement(container,
-                                            'CameraCaptureSettings')
-    mix_ImageData = _subelement(mix_CameraCaptureSettings,
-                                'ImageData')
-
-    mix_fNumber = _subelement(mix_ImageData, 'fNumber')
-    mix_fNumber.text = fNumber
-
-    mix_exposureTime = _subelement(mix_ImageData, 'exposureTime')
-    mix_exposureTime.text = exposureTime
-
-    if spectralSensitivity_elements:
-        for element in spectralSensitivity_elements:
-            mix_spectralSensitivity = _subelement(
-                mix_ImageData, 'spectralSensitivity')
-            mix_spectralSensitivity.text = element
-
-    mix_isoSpeedRatings = _subelement(mix_ImageData, 'isoSpeedRatings')
-    mix_isoSpeedRatings.text = isoSpeedRatings
-
-    mix_oECF = _subelement(mix_ImageData, 'oECF')
-    mix_oECF.text = oECF
-
-    mix_exifVersion = _subelement(mix_ImageData, 'exifVersion')
-    mix_exifVersion.text = exifVersion
-
-    mix_shutterSpeedValue = _subelement(mix_ImageData, 'shutterSpeedValue')
-    mix_shutterSpeedValue.text = shutterSpeedValue
-
-    mix_apertureValue = _subelement(mix_ImageData, 'apertureValue')
-    mix_apertureValue.text = apertureValue
-
-    mix_brightnessValue = _subelement(mix_ImageData, 'brightnessValue')
-    mix_brightnessValue.text = brightnessValue
-
-    mix_exposureBiasValue = _subelement(mix_ImageData, 'exposureBiasValue')
-    mix_exposureBiasValue.text = exposureBiasValue
-
-    mix_maxApertureValue = _subelement(mix_ImageData, 'maxApertureValue')
-    mix_maxApertureValue.text = maxApertureValue
-
-    mix_SubjectDistance = _subelement(mix_ImageData, 'SubjectDistance')
-    mix_distance = _subelement(mix_SubjectDistance, 'distance')
-    mix_distance.text = distance
-
-    mix_MinMaxDistance = _subelement(mix_SubjectDistance, 'MinMaxDistance')
-    mix_minDistance = _subelement(mix_MinMaxDistance, 'minDistance')
-    mix_minDistance.text = minDistance
-    mix_maxDistance = _subelement(mix_MinMaxDistance, 'maxDistance')
-    mix_maxDistance.text = maxDistance
-
-    mix_meteringMode = _subelement(mix_ImageData, 'meteringMode')
-    mix_meteringMode.text = meteringMode
-
-    mix_lightSource = _subelement(mix_ImageData, 'lightSource')
-    mix_lightSource.text = lightSource
-
-    mix_flash = _subelement(mix_ImageData, 'flash')
-    mix_flash.text = flash
-
-    mix_focalLength = _subelement(mix_ImageData, 'focalLength')
-    mix_focalLength.text = focalLength
-
-    mix_flashEnergy = _subelement(mix_ImageData, 'flashEnergy')
-    mix_flashEnergy.text = flashEnergy
-
-    mix_backLight = _subelement(mix_ImageData, 'backLight')
-    mix_backLight.text = backLight
-
-    mix_exposureIndex = _subelement(mix_ImageData, 'exposureIndex')
-    mix_exposureIndex.text = exposureIndex
-
-    mix_sensingMethod = _subelement(mix_ImageData, 'sensingMethod')
-    mix_sensingMethod.text = sensingMethod
-
-    mix_cfaPattern = _subelement(mix_ImageData, 'cfaPattern')
-    mix_cfaPattern.text = cfaPattern
-
-    mix_autoFocus = _subelement(mix_ImageData, 'autoFocus')
-    mix_autoFocus.text = autoFocus
-
-    mix_PrintAspectRatio = _subelement(mix_ImageData, 'PrintAspectRatio')
-    mix_xPrintAspectRatio = _subelement(mix_ImageData, 'xPrintAspectRatio')
-    mix_xPrintAspectRatio.text = xPrintAspectRatio
-    mix_yPrintAspectRatio = _subelement(mix_ImageData, 'yPrintAspectRatio')
-    mix_yPrintAspectRatio.text = yPrintAspectRatio
-
-    mix_GPSData = _element('GPSData')
-    mix_gpsVersionID = _subelement(mix_GPSData, 'gpsVersionID')
-    mix_gpsVersionID.text = gpsVersionID
-
-    mix_gpsLatitudeRef = _subelement(mix_GPSData, 'gpsLatitudeRef')
-    mix_gpsLatitudeRef.text = gpsLatitudeRef
-
-    if GPSLatitude_element:
-        mix_GPSData.append(GPSLatitude_element)
-
-    mix_gpsLongitudeRef = _subelement(mix_GPSData, 'gpsLongitudeRef')
-    mix_gpsLongitudeRef.text = gpsLongitudeRef
-
-    if GPSLongitude_element:
-        mix_GPSData.append(GPSLongitude_element)
-
-    mix_gpsAltitudeRef = _subelement(mix_GPSData, 'gpsAltitudeRef')
-    mix_gpsAltitudeRef.text = gpsAltitudeRef
-
-    mix_gpsAltitude = _subelement(mix_GPSData, 'gpsAltitude')
-    mix_gpsAltitude.text = gpsAltitude
-
-    mix_gpsTimeStamp = _subelement(mix_GPSData, 'gpsTimeStamp')
-    mix_gpsTimeStamp.text = gpsTimeStamp
-
-    mix_gpsSatellites = _subelement(mix_GPSData, 'gpsSatellites')
-    mix_gpsSatellites.text = gpsSatellites
-
-    mix_gpsStatus = _subelement(mix_GPSData, 'gpsStatus')
-    mix_gpsStatus.text = gpsStatus
-
-    mix_gpsMeasureMode = _subelement(mix_GPSData, 'gpsMeasureMode')
-    mix_gpsMeasureMode.text = gpsMeasureMode
-
-    mix_gpsDOP = _subelement(mix_GPSData, 'gpsDOP')
-    mix_gpsDOP.text = gpsDOP
-
-    mix_gpsSpeedRef = _subelement(mix_GPSData, 'gpsSpeedRef')
-    mix_gpsSpeedRef.text = gpsSpeedRef
-
-    mix_gpsSpeed = _subelement(mix_GPSData, 'gpsSpeed')
-    mix_gpsSpeed.text = gpsSpeed
-
-    mix_gpsTrackRef = _subelement(mix_GPSData, 'gpsTrackRef')
-    mix_gpsTrackRef.text = gpsTrackRef
-
-    mix_gpsTrack = _subelement(mix_GPSData, 'gpsTrack')
-    mix_gpsTrack.text = gpsTrack
-
-    mix_gpsImgDirectionRef = _subelement(mix_GPSData, 'gpsImgDirectionRef')
-    mix_gpsImgDirectionRef.text = gpsImgDirectionRef
-
-    mix_gpsImgDirection = _subelement(mix_GPSData, 'gpsImgDirection')
-    mix_gpsImgDirection.text = gpsImgDirection
-
-    mix_gpsMapDatum = _subelement(mix_GPSData, 'gpsMapDatum')
-    mix_gpsMapDatum.text = gpsMapDatum
-
-    mix_gpsDestLatitudeRef = _subelement(mix_GPSData, 'gpsDestLatitudeRef')
-    mix_gpsDestLatitudeRef.text = gpsDestLatitudeRef
-
-    if GPSDestLatitude_element:
-        mix_GPSData.append(GPSDestLatitude_element)
-
-    mix_gpsDestLongitudeRef = _subelement(mix_GPSData, 'gpsDestLongitudeRef')
-    mix_gpsDestLongitudeRef.text = gpsDestLongitudeRef
-
-    if gpsDestLongitude_element:
-        mix_GPSData.append(gpsDestLongitude_element)
-
-    mix_gpsDestBearingRef = _subelement(mix_GPSData, 'gpsDestBearingRef')
-    mix_gpsDestBearingRef.text = gpsDestBearingRef
-
-    mix_gpsDestBearing = _subelement(mix_GPSData, 'gpsDestBearing')
-    mix_gpsDestBearing.text = gpsDestBearing
-
-    mix_gpsDestDistanceRef = _subelement(mix_GPSData, 'gpsDestDistanceRef')
-    mix_gpsDestDistanceRef.text = gpsDestDistanceRef
-
-    mix_gpsDestDistance = _subelement(mix_GPSData, 'gpsDestDistance')
-    mix_gpsDestDistance.text = gpsDestDistance
-
-    mix_gpsProcessingMethod = _subelement(mix_GPSData, 'gpsProcessingMethod')
-    mix_gpsProcessingMethod.text = gpsProcessingMethod
-
-    mix_gpsAreaInformation = _subelement(mix_GPSData, 'gpsAreaInformation')
-    mix_gpsAreaInformation.text = gpsAreaInformation
-
-    mix_gpsDateStamp = _subelement(mix_GPSData, 'gpsDateStamp')
-    mix_gpsDateStamp.text = gpsDateStamp
-
-    mix_gpsDifferential = _subelement(mix_GPSData, 'gpsDifferential')
-    mix_gpsDifferential.text = gpsDifferential
-
-    mix_orientation = _subelement(mix_ImageData, 'orientation')
-    mix_orientation.text = orientation
-
-    mix_methodology = _subelement(mix_ImageData, 'methodology')
-    mix_methodology.text = methodology
+    if orientation:
+        if orientation in ORIENTATION_TYPES:
+            orientation_el = _element('orientation')
+            orientation_el.text = orientation
+            child_elements.append(orientation_el)
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for orientation, accepted values '
+                'are: "%s".' % (orientation, '", "'.join(ORIENTATION_TYPES)))
+    if methodology:
+        methodology_el = _element('methodology')
+        methodology_el.text = methodology
+        child_elements.append(methodology_el)
+
+    child_elements.sort(key=image_capture_order)
+
+    for element in child_elements:
+        container.append(element)
 
     return container
 
 
-def mix_SourceID(sourceIDType=None, sourceIDValue=None):
-    """Returns MIX sourceID element
+def source_information(source_type=None, child_elements=None):
+    """Returns MIX SourceInformation element
 
-    :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
+    Returns the following sorted ElementTree structure::
+
+        <mix:SourceInformation>
+          <mix:sourceType>foo</mix:sourceType>
+          {{ Child elements }}
+        </mix:SourceInformation>
+
+    """
+    container = _element('SourceInformation')
+
+    if source_type:
+        source_type_el = _subelement(container, 'sourceType')
+        source_type_el.text = source_type
+
+    for element in child_elements:
+        container.append(element)
+
+    return container
+
+
+def source_id(source_idtype=None, source_idvalue=None):
+    """Returns MIX SourceID element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:SourceID>
+          <mix:sourceIDType>foo</mix:sourceIDType>
+          <mix:sourceIDValue>foo</mix:sourceIDValue>
+          {{ Child elements }}
+        </mix:SourceID>
+
+    """
+    container = _element('SourceID')
+
+    if source_idtype:
+        source_idtype_el = _subelement(container, 'sourceIDType')
+        source_idtype_el.text = source_idtype
+
+    if source_idvalue:
+        source_idvalue_el = _subelement(container, 'sourceIDValue')
+        source_idvalue_el.text = source_idvalue
+
+    return container
+
+
+# pylint: disable=too-many-arguments, too-many-locals, too-many-branches
+# too-many-arguments: The element contains a lot of subelements
+# too-many-locals: The arguments are many, hence a lot of local variables
+def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
+                z_value=None, z_unit=None):
+    """Returns MIX SourceSize element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:SourceSize>
+          <mix:SourceXDimension>
+            <mix:sourceXDimensionValue>1.23</mix:sourceXDimensionValue>
+            <mix:sourceXDimensionUnit>mm.</mix:sourceXDimensionUnit>
+          </mix:SourceXDimension>
+          <mix:SourceYDimension>
+            <mix:sourceYDimensionValue>1.23</mix:sourceXDimensionValue>
+            <mix:sourceYDimensionUnit>mm.</mix:sourceXDimensionUnit>
+          </mix:SourceYDimension>
+          <mix:SourceZDimension>
+            <mix:sourceZDimensionValue>1.23</mix:sourceXDimensionValue>
+            <mix:sourceZDimensionUnit>mm.</mix:sourceXDimensionUnit>
+          </mix:SourceZDimension>
+        </mix:SourceSize>
+
+    """
+    container = _element('SourceSize')
+
+    if x_value or x_unit:
+        x_dimension = _subelement(container, 'SourceXDimension')
+        if x_value:
+            x_value_el = _subelement(x_dimension, 'sourceXDimensionValue')
+            x_value_el.text = x_value
+        if x_unit:
+            if x_unit in DIMENSION_UNITS:
+                x_unit_el = _subelement(x_dimension, 'sourceXDimensionUnit')
+                x_unit_el.text = x_unit
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for sourceXDimensionUnit, '
+                    'accepted values are: "%s".' % (
+                        x_unit, '", "'.join(DIMENSION_UNITS)))
+
+    if y_value or y_unit:
+        y_dimension = _subelement(container, 'SourceYDimension')
+        if y_value:
+            y_value_el = _subelement(y_dimension, 'sourceYDimensionValue')
+            y_value_el.text = y_value
+        if y_unit:
+            if y_unit in DIMENSION_UNITS:
+                y_unit_el = _subelement(y_dimension, 'sourceYDimensionUnit')
+                y_unit_el.text = y_unit
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for sourceYDimensionUnit, '
+                    'accepted values are: "%s".' % (
+                        y_unit, '", "'.join(DIMENSION_UNITS)))
+
+    if z_value or z_unit:
+        z_dimension = _subelement(container, 'SourceZDimension')
+        if z_value:
+            z_value_el = _subelement(z_dimension, 'sourceZDimensionValue')
+            z_value_el.text = z_value
+        if z_unit:
+            if z_unit in DIMENSION_UNITS:
+                z_unit_el = _subelement(z_dimension, 'sourceZDimensionUnit')
+                z_unit_el.text = z_unit
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for sourceZDimensionUnit, '
+                    'accepted values are: "%s".' % (
+                        z_unit, '", "'.join(DIMENSION_UNITS)))
+
+    return container
+
+
+def capture_information(created=None, producer=None, device=None):
+    """Returns MIX GeneralCaptureInformation element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:GeneralCaptureInformation>
+          <mix:dateTimeCreated>foo</mix:dateTimeCreated>
+          <mix:imageProducer>foo</mix:imageProducer>
+          <mix:captureDevice>foo</mix:captureDevice>
+        </mix:GeneralCaptureInformation>
+
+    """
+    container = _element('GeneralCaptureInformation')
+
+    if created:
+        created_el = _subelement(container, 'dateTimeCreated')
+        created_el.text = created
+
+    if isinstance(producer, list):
+        for item in producer:
+            producer_el = _subelement(container, 'imageProducer')
+            producer_el.text = item
+    elif producer:
+        producer_el = _subelement(container, 'imageProducer')
+        producer_el.text = producer
+
+    if device:
+        if device in CAPTURE_DEVICE_TYPES:
+            device_el = _subelement(container, 'captureDevice')
+            device_el.text = device
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for captureDevice, accepted '
+                'values are: "%s".' % (
+                    device, '", "'.join(CAPTURE_DEVICE_TYPES)))
+
+    return container
+
+
+def device_capture(device_type, manufacturer=None, sensor=None,
+                   child_elements=None):
+    """
+    Returns either MIX ScannerCapture or the DigitalCameraCapture
+    element.
+
+    """
+    prefixes = {'scanner': 'scanner',
+                'camera': 'digitalCamera'}
+
+    if not child_elements:
+        child_elements = []
+    container = _element('capture', prefix=prefixes[device_type])
+
+    if manufacturer:
+        manufacturer_el = _element('manufacturer',
+                                   prefix=prefixes[device_type])
+        manufacturer_el.text = manufacturer
+        child_elements.append(manufacturer)
+
+    if sensor and device_type == 'scanner':
+        if sensor in SCANNER_SENSOR_TYPES:
+            sensor_el = _element('scannerSensor')
+            sensor_el.text = sensor
+            child_elements.append(sensor)
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for scannerSensor, accepted '
+                'values are: "%s".' % (
+                    sensor, '", "'.join(SCANNER_SENSOR_TYPES)))
+
+    if sensor and device_type == 'camera':
+        if sensor in CAMERA_SENSOR_TYPES:
+            sensor_el = _element('cameraSensor')
+            sensor_el.text = sensor
+            child_elements.append(sensor)
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for cameraSensor, accepted '
+                'values are: "%s".' % (
+                    sensor, '", "'.join(CAMERA_SENSOR_TYPES)))
+
+    if device_type == 'scanner':
+        child_elements.sort(key=scanner_capture_order)
+    if device_type == 'camera':
+        child_elements.sort(key=camera_capture_order)
+
+    for element in child_elements:
+        container.append(element)
+
+    return container
+
+
+def device_model(device_type, device_name=None, device_number=None,
+                 device_serialno=None):
+    """
+    Returns either the ScannerModel or the DigitalCameraModel element.
+    """
+    prefixes = {'scanner': 'scanner',
+                'camera': 'digitalCamera'}
+
+    container = _element('model', prefix=prefixes[device_type])
+
+    if device_name:
+        device_name_el = _subelement(container, 'modelName',
+                                     prefix=prefixes[device_type])
+        device_name_el.text = device_name
+
+    if device_number:
+        device_number_el = _subelement(container, 'modelNumber',
+                                       prefix=prefixes[device_type])
+        device_number_el.text = device_number
+
+    if device_serialno:
+        device_serialno_el = _subelement(container, 'modelSerialNo',
+                                         prefix=prefixes[device_type])
+        device_serialno_el.text = device_serialno
+
+    return container
+
+
+def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
+    """Returns MIX MaximumOpticalResolution element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:MaximumOpticalResolution>
+          <mix:xOpticalResolution>foo</mix:xOpticalResolution>
+          <mix:yOpticalResolution>foo</mix:yOpticalResolution>
+          <mix:opticalResolutionUnit>foo</mix:opticalResolutionUnit>
+        </mix:MaximumOpticalResolution>
+
+    """
+    container = _element('MaximumOpticalResolution')
+
+    if x_resolution:
+        x_resolution_el = _subelement(container, 'xOpticalResolution')
+        x_resolution_el.text = x_resolution
+
+    if y_resolution:
+        y_resolution_el = _subelement(container, 'yOpticalResolution')
+        y_resolution_el.text = y_resolution
+
+    if unit:
+        if unit in OPTICAL_RESOLUTION_UNITS:
+            unit_el = _subelement(container, 'opticalResolutionUnit')
+            unit_el.text = unit
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for opticalResolutionUnit, '
+                'accepted values are: "%s".' % (
+                    unit, '", "'.join(OPTICAL_RESOLUTION_UNITS)))
+
+    return container
+
+
+def scanning_software(name=None, version=None):
+    """Returns MIX ScanningSystemSoftware element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:ScanningSystemSoftware>
+          <mix:scanningSoftwareName>foo</mix:scanningSoftwareName>
+          <mix:scanningSoftwareVersionNo>foo</mix:scanningSoftwareVersionNo>
+        </mix:ScanningSystemSoftware>
+
+    """
+    container = _element('ScanningSystemSoftware')
+
+    if name:
+        name_el = _subelement(container, 'scanningSoftwareName')
+        name_el.text = name
+
+    if version:
+        version_el = _subelement(container, 'scanningSoftwareVersionNo')
+        version_el.text = version
+
+    return container
+
+
+def camera_capture_settings(child_elements=None):
+    """Returns MIX CameraCaptureSettings element
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:CameraCaptureSettings>
+          {{ Child elements }}
+        </mix:CameraCaptureSettings>
+
+    """
+    container = _element('CameraCaptureSettings')
+
+    if child_elements:
+        for element in child_elements:
+            container.append(element)
+
+    return container
+
+
+# pylint: disable=unused-argument, too-many-arguments, too-many-locals
+# unused-argument: The arguments are looped as vars()
+# too-many-arguments: The element contains a lot of subelements
+# too-many-locals: The arguments are many, hence a lot of local variables
+def image_data(fnumber=None, exposure_time=None, exposure_program=None,
+               spectral_sensitivity=None, isospeed_ratings=None, oecf=None,
+               exif_version=None, shutter_speed=None, aperture=None,
+               brightnees=None, exposure_bias=None, max_aperture=None,
+               distance=None, min_distance=None, max_distance=None,
+               metering_mode=None, light_source=None, flash=None,
+               focal_length=None, flash_energy=None, back_light=None,
+               exposure_index=None, sensing_method=None, cfa_pattern=None,
+               auto_focus=None, x_print_aspect_ratio=None,
+               y_print_aspect_ratio=None):
+    """Returns the MIX ImageData element."""
+
+    tags = {
+        'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
+        'exposure_program': 'exposureProgram',
+        'spectral_sensitivity': 'spectralSensitivity',
+        'isospeed_ratings': 'isoSpeedRatings', 'oecf': 'oECF',
+        'exif_version': 'exifVersion', 'shutter_speed': 'shutterSpeedValue',
+        'aperture': 'apertureValue', 'brightnees': 'brightnessValue',
+        'exposure_bias': 'exposureBiasValue',
+        'max_aperture': 'maxApertureValue', 'metering_mode': 'meteringMode',
+        'light_source': 'lightSource', 'flash': 'flash',
+        'focal_length': 'focalLength', 'flash_energy': 'flashEnergy',
+        'back_light': 'backLight', 'exposure_index': 'exposureIndex',
+        'sensing_method': 'sensingMethod', 'cfa_pattern': 'cfaPattern',
+        'auto_focus': 'autoFocus'}
+
+    container = _element('ImageData')
+    child_elems = []
+
+    for key, value in vars().iteritems():
+        if key in tags and value:
+            elem = _element(tags[key])
+            elem.text = value
+            child_elems.append(elem)
+
+    if distance or min_distance or max_distance:
+        subject_distance = _element('SubjectDistance')
+        child_elems.append(subject_distance)
+    if distance:
+        distance_el = _subelement(subject_distance, 'distance')
+        distance_el.text = distance
+    if min_distance or max_distance:
+        min_max_distance = _subelement(subject_distance, 'MinMaxDistance')
+    if min_distance:
+        min_distance_el = _subelement(min_max_distance, 'minDistance')
+        min_distance_el.text = min_distance
+    if max_distance:
+        max_distance_el = _subelement(min_max_distance, 'maxDistance')
+        max_distance_el.text = max_distance
+
+    if x_print_aspect_ratio or y_print_aspect_ratio:
+        print_ratio = _element('PrintAspectRatio')
+        child_elems.append(print_ratio)
+    if x_print_aspect_ratio:
+        x_print_aspect_ratio_el = _subelement(print_ratio, 'xPrintAspectRatio')
+        x_print_aspect_ratio_el.text = x_print_aspect_ratio
+    if y_print_aspect_ratio:
+        y_print_aspect_ratio_el = _subelement(print_ratio, 'yPrintAspectRatio')
+        y_print_aspect_ratio_el.text = y_print_aspect_ratio
+
+    child_elems.sort(key=image_data_order)
+
+    for element in child_elems:
+        container.append(element)
+
+    return container
+
+
+# pylint: disable=unused-argument, too-many-arguments, too-many-locals
+# unused-argument: The arguments are looped as vars()
+# too-many-arguments: The element contains a lot of subelements
+# too-many-locals: The arguments are many, hence a lot of local variables
+def gps_data(version=None, lat_ref=None, lat_degrees=None, lat_minutes=None,
+             lat_seconds=None, long_ref=None, long_degrees=None,
+             long_minutes=None, long_seconds=None, altitude_ref=None,
+             altitude=None, timestamp=None, satellites=None, status=None,
+             measure_mode=None, dop=None, speed_ref=None, speed=None,
+             track_ref=None, track=None, direction_ref=None, direction=None,
+             map_datum=None, dest_lat_ref=None, dest_lat_degrees=None,
+             dest_lat_minutes=None, dest_lat_seconds=None, dest_long_ref=None,
+             dest_long_degrees=None, dest_long_minutes=None,
+             dest_long_seconds=None, dest_bearing_ref=None, dest_bearing=None,
+             dest_distance_ref=None, dest_distance=None,
+             processing_method=None, area_information=None, datestamp=None,
+             differential=None, gps_groups=None):
+    """Returns the MIX GPSData element."""
+
+    tags = {'version': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
+            'long_ref': 'gpsLongitudeRef',
+            'altitude_ref': 'gpsAltitudeRef',
+            'timestamp': 'gpsTimeStamp', 'satellites': 'gpsSatellites',
+            'status': 'gpsStatus',
+            'measure_mode': 'gpsMeasureMode',
+            'speed_ref': 'gpsSpeedRef',
+            'track_ref': 'gpsTrackRef',
+            'direction_ref': 'gpsImgDirectionRef',
+            'map_datum': 'gpsMapDatum',
+            'dest_lat_ref': 'gpsDestLatitudeRef',
+            'dest_long_ref': 'gpsDestLongitudeRef',
+            'dest_bearing_ref': 'gpsDestBearingRef',
+            'dest_distance_ref': 'gpsDestDistanceRef',
+            'processing_method': 'gpsProcessingMethod',
+            'area_information': 'gpsAreaInformation',
+            'datestamp': 'gpsDateStamp',
+            'differential': 'gpsDifferential'}
+
+    rationales = {'altitude': 'gpsAltitude',
+                  'dop': 'gpsDOP',
+                  'speed': 'gpsSpeed',
+                  'track': 'gpsTrack',
+                  'direction': 'gpsImgDirection',
+                  'dest_bearing': 'gpsDestBearing',
+                  'dest_distance': 'gpsDestDistance'}
+
+    container = _element('GPSData')
+    child_elems = []
+
+    for key, value in vars().iteritems():
+        if key in tags and value:
+            elem = _element(tags[key])
+            elem.text = value
+            child_elems.append(elem)
+
+        if key in rationales and value:
+            elem = _rationale_element(rationales[key], value)
+            child_elems.append(elem)
+
+    if lat_degrees or lat_minutes or lat_seconds:
+        lat_group = _gps_group('GPSLatitude', degrees=lat_degrees,
+                               minutes=lat_minutes, seconds=lat_seconds)
+        child_elems.append(lat_group)
+
+    if long_degrees or long_minutes or long_seconds:
+        long_group = _gps_group('GPSLongitude', degrees=long_degrees,
+                                minutes=long_minutes, seconds=long_seconds)
+        child_elems.append(long_group)
+
+    if dest_lat_degrees or dest_lat_minutes or dest_lat_seconds:
+        dest_lat_group = _gps_group('GPSDestLatitude',
+                                    degrees=dest_lat_degrees,
+                                    minutes=dest_lat_minutes,
+                                    seconds=dest_lat_seconds)
+        child_elems.append(dest_lat_group)
+
+    if dest_long_degrees or dest_long_minutes or dest_long_seconds:
+        dest_long_group = _gps_group('GPSDestLongitude',
+                                     degrees=dest_long_degrees,
+                                     minutes=dest_long_minutes,
+                                     seconds=dest_long_seconds)
+        child_elems.append(dest_long_group)
+
+    child_elems.sort(key=gps_data_order)
+
+    for element in child_elems:
+        container.append(element)
+
+    return container
+
+
+def _gps_group(tag, degrees=None, minutes=None, seconds=None):
+    """Returns MIX gpsGroup type element.
 
     Returns the following ElementTree structure::
 
-        <mix:sourceID>
-            <mix:sourceIDType></mix:sourceIDType>
-            <mix:sourceIDValue></mix:sourceIDValue>
-        </mix:sourceID>
+        <mix:{{ tag }}>
+            <mix:degrees>
+              <mix:numerator>2</mix:numerator>
+              <mix:denominator>1</mix:denominator>
+            </mix:degrees>
+            <mix:minutes>
+              <mix:numerator>2</mix:numerator>
+              <mix:denominator>1</mix:denominator>
+            </mix:minutes>
+            <mix:seconds>
+              <mix:numerator>2</mix:numerator>
+              <mix:denominator>1</mix:denominator>
+            </mix:seconds>
+        </mix:{{ tag }}>
 
     """
-    mix_sourceID = _element('sourceID')
-    mix_sourceIDType = _subelement(mix_sourceID, 'sourceIDType')
-    mix_sourceIDType.text = sourceIDType
+    container = _element(tag)
 
-    mix_sourceIDValue = _subelement(mix_sourceID, 'sourceIDValue')
-    mix_sourceIDValue.text = sourceIDValue
+    if degrees:
+        degrees_el = _rationale_element('degrees', degrees)
+        container.append(degrees_el)
 
-    return mix_sourceID
+    if minutes:
+        minutes_el = _rationale_element('minutes', minutes)
+        container.append(minutes_el)
 
+    if seconds:
+        seconds_el = _rationale_element('seconds', seconds)
+        container.append(seconds_el)
 
-def mix_gpsGroup(degrees=None, minutes=None, seconds=None):
-    """Returns MIX gpsGroup element
-
-    :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
-
-    Returns the following ElementTree structure::
-
-        <mix:gpsGroup>
-            <mix:degrees></mix:degrees>
-            <mix:minutes></mix:minutes>
-            <mix:seconds></mix:seconds>
-        </mix:sourceID>
-
-    """
-    elem = _element('gpsGroup')
-    mix_degrees = _subelement(elem, 'degrees')
-    mix_degrees.text = degrees
-
-    mix_minutes = _subelement(elem, 'minutes')
-    mix_minutes.text = minutes
-
-    mix_seconds = _subelement(elem, 'seconds')
-    mix_seconds.text = seconds
-
-    return elem
+    return container

@@ -1,283 +1,289 @@
 """Functions for reading and generating MIX Data Dictionaries as
 xml.etree.ElementTree data structures.
 
-References:
-
-    * MIX http://www.loc.gov/standards/mix/
-    * Schema documentation: Data Dictionary - Technical Metadata for
-                            Digital Still Images (ANSI/NISO Z39.87-2006)
-    * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
-
 """
 
-import lxml.etree as ET
-from xml_helpers.utils import xsi_ns
-from nisomix.utils import MIX_NS, NAMESPACES
+from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.utils import (SAMPLING_FREQUENCY_PLANES, SAMPLING_FREQUENCY_UNITS,
+                           BITS_PER_SAMPLE_UNITS, EXTRA_SAMPLES_TYPES,
+                           GRAY_RESPONSE_UNITS, TARGET_TYPES,
+                           RestrictedElementError, assessment_metadata_order,
+                           color_encoding_order, target_data_order)
 
 
-def mix_ImageAssessmentMetadata(samplingFrequencyPlane=None,
-                                samplingFrequencyUnit=None,
-                                xSamplingFrequency=None,
-                                ySamplingFrequency=None,
-                                bitsPerSampleValue_elements=None,
-                                bitsPerSampleUnit=None, samplesPerPixel=None,
-                                extraSamples_elements=None,
-                                colormapReference=None, embeddedColormap=None,
-                                grayResponseCurve_elements=None,
-                                grayResponseUnit=None,
-                                WhitePoint_elements=None,
-                                PrimaryChromaticities_elements=None,
-                                targetType_elements=None,
-                                TargetID_elements=None,
-                                externalTarget_elements=None,
-                                performanceData_elements=None):
-    """Returns MIX ImageAssessmentMetadata element
+def image_assessment_metadata(child_elements=None):
+    """Returns the MIX ImageAssessmentMetadata element."""
 
-    :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
-
-    Returns the following ElementTree structure::
-
-        <mix:ImageAssessmentMetadata>
-            <mix:SpatialMetrics>
-                <mix:samplingFrequencyPlane></mix:samplingFrequencyPlane>
-                <mix:samplingFrequencyUnit></mix:samplingFrequencyUnit>
-                <mix:xSamplingFrequency></mix:xSamplingFrequency>
-                <mix:ySamplingFrequency></mix:ySamplingFrequency>
-            </mix:SpatialMetrics>
-            <mix:ImageColorEncoding>
-                <mix:BitsPerSample>
-                    <mix:bitsPerSampleValue></mix:bitsPerSampleValue>
-                    <mix:bitsPerSampleUnit></mix:bitsPerSampleUnit>
-                </mix:BitsPerSample>
-                <mix:samplesPerPixel></mix:samplesPerPixel>
-                <mix:extraSamples></mix:extraSamples>
-                <mix:Colormap>
-                    <mix:colormapReference></mix:colormapReference>
-                    <mix:embeddedColormap></mix:embeddedColormap>
-                </mix:Colormap>
-                <mix:GrayResponse>
-                    <mix:grayResponseCurve></mix:grayResponseCurve>
-                    <mix:grayResponseUnit></mix:grayResponseUnit>
-                </mix:GrayResponse>
-                {{ WhitePoint elements }}
-                {{ PrimaryChromaticities elements }}
-
-            </mix:ImageColorEncoding>
-            <mix:TargetData>
-                <mix:targetType></mix:targetType>
-                {{ TargetID  elements }}
-                <mix:externalTarget></mix:externalTarget>
-                <mix:performanceData></mix:performanceData>
-            </mix:TargetData>
-        </mix:ImageAssessmentMetadata>
-
-    """
     container = _element('ImageAssessmentMetadata')
-    mix_SpatialMetrics = _subelement(
-        container, 'SpatialMetrics')
-
-    if samplingFrequencyPlane:
-        mix_samplingFrequencyPlane = _subelement(
-            mix_SpatialMetrics, 'samplingFrequencyPlane')
-        mix_samplingFrequencyPlane.text = samplingFrequencyPlane
-
-    if samplingFrequencyUnit:
-        mix_samplingFrequencyUnit = _subelement(
-            mix_SpatialMetrics, 'samplingFrequencyUnit')
-        mix_samplingFrequencyUnit.text = samplingFrequencyUnit
-
-    if xSamplingFrequency:
-        mix_xSamplingFrequency = _subelement(
-            mix_SpatialMetrics, 'xSamplingFrequency')
-        mix_xSamplingFrequency.text = xSamplingFrequency
-
-    if ySamplingFrequency:
-        mix_ySamplingFrequency = _subelement(
-            mix_SpatialMetrics, 'ySamplingFrequency')
-        mix_ySamplingFrequency.text = ySamplingFrequency
-
-    mix_ImageColorEncoding = _subelement(
-        container, 'ImageColorEncoding')
-    mix_BitsPerSample = _subelement(mix_ImageColorEncoding, 'BitsPerSample')
-    if bitsPerSampleValue_elements:
-        for element in bitsPerSampleValue_elements:
-            mix_bitsPerSampleValue = _subelement(
-                mix_BitsPerSample, 'bitsPerSampleValue')
-            mix_bitsPerSampleValue.text = element
-
-    mix_bitsPerSampleUnit = _subelement(mix_BitsPerSample, 'bitsPerSampleUnit')
-    mix_bitsPerSampleUnit.text = bitsPerSampleUnit
-
-    mix_samplesPerPixel = _subelement(
-        mix_ImageColorEncoding, 'samplesPerPixel')
-    mix_samplesPerPixel.text = samplesPerPixel
-
-    if extraSamples_elements:
-        for element in extraSamples_elements:
-            mix_extraSamples = _subelement(
-                mix_ImageColorEncoding, 'extraSamples')
-            mix_extraSamples.text = element
-
-    mix_Colormap = _subelement(mix_ImageColorEncoding, 'Colormap')
-    if colormapReference:
-        mix_colormapReference = _subelement(mix_Colormap, 'colormapReference')
-        mix_colormapReference.text = colormapReference
-
-    if embeddedColormap:
-        mix_embeddedColormap = _subelement(mix_Colormap, 'embeddedColormap')
-        mix_embeddedColormap.text = embeddedColormap
-
-    if grayResponseCurve_elements or grayResponseUnit:
-        mix_GrayResponse = _subelement(mix_ImageColorEncoding, 'GrayResponse')
-
-    if grayResponseCurve_elements:
-        for element in grayResponseCurve_elements:
-            mix_grayResponseCurve = _subelement(mix_GrayResponse,
-                                                'grayResponseCurve')
-            mix_grayResponseCurve.text = element
-
-    if grayResponseUnit:
-        mix_grayResponseUnit = _subelement(
-            mix_GrayResponse, 'grayResponseUnit')
-        mix_grayResponseUnit.text = grayResponseUnit
-
-    if WhitePoint_elements:
-        for element in WhitePoint_elements:
-            mix_ImageColorEncoding.append(element)
-
-    if PrimaryChromaticities_elements:
-        for element in PrimaryChromaticities_elements:
-            mix_ImageColorEncoding.append(element)
-
-    if targetType_elements or TargetID_elements or externalTarget_elements or performanceData_elements:
-        mix_TargetData = _subelement(container, 'TargetData')
-
-    if targetType_elements:
-        for element in targetType_elements:
-            mix_targetType = _subelement(mix_TargetData, 'targetType')
-            mix_targetType.text = element
-
-    if TargetID_elements:
-        for element in TargetID_elements:
-            mix_TargetData.append(element)
-
-    if externalTarget_elements:
-        for element in externalTarget_elements:
-            mix_externalTarget = _subelement(mix_TargetData, 'externalTarget')
-            mix_externalTarget.text = element
-
-    if performanceData_elements:
-        for element in performanceData_elements:
-            mix_performanceData = _subelement(
-                mix_TargetData, 'performanceData')
-            mix_performanceData.text = element
+    if child_elements:
+        child_elements.sort(key=assessment_metadata_order)
+        for element in child_elements:
+            container.append(element)
 
     return container
 
 
-def mix_WhitePoint(whitePointXValue=None, whitePointYValue=None):
-    """Returns MIX gpsGroup element
+def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
+    """Returns the MIX SpatialMetrics element."""
 
-    :Schema documentation: Data Dictionary - Technical Metadata for Digital Still Images (ANSI/NISO Z39.87-2006)
+    container = _element('SpatialMetrics')
 
-    Returns the following ElementTree structure::
+    if plane:
+        if plane in SAMPLING_FREQUENCY_PLANES:
+            plane_el = _subelement(container, 'samplingFrequencyPlane')
+            plane_el.text = plane
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for samplingFrequencyPlane, '
+                'accepted values are: "%s".' % (
+                    plane, '", "'.join(SAMPLING_FREQUENCY_PLANES)))
 
-        <mix:WhitePoint>
-            <mix:whitePointXValue></mix:whitePointXValue>
-            <mix:whitePointYValue></mix:whitePointYValue>
-        </mix:WhitePoint>
+    if unit:
+        if unit in SAMPLING_FREQUENCY_UNITS:
+            unit_el = _subelement(container, 'samplingFrequencyUnit')
+            unit_el.text = unit
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for samplingFrequencyUnit, '
+                'accepted values are: "%s".' % (
+                    unit, '", "'.join(SAMPLING_FREQUENCY_UNITS)))
 
-    """
+    if x_sampling:
+        _rationale_subelement(container, 'xSamplingFrequency', x_sampling)
+
+    if y_sampling:
+        _rationale_subelement(container, 'ySamplingFrequency', y_sampling)
+
+    return container
+
+
+def color_encoding(samples_pixel=None, extra_samples=None,
+                   child_elements=None):
+    """Returns the MIX ImageColorEncoding element."""
+    container = _element('ImageColorEncoding')
+
+    if not child_elements:
+        child_elements = []
+
+    if samples_pixel:
+        pixel_el = _element('samplesPerPixel')
+        pixel_el.text = samples_pixel
+        child_elements.append(pixel_el)
+
+    if isinstance(extra_samples, list):
+        for item in extra_samples:
+            if item in EXTRA_SAMPLES_TYPES:
+                samples_el = _element('extraSamples')
+                samples_el.text = item
+                child_elements.append(samples_el)
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for extraSamples, '
+                    'accepted values are: "%s".' % (
+                        item, '", "'.join(EXTRA_SAMPLES_TYPES)))
+    elif extra_samples:
+        if extra_samples in EXTRA_SAMPLES_TYPES:
+            samples_el = _element('extraSamples')
+            samples_el.text = extra_samples
+            child_elements.append(samples_el)
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for extraSamples, '
+                'accepted values are: "%s".' % (
+                    extra_samples, '", "'.join(EXTRA_SAMPLES_TYPES)))
+
+    child_elements.sort(key=color_encoding_order)
+
+    for element in child_elements:
+        container.append(element)
+
+    return container
+
+
+def bits_per_sample(sample_values=None, sample_unit=None):
+    """Returns the MIX BitsPerSample element."""
+    container = _element('BitsPerSample')
+
+    if isinstance(sample_values, list):
+        for item in sample_values:
+            value_el = _subelement(container, 'bitsPerSampleValue')
+            value_el.text = item
+    elif sample_values:
+        value_el = _subelement(container, 'bitsPerSampleValue')
+        value_el.text = sample_values
+
+    if sample_unit:
+        if sample_unit in BITS_PER_SAMPLE_UNITS:
+            unit_el = _subelement(container, 'bitsPerSampleUnit')
+            unit_el.text = sample_unit
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for bitsPerSampleUnit, '
+                'accepted values are: "%s".' % (
+                    sample_unit, '", "'.join(BITS_PER_SAMPLE_UNITS)))
+
+    return container
+
+
+def color_map(reference=None, embedded=None):
+    """Returns the MIX Colormap element."""
+    container = _element('Colormap')
+
+    if reference:
+        reference_el = _subelement(container, 'colormapReference')
+        reference_el.text = reference
+
+    if embedded:
+        embedded_el = _subelement(container, 'embeddedColormap')
+        embedded_el.text = embedded
+
+    return container
+
+
+def gray_response(curves=None, unit=None):
+    """Returns the MIX GrayResponse element."""
+    container = _element('GrayResponse')
+
+    if isinstance(curves, list):
+        for item in curves:
+            curve_el = _subelement(container, 'grayResponseCurve')
+            curve_el.text = item
+    elif curves:
+        curve_el = _subelement(container, 'grayResponseCurve')
+        curve_el.text = curves
+
+    if unit:
+        if unit in GRAY_RESPONSE_UNITS:
+            unit_el = _subelement(container, 'grayResponseUnit')
+            unit_el.text = unit
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for grayResponseUnit, '
+                'accepted values are: "%s".' % (
+                    unit, '", "'.join(GRAY_RESPONSE_UNITS)))
+
+    return container
+
+
+def white_point(x_value=None, y_value=None):
+    """Returns the MIX WhitePoint element."""
     container = _element('WhitePoint')
-    mix_whitePointXValue = _subelement(container, 'whitePointXValue')
-    mix_whitePointXValue.text = whitePointXValue
 
-    mix_whitePointYValue = _subelement(container, 'whitePointYValue')
-    mix_whitePointYValue.text = whitePointYValue
+    if x_value:
+        _rationale_subelement(container, 'whitePointXValue', x_value)
+
+    if y_value:
+        _rationale_subelement(container, 'whitePointYValue', y_value)
 
     return container
 
 
-def mix_PrimaryChromaticities(primaryChromaticitiesRedX=None,
-                              primaryChromaticitiesRedY=None,
-                              primaryChromaticitiesGreenX=None,
-                              primaryChromaticitiesGreenY=None,
-                              primaryChromaticitiesBlueX=None,
-                              primaryChromaticitiesBlueY=None):
-    """Returns MIX PrimaryChromaticities element
-
-    :Schema documentation: Data Dictionary - Technical Metadata for
-                           Digital Still Images (ANSI/NISO Z39.87-2006)
-
-    Returns the following ElementTree structure::
-
-        <mix:PrimaryChromaticities>
-            <mix:primaryChromaticitiesRedX></mix:primaryChromaticitiesRedX>
-            <mix:primaryChromaticitiesRedY></mix:primaryChromaticitiesRedY>
-            <mix:primaryChromaticitiesGreenX></mix:primaryChromaticitiesGreenX>
-            <mix:primaryChromaticitiesGreenY></mix:primaryChromaticitiesGreenY>
-            <mix:primaryChromaticitiesBlueX></mix:primaryChromaticitiesBlueX>
-            <mix:primaryChromaticitiesBlueY></mix:primaryChromaticitiesBlueY>
-        </mix:PrimaryChromaticities>
-
-    """
+def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
+                           blue_x=None, blue_y=None):
+    """Returns the MIX PrimaryChromaticities element."""
     container = _element('PrimaryChromaticities')
-    mix_primaryChromaticitiesRedX = _subelement(container,
-                                                'primaryChromaticitiesRedX')
-    mix_primaryChromaticitiesRedX.text = primaryChromaticitiesRedX
 
-    mix_primaryChromaticitiesRedY = _subelement(container,
-                                                'primaryChromaticitiesRedY')
-    mix_primaryChromaticitiesRedY.text = primaryChromaticitiesRedY
+    if red_x:
+        _rationale_subelement(container, 'primaryChromaticitiesRedX', red_x)
 
-    mix_primaryChromaticitiesGreenX = _subelement(
-        container, 'primaryChromaticitiesGreenX')
-    mix_primaryChromaticitiesGreenX.text = primaryChromaticitiesGreenX
+    if red_y:
+        _rationale_subelement(container, 'primaryChromaticitiesRedY', red_y)
 
-    mix_primaryChromaticitiesGreenY = _subelement(
-        container, 'primaryChromaticitiesGreenY')
-    mix_primaryChromaticitiesGreenY.text = primaryChromaticitiesGreenY
+    if green_x:
+        _rationale_subelement(container, 'primaryChromaticitiesGreenX',
+                              green_x)
 
-    mix_primaryChromaticitiesBlueX = _subelement(container,
-                                                 'primaryChromaticitiesBlueX')
-    mix_primaryChromaticitiesBlueX.text = primaryChromaticitiesBlueX
+    if green_y:
+        _rationale_subelement(container, 'primaryChromaticitiesGreenY',
+                              green_y)
 
-    mix_primaryChromaticitiesBlueY = _subelement(container,
-                                                 'primaryChromaticitiesBlueY')
-    mix_primaryChromaticitiesBlueY.text = primaryChromaticitiesBlueY
+    if blue_x:
+        _rationale_subelement(container, 'primaryChromaticitiesBlueX',
+                              blue_x)
+
+    if blue_y:
+        _rationale_subelement(container, 'primaryChromaticitiesBlueY',
+                              blue_y)
 
     return container
 
 
-def mix_TargetID(targetManufacturer=None, targetName=None, targetNo=None,
-                 targetMedia=None):
-    """Returns MIX TargetID element
+def target_data(target_types=None, external_targets=None,
+                performance_data=None, child_elements=None):
+    """Returns MIX TargetData element."""
+    container = _element('TargetData')
 
-    :Schema documentation: Data Dictionary - Technical Metadata for
-                           Digital Still Images (ANSI/NISO Z39.87-2006)
+    if not child_elements:
+        child_elements = []
 
-    Returns the following ElementTree structure::
+    if isinstance(target_types, list):
+        for item in target_types:
+            if item in TARGET_TYPES:
+                type_el = _element('targetType')
+                type_el.text = item
+                child_elements.append(type_el)
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for targetType, '
+                    'accepted values are: "%s".' % (
+                        item, '", "'.join(TARGET_TYPES)))
+    elif target_types:
+        if target_types in TARGET_TYPES:
+            type_el = _element('targetType')
+            type_el.text = target_types
+            child_elements.append(type_el)
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for targetType, '
+                'accepted values are: "%s".' % (
+                    target_types, '", "'.join(TARGET_TYPES)))
 
-        <mix:TargetID>
-            <mix:targetManufacturer></mix:targetManufacturer>
-            <mix:targetName></mix:targetName>
-            <mix:targetNo></mix:targetNo>
-            <mix:targetMedia></mix:targetMedia>
-        </mix:TargetID>
+    if isinstance(external_targets, list):
+        for item in external_targets:
+            target_el = _element('externalTarget')
+            target_el.text = item
+            child_elements.append(target_el)
+    elif external_targets:
+        target_el = _element('externalTarget')
+        target_el.text = external_targets
+        child_elements.append(target_el)
 
-    """
+    if isinstance(performance_data, list):
+        for item in performance_data:
+            data_el = _element('performanceData')
+            data_el.text = item
+            child_elements.append(data_el)
+    elif performance_data:
+        data_el = _element('performanceData')
+        data_el.text = performance_data
+        child_elements.append(data_el)
+
+    child_elements.sort(key=target_data_order)
+
+    for element in child_elements:
+        container.append(element)
+
+    return container
+
+
+def target_id(manufacturer=None, name=None, target_no=None, media=None):
+    """Returns MIX TargetID element."""
     container = _element('TargetID')
-    mix_targetManufacturer = _subelement(container, 'targetManufacturer')
-    mix_targetManufacturer.text = targetManufacturer
 
-    mix_targetName = _subelement(container, 'targetName')
-    mix_targetName.text = targetName
+    if manufacturer:
+        manufacturer_el = _subelement(container, 'targetManufacturer')
+        manufacturer_el.text = manufacturer
 
-    mix_targetNo = _subelement(container, 'targetNo')
-    mix_targetNo.text = targetNo
+    if name:
+        name_el = _subelement(container, 'targetName')
+        name_el.text = name
 
-    mix_targetMedia = _subelement(container, 'targetMedia')
-    mix_targetMedia.text = targetMedia
+    if target_no:
+        target_no_el = _subelement(container, 'targetNo')
+        target_no_el.text = target_no
+
+    if media:
+        media_el = _subelement(container, 'targetMedia')
+        media_el.text = media
 
     return container

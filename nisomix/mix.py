@@ -75,6 +75,55 @@ def _subelement(parent, tag, prefix="", namespaces=None):
     return ET.SubElement(parent, mix_ns(tag, prefix), nsmap=namespaces)
 
 
+def _rationale_element(tag, numerator, denominator='1'):
+    """Return a rationale type element.
+
+    Returns the following ElementTree strucure::
+
+        <mix:{{ tag }}>
+          <mix:numerator>foo</numerator>
+          <mix:denominator>1</denominator>
+        </mix:{{ tag }}>
+
+    :tag: Element tagname
+    :numerator: Contents of the numerator part of the element
+    :denominator: Contents of the denominator part of the element
+
+    """
+    elem = _element(tag)
+    numerator_el = _subelement(elem, 'numerator')
+    numerator_el.text = numerator
+    denominator_el = _subelement(elem, 'denominator')
+    denominator_el.text = denominator
+
+    return elem
+
+
+def _rationale_subelement(parent, tag, numerator, denominator='1'):
+    """Return a rationale type element for the parent.
+
+    Returns the following ElementTree strucure::
+
+        <mix:{{ tag }}>
+          <mix:numerator>foo</numerator>
+          <mix:denominator>1</denominator>
+        </mix:{{ tag }}>
+
+    :parent: Parent element
+    :tag: Element tagname
+    :numerator: Contents of the numerator part of the element
+    :denominator: Contents of the denominator part of the element
+
+    """
+    elem = _subelement(parent, tag)
+    numerator_el = _subelement(elem, 'numerator')
+    numerator_el.text = numerator
+    denominator_el = _subelement(elem, 'denominator')
+    denominator_el.text = denominator
+
+    return elem
+
+
 def mix_mix(child_elements=None, namespaces=None):
     """Create MIX Data Dictionary root element.
 

@@ -3,7 +3,12 @@ Functions for reading and generating MIX BasicImageInformatio
 metadata and its contents.
 """
 
-from nisomix.mix import _element, _subelement
+from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.utils import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
+                           YCBCR_POSITIONING_TYPES,
+                           COMPONENT_INTERPRETATION_TYPES,
+                           RestrictedElementError, image_information_order,
+                           photom_interpret_order)
 
 
 def image_information(child_elements=None):
@@ -12,6 +17,8 @@ def image_information(child_elements=None):
     container = _element('BasicImageInformation')
 
     if child_elements:
+        child_elements.sort(key=image_information_order)
+
         for element in child_elements:
             container.append(element)
 
@@ -44,6 +51,7 @@ def photometric_interpretation(color_space=None, child_elements=None):
         color_space_el = _subelement(container, 'colorSpace')
         color_space_el.text = color_space
     if child_elements:
+        child_elements.sort(key=photom_interpret_order)
         for element in child_elements:
             container.append(element)
 
@@ -93,38 +101,44 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
     if subsample_horiz or subsample_vert:
         subsample_container = _subelement(container, 'YCbCrSubSampling')
         if subsample_horiz:
-            subsample_horiz_el = _subelement(
-                subsample_container, 'yCbCrSubsampleHoriz')
-            subsample_horiz_el.text = subsample_horiz
+            if subsample_horiz in YCBCR_SUBSAMPLE_TYPES:
+                subsample_horiz_el = _subelement(
+                    subsample_container, 'yCbCrSubsampleHoriz')
+                subsample_horiz_el.text = subsample_horiz
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for yCbCrSubsampleHoriz, '
+                    'accepted values are: "%s".' % (
+                        subsample_horiz, '", "'.join(YCBCR_SUBSAMPLE_TYPES)))
         if subsample_vert:
-            subsample_vert_el = _subelement(
-                subsample_container, 'yCbCrSubsampleVert')
-            subsample_vert_el.text = subsample_vert
+            if subsample_vert in YCBCR_SUBSAMPLE_TYPES:
+                subsample_vert_el = _subelement(
+                    subsample_container, 'yCbCrSubsampleVert')
+                subsample_vert_el.text = subsample_vert
+            else:
+                raise RestrictedElementError(
+                    'The value "%s" is invalid for yCbCrSubsampleVert, '
+                    'accepted values are: "%s".' % (
+                        subsample_vert, '", "'.join(YCBCR_SUBSAMPLE_TYPES)))
 
     if positioning:
-        positioning_el = _subelement(container, 'yCbCrPositioning')
-        positioning_el.text = positioning
+        if positioning in YCBCR_POSITIONING_TYPES:
+            positioning_el = _subelement(container, 'yCbCrPositioning')
+            positioning_el.text = positioning
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for yCbCrPositioning, '
+                'accepted values are: "%s".' % (
+                    positioning, '", "'.join(YCBCR_POSITIONING_TYPES)))
 
     if luma_red or luma_green or luma_blue:
         luma_container = _subelement(container, 'YCbCrCoefficients')
         if luma_red:
-            luma_red_el = _subelement(luma_container, 'lumaRed')
-            numerator = _subelement(luma_red_el, 'numerator')
-            numerator.text = luma_red
-            denominator = _subelement(luma_red_el, 'denominator')
-            denominator.text = '1'
+            _rationale_subelement(luma_container, 'lumaRed', luma_red)
         if luma_green:
-            luma_green_el = _subelement(luma_container, 'lumaGreen')
-            numerator = _subelement(luma_green_el, 'numerator')
-            numerator.text = luma_green
-            denominator = _subelement(luma_green_el, 'denominator')
-            denominator.text = '1'
+            _rationale_subelement(luma_container, 'lumaGreen', luma_green)
         if luma_blue:
-            luma_blue_el = _subelement(luma_container, 'lumaBlue')
-            numerator = _subelement(luma_blue_el, 'numerator')
-            numerator.text = luma_blue
-            denominator = _subelement(luma_blue_el, 'denominator')
-            denominator.text = '1'
+            _rationale_subelement(luma_container, 'lumaBlue', luma_blue)
 
     return container
 
@@ -148,23 +162,23 @@ def component(c_photometric_interpretation=None, footroom=None,
     container = _element('Component')
 
     if c_photometric_interpretation:
-        cpi_el = _subelement(
-            container, 'componentPhotometricInterpretation')
-        cpi_el.text = c_photometric_interpretation
+        if c_photometric_interpretation in COMPONENT_INTERPRETATION_TYPES:
+            cpi_el = _subelement(
+                container, 'componentPhotometricInterpretation')
+            cpi_el.text = c_photometric_interpretation
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for '
+                'componentPhotometricInterpretation, accepted values '
+                'are: "%s".' % (
+                    c_photometric_interpretation,
+                    '", "'.join(COMPONENT_INTERPRETATION_TYPES)))
 
     if footroom:
-        footroom_el = _subelement(container, 'footroom')
-        numerator = _subelement(footroom_el, 'numerator')
-        numerator.text = footroom
-        denominator = _subelement(footroom_el, 'denominator')
-        denominator.text = '1'
+        _rationale_subelement(container, 'footroom', footroom)
 
     if headroom:
-        footroom_el = _subelement(container, 'headroom')
-        numerator = _subelement(footroom_el, 'numerator')
-        numerator.text = headroom
-        denominator = _subelement(footroom_el, 'denominator')
-        denominator.text = '1'
+        _rationale_subelement(container, 'headroom', headroom)
 
     return container
 
@@ -181,9 +195,9 @@ def format_characteristics(child_elements=None):
     return container
 
 
-def jpeg200(codec=None, codec_version=None, codestream_profile=None,
-            compliance_class=None, tile_width=None, tile_height=None,
-            quality_layers=None, resolution_levels=None):
+def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
+             compliance_class=None, tile_width=None, tile_height=None,
+             quality_layers=None, resolution_levels=None):
     """Creates the MIX JPEG2000 element."""
 
     container = _element('JPEG2000')
@@ -244,12 +258,20 @@ def mrsid(zoom_levels=None):
 
 
 def djvu(djvu_format=None):
-    """Creates the MIX Djvu element."""
+    """
+    Creates the MIX Djvu element. Djvu format supports only a specific
+    set of types.
+    """
 
     container = _element('Djvu')
 
     if djvu_format:
-        djvu_format_el = _subelement(container, 'djvuFormat')
-        djvu_format_el.text = djvu_format
+        if djvu_format in DJVU_FORMATS:
+            djvu_format_el = _subelement(container, 'djvuFormat')
+            djvu_format_el.text = djvu_format
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for djvuFormat, accepted '
+                'values are: "%s".' % (djvu_format, '", "'.join(DJVU_FORMATS)))
 
     return container

@@ -3,13 +3,9 @@ BasicDigitalObjectInformation metadata and its contents.
 
 """
 
-from nisomix.mix import _element, _subelement
-from nisomix.utils import basic_do_order
-
-
-class ByteOrderError(Exception):
-    """Raised when byte order is invalid."""
-    pass
+from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.utils import (basic_do_order, RestrictedElementError,
+                           BYTE_ORDER_TYPES, DIGEST_ALGORITHMS)
 
 
 def digital_object_information(byte_order=None, file_size=None,
@@ -157,11 +153,7 @@ def compression(compression_scheme=None, local_list=None,
         local_value_el.text = local_value
 
     if compression_ratio:
-        compression_ratio_el = _subelement(container, 'compressionRatio')
-        numerator = _subelement(compression_ratio_el, 'numerator')
-        numerator.text = compression_ratio
-        denominator = _subelement(compression_ratio_el, 'denominator')
-        denominator.text = '1'
+        _rationale_subelement(container, 'compressionRatio', compression_ratio)
 
     return container
 
@@ -181,8 +173,14 @@ def fixity(algorithm=None, digest=None, originator=None):
     container = _element('Fixity')
 
     if algorithm:
-        algorithm_el = _subelement(container, 'messageDigestAlgorithm')
-        algorithm_el.text = algorithm
+        if algorithm in DIGEST_ALGORITHMS:
+            algorithm_el = _subelement(container, 'messageDigestAlgorithm')
+            algorithm_el.text = algorithm
+        else:
+            raise RestrictedElementError(
+                'The value "%s" is invalid for messageDigestAlgorithm, '
+                'accepted values are: "%s".' % (
+                    algorithm, '", "'.join(DIGEST_ALGORITHMS)))
 
     if digest:
         digest_el = _subelement(container, 'messageDigest')
@@ -199,15 +197,15 @@ def normalized_byteorder(byte_order):
     """
     Tries to fix the byte_order so that the value corresponds to the
     values allowed in the MIX schema. Normalizes hyphens, underscores
-    and capitalized letters.
+    and capitalized letters. Raises an exception if bytOrder couldn't
+    be normalized.
 
     :returns: The (fixed) byte order as a string
     """
-    allowed_values = ['big endian', 'little endian']
     byte_order = byte_order.replace('-', ' ').replace('_', ' ')
     byte_order = byte_order.lower()
 
-    if byte_order in allowed_values:
+    if byte_order in BYTE_ORDER_TYPES:
         return byte_order
 
     if 'big' in byte_order and 'endian' in byte_order:
@@ -216,4 +214,6 @@ def normalized_byteorder(byte_order):
     if 'little' in byte_order and 'endian' in byte_order:
         return 'little endian'
 
-    raise ByteOrderError
+    raise RestrictedElementError(
+        'The value "%s" is invalid for byteOrder, accepted values '
+        'are: "%s".' % (byte_order, '", "'.join(BYTE_ORDER_TYPES)))

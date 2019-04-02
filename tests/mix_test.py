@@ -1,7 +1,8 @@
 """Test nisomix features."""
 import pytest
 import lxml.etree as ET
-from nisomix.mix import MIX_NS, mix_ns, mix_mix, _element, _subelement
+from nisomix.mix import (MIX_NS, mix_ns, mix_mix, _element, _subelement,
+                         _rationale_subelement)
 
 
 @pytest.mark.parametrize(('tag', 'prefix'), [
@@ -48,6 +49,21 @@ def test_subelement():
     assert ET.tostring(elem) == (
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:preTest/></mix:test>')
+
+
+def test_rationale_subelement():
+    """
+    Tests the _rationale_subelement function by asserting that the
+    element was created correctly as a child element of its parent and
+    that it is containing both the numerator and denominator subelements.
+    """
+    elem = _element('test')
+    subelem = _rationale_subelement(elem, 'subtest', '30')
+
+    assert ET.tostring(elem) == (
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
+        '<mix:subtest><mix:numerator>30</mix:numerator>'
+        '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>')
 
 
 def test_mix():

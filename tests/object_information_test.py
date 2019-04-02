@@ -2,10 +2,12 @@
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
+from nisomix.utils import RestrictedElementError
+from nisomix.mix import _element
 from nisomix.object_information import (digital_object_information, identifier,
                                         compression, format_designation,
                                         format_registry, fixity,
-                                        normalized_byteorder, ByteOrderError)
+                                        normalized_byteorder)
 
 
 def test_digitalobjectinformation():
@@ -15,24 +17,29 @@ def test_digitalobjectinformation():
 
     compr = compression(compression_scheme='jpeg')
     format_des = format_designation(format_name='jpeg', format_version='1.01')
+    ident = _element('ObjectIdentifier')
+    format_reg = _element('FormatRegistry')
+    fix = _element('Fixity')
     mix = digital_object_information(byte_order='big endian', file_size='1234',
-                                     child_elements=[compr, format_des])
+                                     child_elements=[compr, format_des, fix,
+                                                     format_reg, ident])
 
     xml_str = ('<mix:BasicDigitalObjectInformation xmlns:mix='
-               '"http://www.loc.gov/mix/v20"><mix:fileSize>1234'
-               '</mix:fileSize><mix:FormatDesignation><mix:formatName>jpeg'
-               '</mix:formatName><mix:formatVersion>1.01</mix:formatVersion>'
-               '</mix:FormatDesignation><mix:byteOrder>big endian'
-               '</mix:byteOrder><mix:Compression><mix:compressionScheme>jpeg'
-               '</mix:compressionScheme></mix:Compression>'
+               '"http://www.loc.gov/mix/v20"><mix:ObjectIdentifier/>'
+               '<mix:fileSize>1234</mix:fileSize><mix:FormatDesignation>'
+               '<mix:formatName>jpeg</mix:formatName><mix:formatVersion>1.01'
+               '</mix:formatVersion></mix:FormatDesignation>'
+               '<mix:FormatRegistry/><mix:byteOrder>big endian</mix:byteOrder>'
+               '<mix:Compression><mix:compressionScheme>jpeg'
+               '</mix:compressionScheme></mix:Compression><mix:Fixity/>'
                '</mix:BasicDigitalObjectInformation>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))
-    assert mix.xpath('./*')[0].tag == '{http://www.loc.gov/mix/v20}fileSize'
-    assert mix.xpath('./*')[1].tag == \
+    assert mix.xpath('./*')[1].tag == '{http://www.loc.gov/mix/v20}fileSize'
+    assert mix.xpath('./*')[2].tag == \
         '{http://www.loc.gov/mix/v20}FormatDesignation'
-    assert mix.xpath('./*')[2].tag == '{http://www.loc.gov/mix/v20}byteOrder'
-    assert mix.xpath('./*')[3].tag == '{http://www.loc.gov/mix/v20}Compression'
+    assert mix.xpath('./*')[4].tag == '{http://www.loc.gov/mix/v20}byteOrder'
+    assert mix.xpath('./*')[5].tag == '{http://www.loc.gov/mix/v20}Compression'
 
 
 def test_identifier():
@@ -88,17 +95,45 @@ def test_compression():
     assert h.compare_trees(compr, ET.fromstring(xml_str))
 
 
+def test_compression_local():
+    """Test that the element Compression is created correctly."""
+
+    compr = compression(compression_scheme='enumerated in local list',
+                        local_value='test', local_list='2')
+
+    xml_str = ('<mix:Compression xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:compressionScheme>enumerated in local list'
+               '</mix:compressionScheme><mix:compressionSchemeLocalList>2'
+               '</mix:compressionSchemeLocalList>'
+               '<mix:compressionSchemeLocalValue>test'
+               '</mix:compressionSchemeLocalValue>'
+               '</mix:Compression>')
+
+    assert h.compare_trees(compr, ET.fromstring(xml_str))
+
+
 def test_fixity():
     """Test that the element Fixity is created correctly."""
 
-    fix = fixity(algorithm='md5', digest='foo')
+    fix = fixity(algorithm='MD5', digest='foo', originator='2')
 
     xml_str = ('<mix:Fixity xmlns:mix="http://www.loc.gov/mix/v20">'
-               '<mix:messageDigestAlgorithm>md5</mix:messageDigestAlgorithm>'
+               '<mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>'
                '<mix:messageDigest>foo</mix:messageDigest>'
+               '<mix:messageDigestOriginator>2</mix:messageDigestOriginator>'
                '</mix:Fixity>')
 
     assert h.compare_trees(fix, ET.fromstring(xml_str))
+
+
+def test_fixity_error():
+    """
+    Tests that invalid values for restricted elements return an
+    exception.
+    """
+
+    with pytest.raises(RestrictedElementError):
+        fixity(algorithm='foo')
 
 
 @pytest.mark.parametrize(('input_str', 'expected_output'), [
@@ -118,5 +153,5 @@ def test_normalized_byteorder(input_str, expected_output):
     if expected_output:
         assert normalized_byteorder(input_str) == expected_output
     else:
-        with pytest.raises(ByteOrderError):
+        with pytest.raises(RestrictedElementError):
             normalized_byteorder(input_str)
