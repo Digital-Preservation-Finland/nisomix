@@ -8,7 +8,8 @@ from nisomix.object_information_base import (digital_object_information,
                                              identifier, compression,
                                              format_designation,
                                              format_registry, fixity,
-                                             normalized_byteorder)
+                                             normalized_byteorder,
+                                             parse_message_digest)
 
 
 def test_digitalobjectinformation():
@@ -156,3 +157,22 @@ def test_normalized_byteorder(input_str, expected_output):
     else:
         with pytest.raises(RestrictedElementError):
             normalized_byteorder(input_str)
+
+
+def test_parse_message_digest():
+    """Tests the parse_message_digest function."""
+
+    xml_str = ('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:BasicDigitalObjectInformation><mix:ObjectIdentifier/>'
+               '<mix:fileSize>1234</mix:fileSize><mix:FormatDesignation>'
+               '<mix:formatName>jpeg</mix:formatName><mix:formatVersion>1.01'
+               '</mix:formatVersion></mix:FormatDesignation>'
+               '<mix:FormatRegistry/><mix:byteOrder>big endian</mix:byteOrder>'
+               '<mix:Compression><mix:compressionScheme>jpeg'
+               '</mix:compressionScheme></mix:Compression><mix:Fixity>'
+               '<mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>'
+               '<mix:messageDigest>test</mix:messageDigest></mix:Fixity>'
+               '</mix:BasicDigitalObjectInformation></mix:mix>')
+
+    mix = ET.fromstring(xml_str)
+    assert parse_message_digest(mix) == ('MD5', 'test')

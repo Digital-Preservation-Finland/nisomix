@@ -3,9 +3,9 @@ BasicDigitalObjectInformation metadata and its contents.
 
 """
 
-from nisomix.base import _element, _subelement, _rationale_subelement
+from nisomix.base import mix_ns, _element, _subelement, _rationale_subelement
 from nisomix.utils import (basic_do_order, RestrictedElementError,
-                           BYTE_ORDER_TYPES, DIGEST_ALGORITHMS)
+                           BYTE_ORDER_TYPES, DIGEST_ALGORITHMS, NAMESPACES)
 
 
 def digital_object_information(byte_order=None, file_size=None,
@@ -217,3 +217,25 @@ def normalized_byteorder(byte_order):
     raise RestrictedElementError(
         'The value "%s" is invalid for byteOrder, accepted values '
         'are: "%s".' % (byte_order, '", "'.join(BYTE_ORDER_TYPES)))
+
+
+def parse_message_digest(elem):
+    """
+    Returns the message digest algorithm and value from a MIX metadata
+    block in XML.
+    """
+    algorithm = None
+    value = None
+
+    if elem.tag != (mix_ns, 'Fixity'):
+        elem = elem.xpath('//mix:Fixity', namespaces=NAMESPACES)[0]
+
+    if elem:
+        algorithm_el = elem.find('./' + mix_ns('messageDigestAlgorithm'))
+        if algorithm_el.text:
+            algorithm = algorithm_el.text
+        value_el = elem.find('./' + mix_ns('messageDigest'))
+        if value_el.text:
+            value = value_el.text
+
+    return algorithm, value
