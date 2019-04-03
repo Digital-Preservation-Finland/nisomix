@@ -26,8 +26,8 @@ def test_element():
     """
     elem1 = _element('test')
     assert elem1.tag == '{http://www.loc.gov/mix/v20}test'
-    assert ET.tostring(elem1) == \
-        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20"/>'
+    assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20"/>'))
 
     elem2 = _element('test', 'pre')
     assert elem2.tag == '{http://www.loc.gov/mix/v20}preTest'
@@ -46,9 +46,9 @@ def test_subelement():
     assert subelem.getparent() == elem
     assert elem.xpath('./*')[0] == subelem
     assert len(elem) == 1
-    assert ET.tostring(elem) == (
+    assert ET.tostring(elem) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
-        '<mix:preTest/></mix:test>')
+        '<mix:preTest/></mix:test>'))
 
 
 def test_rationale_element():
@@ -59,10 +59,10 @@ def test_rationale_element():
     """
     elem = _rationale_element('test', '30')
 
-    assert ET.tostring(elem) == (
+    assert ET.tostring(elem) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:numerator>30</mix:numerator>'
-        '<mix:denominator>1</mix:denominator></mix:test>')
+        '<mix:denominator>1</mix:denominator></mix:test>'))
 
 
 def test_rationale_subelement():
@@ -72,12 +72,12 @@ def test_rationale_subelement():
     that it is containing both the numerator and denominator subelements.
     """
     elem = _element('test')
-    subelem = _rationale_subelement(elem, 'subtest', '30')
+    _rationale_subelement(elem, 'subtest', '30')
 
-    assert ET.tostring(elem) == (
+    assert ET.tostring(elem) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:subtest><mix:numerator>30</mix:numerator>'
-        '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>')
+        '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>'))
 
 
 def test_mix():
