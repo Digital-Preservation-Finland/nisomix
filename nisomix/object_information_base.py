@@ -3,7 +3,7 @@ BasicDigitalObjectInformation metadata and its contents.
 
 """
 
-from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.base import _element, _subelement, _rationale_subelement
 from nisomix.utils import (basic_do_order, RestrictedElementError,
                            BYTE_ORDER_TYPES, DIGEST_ALGORITHMS)
 

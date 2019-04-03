@@ -2,14 +2,14 @@
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
-from nisomix.mix import _element
+from nisomix.base import _element
 from nisomix.utils import RestrictedElementError
-from nisomix.assessment_metadata import (image_assessment_metadata,
-                                         spatial_metrics, color_encoding,
-                                         bits_per_sample, color_map,
-                                         gray_response, white_point,
-                                         primary_chromaticities, target_data,
-                                         target_id)
+from nisomix.assessment_metadata_base import (image_assessment_metadata,
+                                              spatial_metrics, color_encoding,
+                                              bits_per_sample, color_map,
+                                              gray_response, white_point,
+                                              primary_chromaticities,
+                                              target_data, target_id)
 
 
 def test_assessment_metadata():

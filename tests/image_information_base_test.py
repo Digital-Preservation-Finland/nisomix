@@ -2,15 +2,15 @@
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
-from nisomix.mix import _element
+from nisomix.base import _element
 from nisomix.utils import RestrictedElementError
-from nisomix.image_information import (image_information,
-                                       image_characteristics,
-                                       photometric_interpretation,
-                                       color_profile, ycbcr,
-                                       ref_black_white, component,
-                                       format_characteristics,
-                                       jpeg2000, mrsid, djvu)
+from nisomix.image_information_base import (image_information,
+                                            image_characteristics,
+                                            photometric_interpretation,
+                                            color_profile, ycbcr,
+                                            ref_black_white, component,
+                                            format_characteristics,
+                                            jpeg2000, mrsid, djvu)
 
 
 def test_image_information():

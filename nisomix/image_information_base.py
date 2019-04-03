@@ -3,7 +3,7 @@ Functions for reading and generating MIX BasicImageInformatio
 metadata and its contents.
 """
 
-from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.base import _element, _subelement, _rationale_subelement
 from nisomix.utils import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
                            YCBCR_POSITIONING_TYPES,
                            COMPONENT_INTERPRETATION_TYPES,

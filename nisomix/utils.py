@@ -165,6 +165,15 @@ def camera_capture_order(elem):
             '{%s}CameraCaptureSettings' % MIX_NS].index(elem.tag)
 
 
+def camera_capture_settings_order(elem):
+    """
+    Sorts the elements in the CameraCaptureSettings parent
+    element in the correct sequence.
+    """
+    return ['{%s}ImageData' % MIX_NS,
+            '{%s}GPSData' % MIX_NS].index(elem.tag)
+
+
 def image_data_order(elem):
     """
     Sorts the elements in the ImageData parent

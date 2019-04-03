@@ -2,12 +2,13 @@
 xml.etree.ElementTree data structures.
 """
 
-from nisomix.mix import _element, _subelement, _rationale_element
+from nisomix.base import _element, _subelement, _rationale_element
 from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
                            CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
                            OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
                            image_capture_order, scanner_capture_order,
-                           camera_capture_order, RestrictedElementError,
+                           camera_capture_order, camera_capture_settings_order,
+                           RestrictedElementError,
                            image_data_order, gps_data_order)
 
 
@@ -270,30 +271,33 @@ def device_capture(device_type, manufacturer=None, sensor=None,
     return container
 
 
-def device_model(device_type, device_name=None, device_number=None,
-                 device_serialno=None):
+def device_model(device_type, name=None, number=None,
+                 serialno=None):
     """
     Returns either the ScannerModel or the DigitalCameraModel element.
     """
     prefixes = {'scanner': 'scanner',
                 'camera': 'digitalCamera'}
 
-    container = _element('model', prefix=prefixes[device_type])
+    container = _element(
+        'model',
+        prefix=prefixes[device_type][0].capitalize()
+        + prefixes[device_type][1:])
 
-    if device_name:
+    if name:
         device_name_el = _subelement(container, 'modelName',
                                      prefix=prefixes[device_type])
-        device_name_el.text = device_name
+        device_name_el.text = name
 
-    if device_number:
+    if number:
         device_number_el = _subelement(container, 'modelNumber',
                                        prefix=prefixes[device_type])
-        device_number_el.text = device_number
+        device_number_el.text = number
 
-    if device_serialno:
+    if serialno:
         device_serialno_el = _subelement(container, 'modelSerialNo',
                                          prefix=prefixes[device_type])
-        device_serialno_el.text = device_serialno
+        device_serialno_el.text = serialno
 
     return container
 
@@ -370,6 +374,8 @@ def camera_capture_settings(child_elements=None):
     container = _element('CameraCaptureSettings')
 
     if child_elements:
+        child_elements.sort(key=camera_capture_settings_order)
+
         for element in child_elements:
             container.append(element)
 
@@ -395,17 +401,20 @@ def image_data(fnumber=None, exposure_time=None, exposure_program=None,
     tags = {
         'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
         'exposure_program': 'exposureProgram',
-        'spectral_sensitivity': 'spectralSensitivity',
-        'isospeed_ratings': 'isoSpeedRatings', 'oecf': 'oECF',
-        'exif_version': 'exifVersion', 'shutter_speed': 'shutterSpeedValue',
-        'aperture': 'apertureValue', 'brightnees': 'brightnessValue',
-        'exposure_bias': 'exposureBiasValue',
-        'max_aperture': 'maxApertureValue', 'metering_mode': 'meteringMode',
+        'isospeed_ratings': 'isoSpeedRatings',
+        'exif_version': 'exifVersion',
+        'metering_mode': 'meteringMode',
         'light_source': 'lightSource', 'flash': 'flash',
-        'focal_length': 'focalLength', 'flash_energy': 'flashEnergy',
+        'focal_length': 'focalLength',
         'back_light': 'backLight', 'exposure_index': 'exposureIndex',
         'sensing_method': 'sensingMethod', 'cfa_pattern': 'cfaPattern',
         'auto_focus': 'autoFocus'}
+
+    rationales = {'oecf': 'oECF', 'shutter_speed': 'shutterSpeedValue',
+                  'aperture': 'apertureValue', 'brightnees': 'brightnessValue',
+                  'exposure_bias': 'exposureBiasValue',
+                  'max_aperture': 'maxApertureValue',
+                  'flash_energy': 'flashEnergy'}
 
     container = _element('ImageData')
     child_elems = []
@@ -415,6 +424,20 @@ def image_data(fnumber=None, exposure_time=None, exposure_program=None,
             elem = _element(tags[key])
             elem.text = value
             child_elems.append(elem)
+
+        if key in rationales and value:
+            elem = _rationale_element(rationales[key], value)
+            child_elems.append(elem)
+
+    if isinstance(spectral_sensitivity, list):
+        for item in spectral_sensitivity:
+            spec_sens_el = _element('spectralSensitivity')
+            spec_sens_el.text = item
+            child_elems.append(spec_sens_el)
+    elif spectral_sensitivity:
+        spec_sens_el = _element('spectralSensitivity')
+        spec_sens_el.text = spectral_sensitivity
+        child_elems.append(spec_sens_el)
 
     if distance or min_distance or max_distance:
         subject_distance = _element('SubjectDistance')

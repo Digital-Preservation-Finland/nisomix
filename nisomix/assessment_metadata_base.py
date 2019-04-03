@@ -3,7 +3,7 @@ xml.etree.ElementTree data structures.
 
 """
 
-from nisomix.mix import _element, _subelement, _rationale_subelement
+from nisomix.base import _element, _subelement, _rationale_subelement
 from nisomix.utils import (SAMPLING_FREQUENCY_PLANES, SAMPLING_FREQUENCY_UNITS,
                            BITS_PER_SAMPLE_UNITS, EXTRA_SAMPLES_TYPES,
                            GRAY_RESPONSE_UNITS, TARGET_TYPES,

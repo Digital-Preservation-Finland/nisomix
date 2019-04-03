@@ -2,14 +2,16 @@
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
-from nisomix.mix import _element
+from nisomix.base import _element
 from nisomix.utils import RestrictedElementError
-from nisomix.capture_metadata import (image_capture_metadata,
-                                      source_information, source_id,
-                                      source_size, capture_information,
-                                      device_capture,
-                                      gps_data,
-                                      _gps_group)
+from nisomix.capture_metadata_base import (image_capture_metadata,
+                                           source_information, source_id,
+                                           source_size, capture_information,
+                                           device_capture, device_model,
+                                           max_optical_resolution,
+                                           scanning_software,
+                                           camera_capture_settings,
+                                           image_data, gps_data, _gps_group)
 
 
 def test_capture_metadata():
@@ -158,7 +160,7 @@ def test_device_capture_scanner():
     assert h.compare_trees(mix, ET.fromstring(xml_str))
 
 
-def test_device_capture_camer():
+def test_device_capture_camera():
     """
     Tests that the element DigitalCameraCapture is created correctly
     using the device_capture function.
@@ -177,6 +179,189 @@ def test_device_capture_camer():
                '<mix:cameraSensor>undefined</mix:cameraSensor>'
                '<mix:CameraCaptureSettings/>'
                '</mix:DigitalCameraCapture>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_sensor_error():
+    """
+    Tests that invalid values for restricted elements return an
+    exception.
+    """
+
+    with pytest.raises(RestrictedElementError):
+        device_capture(device_type='scanner', sensor='foo')
+
+    with pytest.raises(RestrictedElementError):
+        device_capture(device_type='camera', sensor='foo')
+
+
+def test_device_model_scanner():
+    """
+    Tests that the element ScannerModel is created correctly
+    using the device_model function.
+    """
+    mix = device_model(device_type='scanner', name='test', number='2',
+                       serialno='3')
+
+    xml_str = ('<mix:ScannerModel '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:scannerModelName>test'
+               '</mix:scannerModelName>'
+               '<mix:scannerModelNumber>2'
+               '</mix:scannerModelNumber>'
+               '<mix:scannerModelSerialNo>3'
+               '</mix:scannerModelSerialNo>'
+               '</mix:ScannerModel>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_device_model_camera():
+    """
+    Tests that the element DigitalCameraModel is created correctly
+    using the device_model function.
+    """
+    mix = device_model(device_type='camera', name='test', number='2',
+                       serialno='3')
+
+    xml_str = ('<mix:DigitalCameraModel '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:digitalCameraModelName>test'
+               '</mix:digitalCameraModelName>'
+               '<mix:digitalCameraModelNumber>2'
+               '</mix:digitalCameraModelNumber>'
+               '<mix:digitalCameraModelSerialNo>3'
+               '</mix:digitalCameraModelSerialNo>'
+               '</mix:DigitalCameraModel>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_max_optical_resolution():
+    """
+    Tests that the element MaximumOpticalResolution is created
+    correctly.
+    """
+    mix = max_optical_resolution(x_resolution='1', y_resolution='2',
+                                 unit='cm')
+
+    xml_str = ('<mix:MaximumOpticalResolution '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:xOpticalResolution>1'
+               '</mix:xOpticalResolution>'
+               '<mix:yOpticalResolution>2'
+               '</mix:yOpticalResolution>'
+               '<mix:opticalResolutionUnit>cm'
+               '</mix:opticalResolutionUnit>'
+               '</mix:MaximumOpticalResolution>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_optical_resolution_error():
+    """
+    Tests that invalid values for restricted elements return an
+    exception.
+    """
+
+    with pytest.raises(RestrictedElementError):
+        max_optical_resolution(unit='foo')
+
+
+def test_scanning_software():
+    """
+    Tests that the element ScanningSystemSoftware is created
+    correctly.
+    """
+    mix = scanning_software(name='1', version='2')
+
+    xml_str = ('<mix:ScanningSystemSoftware '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:scanningSoftwareName>1'
+               '</mix:scanningSoftwareName>'
+               '<mix:scanningSoftwareVersionNo>2'
+               '</mix:scanningSoftwareVersionNo>'
+               '</mix:ScanningSystemSoftware>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_camera_capture_settings():
+    """
+    Tests that the element CameraCaptureSettings is created correctly
+    and that the subelements are sorted properly.
+    """
+    gps = _element('GPSData')
+    img = _element('ImageData')
+
+    mix = camera_capture_settings(child_elements=[gps, img])
+
+    xml_str = ('<mix:CameraCaptureSettings '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:ImageData/><mix:GPSData/>'
+               '</mix:CameraCaptureSettings>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_image_data():
+    """Tests that the element ImageData is created correctly."""
+
+    mix = image_data(fnumber='1', exposure_time='2', exposure_program='3',
+                     spectral_sensitivity=['4', '4b'], isospeed_ratings='5',
+                     oecf='6', exif_version='7', shutter_speed='8',
+                     aperture='9', brightnees='10', exposure_bias='11',
+                     max_aperture='12', distance='13', min_distance='14',
+                     max_distance='15', metering_mode='16', light_source='17',
+                     flash='18', focal_length='19', flash_energy='20',
+                     back_light='21', exposure_index='22', sensing_method='23',
+                     cfa_pattern='24', auto_focus='25',
+                     x_print_aspect_ratio='26', y_print_aspect_ratio='27')
+
+    xml_str = ('<mix:ImageData '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:fNumber>1</mix:fNumber><mix:exposureTime>2'
+               '</mix:exposureTime><mix:exposureProgram>3'
+               '</mix:exposureProgram>'
+               '<mix:spectralSensitivity>4</mix:spectralSensitivity>'
+               '<mix:spectralSensitivity>4b</mix:spectralSensitivity>'
+               '<mix:isoSpeedRatings>5</mix:isoSpeedRatings>'
+               '<mix:oECF><mix:numerator>6</mix:numerator>'
+               '<mix:denominator>1</mix:denominator></mix:oECF>'
+               '<mix:exifVersion>7</mix:exifVersion>'
+               '<mix:shutterSpeedValue><mix:numerator>8</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:shutterSpeedValue><mix:apertureValue>'
+               '<mix:numerator>9</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:apertureValue><mix:brightnessValue>'
+               '<mix:numerator>10</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:brightnessValue><mix:exposureBiasValue>'
+               '<mix:numerator>11</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:exposureBiasValue><mix:maxApertureValue>'
+               '<mix:numerator>12</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:maxApertureValue><mix:SubjectDistance>'
+               '<mix:distance>13</mix:distance><mix:MinMaxDistance>'
+               '<mix:minDistance>14</mix:minDistance>'
+               '<mix:maxDistance>15</mix:maxDistance>'
+               '</mix:MinMaxDistance></mix:SubjectDistance>'
+               '<mix:meteringMode>16</mix:meteringMode>'
+               '<mix:lightSource>17</mix:lightSource><mix:flash>18</mix:flash>'
+               '<mix:focalLength>19</mix:focalLength><mix:flashEnergy>'
+               '<mix:numerator>20</mix:numerator>'
+               '<mix:denominator>1</mix:denominator>'
+               '</mix:flashEnergy><mix:backLight>21</mix:backLight>'
+               '<mix:exposureIndex>22</mix:exposureIndex>'
+               '<mix:sensingMethod>23</mix:sensingMethod>'
+               '<mix:cfaPattern>24</mix:cfaPattern>'
+               '<mix:autoFocus>25</mix:autoFocus><mix:PrintAspectRatio>'
+               '<mix:xPrintAspectRatio>26</mix:xPrintAspectRatio>'
+               '<mix:yPrintAspectRatio>27</mix:yPrintAspectRatio>'
+               '</mix:PrintAspectRatio></mix:ImageData>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))
 

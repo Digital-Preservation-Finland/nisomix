@@ -3,11 +3,12 @@ import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
 from nisomix.utils import RestrictedElementError
-from nisomix.mix import _element
-from nisomix.object_information import (digital_object_information, identifier,
-                                        compression, format_designation,
-                                        format_registry, fixity,
-                                        normalized_byteorder)
+from nisomix.base import _element
+from nisomix.object_information_base import (digital_object_information,
+                                             identifier, compression,
+                                             format_designation,
+                                             format_registry, fixity,
+                                             normalized_byteorder)
 
 
 def test_digitalobjectinformation():
