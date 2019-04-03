@@ -6,6 +6,7 @@ from nisomix.base import _element, _subelement, _rationale_element
 from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
                            CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
                            OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
+                           IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS,
                            image_capture_order, scanner_capture_order,
                            camera_capture_order, camera_capture_settings_order,
                            RestrictedElementError,
@@ -382,21 +383,41 @@ def camera_capture_settings(child_elements=None):
     return container
 
 
-# pylint: disable=unused-argument, too-many-arguments, too-many-locals
-# unused-argument: The arguments are looped as vars()
-# too-many-arguments: The element contains a lot of subelements
-# too-many-locals: The arguments are many, hence a lot of local variables
-def image_data(fnumber=None, exposure_time=None, exposure_program=None,
-               spectral_sensitivity=None, isospeed_ratings=None, oecf=None,
-               exif_version=None, shutter_speed=None, aperture=None,
-               brightnees=None, exposure_bias=None, max_aperture=None,
-               distance=None, min_distance=None, max_distance=None,
-               metering_mode=None, light_source=None, flash=None,
-               focal_length=None, flash_energy=None, back_light=None,
-               exposure_index=None, sensing_method=None, cfa_pattern=None,
-               auto_focus=None, x_print_aspect_ratio=None,
-               y_print_aspect_ratio=None):
-    """Returns the MIX ImageData element."""
+def image_data(contents=None):
+    """
+    Returns the MIX ImageData element. The function argument contents
+    is a dict. The keys from contents are matched to create the MIX
+    element and its substructure. The dict should look like this::
+
+        contents = {"fnumber": None,
+                    "exposure_time": None,
+                    "exposure_program": None,
+                    "spectral_sensitivity": None,
+                    "isospeed_ratings": None,
+                    "oecf": None,
+                    "exif_version": None,
+                    "shutter_speed_value": None,
+                    "aperture_value": None,
+                    "brightness_value": None,
+                    "exposure_bias_value": None,
+                    "max_aperture_value": None,
+                    "distance": None,
+                    "min_distance": None,
+                    "max_distance": None,
+                    "metering_mode": None,
+                    "light_source": None,
+                    "flash": None,
+                    "focal_length": None,
+                    "flash_energy": None,
+                    "back_light": None,
+                    "exposure_index": None,
+                    "sensing_method": None,
+                    "cfa_pattern": None,
+                    "auto_focus": None,
+                    "x_print_aspect_ratio": None,
+                    "y_print_aspect_ratio": None}
+
+        """
 
     tags = {
         'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
@@ -410,59 +431,66 @@ def image_data(fnumber=None, exposure_time=None, exposure_program=None,
         'sensing_method': 'sensingMethod', 'cfa_pattern': 'cfaPattern',
         'auto_focus': 'autoFocus'}
 
-    rationales = {'oecf': 'oECF', 'shutter_speed': 'shutterSpeedValue',
-                  'aperture': 'apertureValue', 'brightnees': 'brightnessValue',
-                  'exposure_bias': 'exposureBiasValue',
-                  'max_aperture': 'maxApertureValue',
-                  'flash_energy': 'flashEnergy'}
+    rationals = {'oecf': 'oECF', 'shutter_speed_value': 'shutterSpeedValue',
+                 'aperture_value': 'apertureValue',
+                 'brightness_value': 'brightnessValue',
+                 'exposure_bias_value': 'exposureBiasValue',
+                 'max_aperture_value': 'maxApertureValue',
+                 'flash_energy': 'flashEnergy'}
+
+    for key in contents:
+        if key not in IMAGE_DATA_CONTENTS:
+            raise ValueError('Key "%s" not in supported keys for '
+                             'image_data.' % key)
 
     container = _element('ImageData')
     child_elems = []
 
-    for key, value in vars().iteritems():
+    for key, value in contents.iteritems():
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
             child_elems.append(elem)
 
-        if key in rationales and value:
-            elem = _rationale_element(rationales[key], value)
+        if key in rationals and value:
+            elem = _rationale_element(rationals[key], value)
             child_elems.append(elem)
 
-    if isinstance(spectral_sensitivity, list):
-        for item in spectral_sensitivity:
+    if isinstance(contents["spectral_sensitivity"], list):
+        for item in contents["spectral_sensitivity"]:
             spec_sens_el = _element('spectralSensitivity')
             spec_sens_el.text = item
             child_elems.append(spec_sens_el)
-    elif spectral_sensitivity:
+    elif contents["spectral_sensitivity"]:
         spec_sens_el = _element('spectralSensitivity')
-        spec_sens_el.text = spectral_sensitivity
+        spec_sens_el.text = contents["spectral_sensitivity"]
         child_elems.append(spec_sens_el)
 
-    if distance or min_distance or max_distance:
+    if contents["distance"] or contents["min_distance"] \
+            or contents["max_distance"]:
         subject_distance = _element('SubjectDistance')
         child_elems.append(subject_distance)
-    if distance:
+    if contents["distance"]:
         distance_el = _subelement(subject_distance, 'distance')
-        distance_el.text = distance
-    if min_distance or max_distance:
+        distance_el.text = contents["distance"]
+    if contents["min_distance"] or contents["max_distance"]:
         min_max_distance = _subelement(subject_distance, 'MinMaxDistance')
-    if min_distance:
+    if contents["min_distance"]:
         min_distance_el = _subelement(min_max_distance, 'minDistance')
-        min_distance_el.text = min_distance
-    if max_distance:
+        min_distance_el.text = contents["min_distance"]
+    if contents["max_distance"]:
         max_distance_el = _subelement(min_max_distance, 'maxDistance')
-        max_distance_el.text = max_distance
+        max_distance_el.text = contents["max_distance"]
 
-    if x_print_aspect_ratio or y_print_aspect_ratio:
+    if contents["x_print_aspect_ratio"] or contents["y_print_aspect_ratio"]:
         print_ratio = _element('PrintAspectRatio')
         child_elems.append(print_ratio)
-    if x_print_aspect_ratio:
+    if contents["x_print_aspect_ratio"]:
         x_print_aspect_ratio_el = _subelement(print_ratio, 'xPrintAspectRatio')
-        x_print_aspect_ratio_el.text = x_print_aspect_ratio
-    if y_print_aspect_ratio:
+        x_print_aspect_ratio_el.text = contents["x_print_aspect_ratio"]
+    if contents["y_print_aspect_ratio"]:
         y_print_aspect_ratio_el = _subelement(print_ratio, 'yPrintAspectRatio')
-        y_print_aspect_ratio_el.text = y_print_aspect_ratio
+        y_print_aspect_ratio_el.text = contents["y_print_aspect_ratio"]
 
     child_elems.sort(key=image_data_order)
 
@@ -472,26 +500,57 @@ def image_data(fnumber=None, exposure_time=None, exposure_program=None,
     return container
 
 
-# pylint: disable=unused-argument, too-many-arguments, too-many-locals
-# unused-argument: The arguments are looped as vars()
-# too-many-arguments: The element contains a lot of subelements
-# too-many-locals: The arguments are many, hence a lot of local variables
-def gps_data(version=None, lat_ref=None, lat_degrees=None, lat_minutes=None,
-             lat_seconds=None, long_ref=None, long_degrees=None,
-             long_minutes=None, long_seconds=None, altitude_ref=None,
-             altitude=None, timestamp=None, satellites=None, status=None,
-             measure_mode=None, dop=None, speed_ref=None, speed=None,
-             track_ref=None, track=None, direction_ref=None, direction=None,
-             map_datum=None, dest_lat_ref=None, dest_lat_degrees=None,
-             dest_lat_minutes=None, dest_lat_seconds=None, dest_long_ref=None,
-             dest_long_degrees=None, dest_long_minutes=None,
-             dest_long_seconds=None, dest_bearing_ref=None, dest_bearing=None,
-             dest_distance_ref=None, dest_distance=None,
-             processing_method=None, area_information=None, datestamp=None,
-             differential=None, gps_groups=None):
-    """Returns the MIX GPSData element."""
+def gps_data(contents=None):
+    """
+    Returns the MIX GPSData element. The function argument contents
+    is a dict, see global variable GPS_DATA_CONTENTS. The keys from
+    contents are matched to create the MIX element and its substructure.
+    The dict should look like this::
 
-    tags = {'version': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
+        contents = {"version_id": None,
+                    "lat_ref": None,
+                    "lat_degrees": None,
+                    "lat_minutes": None,
+                    "lat_seconds": None,
+                    "long_ref": None,
+                    "long_degrees": None,
+                    "long_minutes": None,
+                    "long_seconds": None,
+                    "altitude_ref": None,
+                    "altitude": None,
+                    "timestamp": None,
+                    "satellites": None,
+                    "status": None,
+                    "measure_mode": None,
+                    "dop": None,
+                    "speed_ref": None,
+                    "speed": None,
+                    "track_ref": None,
+                    "track": None,
+                    "img_direction_ref": None,
+                    "direction": None,
+                    "map_datum": None,
+                    "dest_lat_ref": None,
+                    "dest_lat_degrees": None,
+                    "dest_lat_minutes": None,
+                    "dest_lat_seconds": None,
+                    "dest_long_ref": None,
+                    "dest_long_degrees": None,
+                    "dest_long_minutes": None,
+                    "dest_long_seconds": None,
+                    "dest_bearing_ref": None,
+                    "dest_bearing": None,
+                    "dest_distance_ref": None,
+                    "dest_distance": None,
+                    "processing_method": None,
+                    "area_information": None,
+                    "datestamp": None,
+                    "differential": None,
+                    "gps_groups": None}
+
+    """
+
+    tags = {'version_id': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
             'long_ref': 'gpsLongitudeRef',
             'altitude_ref': 'gpsAltitudeRef',
             'timestamp': 'gpsTimeStamp', 'satellites': 'gpsSatellites',
@@ -499,7 +558,7 @@ def gps_data(version=None, lat_ref=None, lat_degrees=None, lat_minutes=None,
             'measure_mode': 'gpsMeasureMode',
             'speed_ref': 'gpsSpeedRef',
             'track_ref': 'gpsTrackRef',
-            'direction_ref': 'gpsImgDirectionRef',
+            'img_direction_ref': 'gpsImgDirectionRef',
             'map_datum': 'gpsMapDatum',
             'dest_lat_ref': 'gpsDestLatitudeRef',
             'dest_long_ref': 'gpsDestLongitudeRef',
@@ -510,49 +569,61 @@ def gps_data(version=None, lat_ref=None, lat_degrees=None, lat_minutes=None,
             'datestamp': 'gpsDateStamp',
             'differential': 'gpsDifferential'}
 
-    rationales = {'altitude': 'gpsAltitude',
-                  'dop': 'gpsDOP',
-                  'speed': 'gpsSpeed',
-                  'track': 'gpsTrack',
-                  'direction': 'gpsImgDirection',
-                  'dest_bearing': 'gpsDestBearing',
-                  'dest_distance': 'gpsDestDistance'}
+    rationals = {'altitude': 'gpsAltitude',
+                 'dop': 'gpsDOP',
+                 'speed': 'gpsSpeed',
+                 'track': 'gpsTrack',
+                 'direction': 'gpsImgDirection',
+                 'dest_bearing': 'gpsDestBearing',
+                 'dest_distance': 'gpsDestDistance'}
+
+    for key in contents:
+        if key not in GPS_DATA_CONTENTS:
+            raise ValueError('Key "%s" not in supported keys '
+                             'for gps_data.' % key)
 
     container = _element('GPSData')
     child_elems = []
 
-    for key, value in vars().iteritems():
+    for key, value in contents.iteritems():
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
             child_elems.append(elem)
 
-        if key in rationales and value:
-            elem = _rationale_element(rationales[key], value)
+        if key in rationals and value:
+            elem = _rationale_element(rationals[key], value)
             child_elems.append(elem)
 
-    if lat_degrees or lat_minutes or lat_seconds:
-        lat_group = _gps_group('GPSLatitude', degrees=lat_degrees,
-                               minutes=lat_minutes, seconds=lat_seconds)
+    if contents["lat_degrees"] or contents["lat_minutes"] or \
+            contents["lat_seconds"]:
+        lat_group = _gps_group('GPSLatitude', degrees=contents["lat_degrees"],
+                               minutes=contents["lat_minutes"],
+                               seconds=contents["lat_seconds"])
         child_elems.append(lat_group)
 
-    if long_degrees or long_minutes or long_seconds:
-        long_group = _gps_group('GPSLongitude', degrees=long_degrees,
-                                minutes=long_minutes, seconds=long_seconds)
+    if contents["long_degrees"] or contents["long_minutes"] or \
+            contents["long_seconds"]:
+        long_group = _gps_group('GPSLongitude',
+                                degrees=contents["long_degrees"],
+                                minutes=contents["long_minutes"],
+                                seconds=contents["long_seconds"])
         child_elems.append(long_group)
 
-    if dest_lat_degrees or dest_lat_minutes or dest_lat_seconds:
+    if contents["dest_lat_degrees"] or contents["dest_lat_minutes"] or \
+            contents["dest_lat_seconds"]:
         dest_lat_group = _gps_group('GPSDestLatitude',
-                                    degrees=dest_lat_degrees,
-                                    minutes=dest_lat_minutes,
-                                    seconds=dest_lat_seconds)
+                                    degrees=contents["dest_lat_degrees"],
+                                    minutes=contents["dest_lat_minutes"],
+                                    seconds=contents["dest_lat_seconds"])
         child_elems.append(dest_lat_group)
 
-    if dest_long_degrees or dest_long_minutes or dest_long_seconds:
+    if contents["dest_long_degrees"] or contents["dest_long_minutes"] or \
+            contents["dest_long_seconds"]:
         dest_long_group = _gps_group('GPSDestLongitude',
-                                     degrees=dest_long_degrees,
-                                     minutes=dest_long_minutes,
-                                     seconds=dest_long_seconds)
+                                     degrees=contents["dest_long_degrees"],
+                                     minutes=contents["dest_long_minutes"],
+                                     seconds=contents["dest_long_seconds"])
         child_elems.append(dest_long_group)
 
     child_elems.sort(key=gps_data_order)

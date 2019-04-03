@@ -308,16 +308,35 @@ def test_camera_capture_settings():
 def test_image_data():
     """Tests that the element ImageData is created correctly."""
 
-    mix = image_data(fnumber='1', exposure_time='2', exposure_program='3',
-                     spectral_sensitivity=['4', '4b'], isospeed_ratings='5',
-                     oecf='6', exif_version='7', shutter_speed='8',
-                     aperture='9', brightnees='10', exposure_bias='11',
-                     max_aperture='12', distance='13', min_distance='14',
-                     max_distance='15', metering_mode='16', light_source='17',
-                     flash='18', focal_length='19', flash_energy='20',
-                     back_light='21', exposure_index='22', sensing_method='23',
-                     cfa_pattern='24', auto_focus='25',
-                     x_print_aspect_ratio='26', y_print_aspect_ratio='27')
+    contents = {"fnumber": "1",
+                "exposure_time": "2",
+                "exposure_program": "3",
+                "spectral_sensitivity": ["4", "4b"],
+                "isospeed_ratings": "5",
+                "oecf": "6",
+                "exif_version": "7",
+                "shutter_speed_value": "8",
+                "aperture_value": "9",
+                "brightness_value": "10",
+                "exposure_bias_value": "11",
+                "max_aperture_value": "12",
+                "distance": "13",
+                "min_distance": "14",
+                "max_distance": "15",
+                "metering_mode": "16",
+                "light_source": "17",
+                "flash": "18",
+                "focal_length": "19",
+                "flash_energy": "20",
+                "back_light": "21",
+                "exposure_index": "22",
+                "sensing_method": "23",
+                "cfa_pattern": "24",
+                "auto_focus": "25",
+                "x_print_aspect_ratio": "26",
+                "y_print_aspect_ratio": "27"}
+
+    mix = image_data(contents=contents)
 
     xml_str = ('<mix:ImageData '
                'xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -390,78 +409,106 @@ def test_gps_data():
     created correctly.
     """
 
-    mix = gps_data(version='1', lat_ref='1', lat_degrees='1', lat_minutes='1',
-                   lat_seconds='1', long_ref='1', long_degrees='1',
-                   long_minutes='1', long_seconds='1', altitude_ref='1',
-                   altitude='1', timestamp='1', satellites='1', status='1',
-                   measure_mode='1', dop='1', speed_ref='1', speed='1',
-                   track_ref='1', track='1', direction_ref='1', direction='1',
-                   map_datum='1', dest_lat_ref='1', dest_lat_degrees='1',
-                   dest_lat_minutes='1', dest_lat_seconds='1',
-                   dest_long_ref='1', dest_long_degrees='1',
-                   dest_long_minutes='1', dest_long_seconds='1',
-                   dest_bearing_ref='1', dest_bearing='1',
-                   dest_distance_ref='1', dest_distance='1',
-                   processing_method='1', area_information='1', datestamp='1',
-                   differential='1', gps_groups='1')
+    contents = {"version_id": "1",
+                "lat_ref": "2",
+                "lat_degrees": "3",
+                "lat_minutes": "4",
+                "lat_seconds": "5",
+                "long_ref": "6",
+                "long_degrees": "7",
+                "long_minutes": "8",
+                "long_seconds": "9",
+                "altitude_ref": "10",
+                "altitude": "11",
+                "timestamp": "12",
+                "satellites": "13",
+                "status": "14",
+                "measure_mode": "15",
+                "dop": "16",
+                "speed_ref": "17",
+                "speed": "18",
+                "track_ref": "19",
+                "track": "20",
+                "img_direction_ref": "21",
+                "direction": "22",
+                "map_datum": "23",
+                "dest_lat_ref": "24",
+                "dest_lat_degrees": "25",
+                "dest_lat_minutes": "26",
+                "dest_lat_seconds": "27",
+                "dest_long_ref": "28",
+                "dest_long_degrees": "29",
+                "dest_long_minutes": "30",
+                "dest_long_seconds": "31",
+                "dest_bearing_ref": "32",
+                "dest_bearing": "33",
+                "dest_distance_ref": "34",
+                "dest_distance": "35",
+                "processing_method": "36",
+                "area_information": "37",
+                "datestamp": "38",
+                "differential": "39",
+                "gps_groups": "40"}
+
+    mix = gps_data(contents=contents)
 
     xml_str = ('<mix:GPSData xmlns:mix="http://www.loc.gov/mix/v20">'
-               '<mix:gpsVersionID>1</mix:gpsVersionID><mix:gpsLatitudeRef>1'
+               '<mix:gpsVersionID>1</mix:gpsVersionID><mix:gpsLatitudeRef>2'
                '</mix:gpsLatitudeRef><mix:GPSLatitude><mix:degrees>'
-               '<mix:numerator>1</mix:numerator><mix:denominator>1'
-               '</mix:denominator></mix:degrees><mix:minutes><mix:numerator>1'
+               '<mix:numerator>3</mix:numerator><mix:denominator>1'
+               '</mix:denominator></mix:degrees><mix:minutes><mix:numerator>4'
                '</mix:numerator><mix:denominator>1</mix:denominator>'
-               '</mix:minutes><mix:seconds><mix:numerator>1</mix:numerator>'
+               '</mix:minutes><mix:seconds><mix:numerator>5</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:seconds>'
-               '</mix:GPSLatitude><mix:gpsLongitudeRef>1</mix:gpsLongitudeRef>'
-               '<mix:GPSLongitude><mix:degrees><mix:numerator>1'
+               '</mix:GPSLatitude><mix:gpsLongitudeRef>6</mix:gpsLongitudeRef>'
+               '<mix:GPSLongitude><mix:degrees><mix:numerator>7'
                '</mix:numerator><mix:denominator>1</mix:denominator>'
-               '</mix:degrees><mix:minutes><mix:numerator>1</mix:numerator>'
+               '</mix:degrees><mix:minutes><mix:numerator>8</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:minutes>'
-               '<mix:seconds><mix:numerator>1</mix:numerator>'
+               '<mix:seconds><mix:numerator>9</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:seconds>'
-               '</mix:GPSLongitude><mix:gpsAltitudeRef>1</mix:gpsAltitudeRef>'
-               '<mix:gpsAltitude><mix:numerator>1</mix:numerator>'
+               '</mix:GPSLongitude><mix:gpsAltitudeRef>10</mix:gpsAltitudeRef>'
+               '<mix:gpsAltitude><mix:numerator>11</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:gpsAltitude>'
-               '<mix:gpsTimeStamp>1</mix:gpsTimeStamp><mix:gpsSatellites>1'
-               '</mix:gpsSatellites><mix:gpsStatus>1</mix:gpsStatus>'
-               '<mix:gpsMeasureMode>1</mix:gpsMeasureMode><mix:gpsDOP>'
-               '<mix:numerator>1</mix:numerator><mix:denominator>1'
-               '</mix:denominator></mix:gpsDOP><mix:gpsSpeedRef>1'
-               '</mix:gpsSpeedRef><mix:gpsSpeed><mix:numerator>1'
+               '<mix:gpsTimeStamp>12</mix:gpsTimeStamp><mix:gpsSatellites>13'
+               '</mix:gpsSatellites><mix:gpsStatus>14</mix:gpsStatus>'
+               '<mix:gpsMeasureMode>15</mix:gpsMeasureMode><mix:gpsDOP>'
+               '<mix:numerator>16</mix:numerator><mix:denominator>1'
+               '</mix:denominator></mix:gpsDOP><mix:gpsSpeedRef>17'
+               '</mix:gpsSpeedRef><mix:gpsSpeed><mix:numerator>18'
                '</mix:numerator><mix:denominator>1</mix:denominator>'
-               '</mix:gpsSpeed><mix:gpsTrackRef>1</mix:gpsTrackRef>'
-               '<mix:gpsTrack><mix:numerator>1</mix:numerator>'
+               '</mix:gpsSpeed><mix:gpsTrackRef>19</mix:gpsTrackRef>'
+               '<mix:gpsTrack><mix:numerator>20</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:gpsTrack>'
-               '<mix:gpsImgDirectionRef>1</mix:gpsImgDirectionRef>'
-               '<mix:gpsImgDirection><mix:numerator>1</mix:numerator>'
+               '<mix:gpsImgDirectionRef>21</mix:gpsImgDirectionRef>'
+               '<mix:gpsImgDirection><mix:numerator>22</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:gpsImgDirection>'
-               '<mix:gpsMapDatum>1</mix:gpsMapDatum>'
-               '<mix:gpsDestLatitudeRef>1</mix:gpsDestLatitudeRef>'
-               '<mix:GPSDestLatitude><mix:degrees><mix:numerator>1'
+               '<mix:gpsMapDatum>23</mix:gpsMapDatum>'
+               '<mix:gpsDestLatitudeRef>24</mix:gpsDestLatitudeRef>'
+               '<mix:GPSDestLatitude><mix:degrees><mix:numerator>25'
                '</mix:numerator><mix:denominator>1</mix:denominator>'
-               '</mix:degrees><mix:minutes><mix:numerator>1</mix:numerator>'
+               '</mix:degrees><mix:minutes><mix:numerator>26</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:minutes>'
-               '<mix:seconds><mix:numerator>1</mix:numerator>'
+               '<mix:seconds><mix:numerator>27</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:seconds>'
-               '</mix:GPSDestLatitude><mix:gpsDestLongitudeRef>1'
+               '</mix:GPSDestLatitude><mix:gpsDestLongitudeRef>28'
                '</mix:gpsDestLongitudeRef><mix:GPSDestLongitude>'
-               '<mix:degrees><mix:numerator>1</mix:numerator>'
+               '<mix:degrees><mix:numerator>29</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:degrees>'
-               '<mix:minutes><mix:numerator>1</mix:numerator>'
+               '<mix:minutes><mix:numerator>30</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:minutes>'
-               '<mix:seconds><mix:numerator>1</mix:numerator>'
+               '<mix:seconds><mix:numerator>31</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:seconds>'
-               '</mix:GPSDestLongitude><mix:gpsDestBearingRef>1'
-               '</mix:gpsDestBearingRef><mix:gpsDestBearing><mix:numerator>1'
+               '</mix:GPSDestLongitude><mix:gpsDestBearingRef>32'
+               '</mix:gpsDestBearingRef><mix:gpsDestBearing><mix:numerator>33'
                '</mix:numerator><mix:denominator>1</mix:denominator>'
-               '</mix:gpsDestBearing><mix:gpsDestDistanceRef>1'
+               '</mix:gpsDestBearing><mix:gpsDestDistanceRef>34'
                '</mix:gpsDestDistanceRef><mix:gpsDestDistance>'
-               '<mix:numerator>1</mix:numerator><mix:denominator>1'
+               '<mix:numerator>35</mix:numerator><mix:denominator>1'
                '</mix:denominator></mix:gpsDestDistance>'
-               '<mix:gpsProcessingMethod>1</mix:gpsProcessingMethod>'
-               '<mix:gpsAreaInformation>1</mix:gpsAreaInformation>'
-               '<mix:gpsDateStamp>1</mix:gpsDateStamp><mix:gpsDifferential>1'
+               '<mix:gpsProcessingMethod>36</mix:gpsProcessingMethod>'
+               '<mix:gpsAreaInformation>37</mix:gpsAreaInformation>'
+               '<mix:gpsDateStamp>38</mix:gpsDateStamp><mix:gpsDifferential>39'
                '</mix:gpsDifferential></mix:GPSData>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))
