@@ -2,6 +2,7 @@
 xml.etree.ElementTree data structures.
 """
 
+import six
 from nisomix.base import _element, _subelement, _rationale_element
 from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
                            CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
@@ -446,7 +447,7 @@ def image_data(contents=None):
     container = _element('ImageData')
     child_elems = []
 
-    for key, value in contents.iteritems():
+    for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
@@ -585,7 +586,7 @@ def gps_data(contents=None):
     container = _element('GPSData')
     child_elems = []
 
-    for key, value in contents.iteritems():
+    for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
