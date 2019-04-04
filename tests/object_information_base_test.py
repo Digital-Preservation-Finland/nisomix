@@ -22,7 +22,7 @@ def test_digitalobjectinformation():
     ident = _element('ObjectIdentifier')
     format_reg = _element('FormatRegistry')
     fix = _element('Fixity')
-    mix = digital_object_information(byte_order='big endian', file_size='1234',
+    mix = digital_object_information(byte_order='big endian', file_size=1234,
                                      child_elements=[compr, format_des, fix,
                                                      format_reg, ident])
 
@@ -86,7 +86,7 @@ def test_format_registry():
 def test_compression():
     """Test that the element Compression is created correctly."""
 
-    compr = compression(compression_scheme='jpeg', compression_ratio='200')
+    compr = compression(compression_scheme='jpeg', compression_ratio=200)
 
     xml_str = ('<mix:Compression xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:compressionScheme>jpeg</mix:compressionScheme>'

@@ -57,14 +57,14 @@ def test_rationaltype_element():
     element was created correctly, that it is containing both the
     numerator and denominator subelements.
     """
-    elem1 = _rationaltype_element('test', '30')
+    elem1 = _rationaltype_element('test', 30)
 
     assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:numerator>30</mix:numerator>'
         '<mix:denominator>1</mix:denominator></mix:test>'))
 
-    elem2 = _rationaltype_element('test', ['30', '3'])
+    elem2 = _rationaltype_element('test', [30, 3])
 
     assert ET.tostring(elem2) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -79,7 +79,7 @@ def test_rationaltype_subelement():
     that it is containing both the numerator and denominator subelements.
     """
     elem1 = _element('test')
-    _rationaltype_subelement(elem1, 'subtest', '30')
+    _rationaltype_subelement(elem1, 'subtest', 30)
 
     assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -87,7 +87,7 @@ def test_rationaltype_subelement():
         '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>'))
 
     elem2 = _element('test')
-    _rationaltype_subelement(elem2, 'subtest', ['30', '3'])
+    _rationaltype_subelement(elem2, 'subtest', [30, 3])
 
     assert ET.tostring(elem2) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'

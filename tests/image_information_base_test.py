@@ -40,7 +40,7 @@ def test_image_characteristics():
     """
 
     interpretation = _element('PhotometricInterpretation')
-    mix = image_characteristics(width='1', height='2',
+    mix = image_characteristics(width=1, height=2,
                                 child_elements=[interpretation])
 
     xml_str = ('<mix:BasicImageCharacteristics '
@@ -97,7 +97,7 @@ def test_ycbcr():
     """Test that the element YCbCr is created correctly."""
 
     mix = ycbcr(subsample_horiz='1', subsample_vert='2',
-                positioning='2', luma_red='1', luma_green='2', luma_blue='3')
+                positioning='2', luma_red=1, luma_green=2, luma_blue=3)
 
     xml_str = ('<mix:YCbCr xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:YCbCrSubSampling>'
@@ -150,8 +150,8 @@ def test_ref_black_white():
 def test_component():
     """Test that the element Component is created correctly."""
 
-    mix = component(c_photometric_interpretation='R', footroom='1',
-                    headroom='2')
+    mix = component(c_photometric_interpretation='R', footroom=1,
+                    headroom=2)
 
     xml_str = ('<mix:Component xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:componentPhotometricInterpretation>R'
@@ -194,8 +194,8 @@ def test_format_characteristics():
 def test_jpeg2000():
     """Test that the element JPEG2000 is created correctly."""
     mix = jpeg2000(codec='jp2', codec_version='1.0', codestream_profile='P1',
-                   compliance_class='C0', tile_width='1', tile_height='2',
-                   quality_layers='3', resolution_levels='4')
+                   compliance_class='C0', tile_width=1, tile_height=2,
+                   quality_layers=3, resolution_levels=4)
 
     xml_str = ('<mix:JPEG2000 xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:CodecCompliance><mix:codec>jp2</mix:codec>'
@@ -214,7 +214,7 @@ def test_jpeg2000():
 
 def test_mrsid():
     """Test that the element MrSID is created correctly."""
-    mix = mrsid(zoom_levels='3')
+    mix = mrsid(zoom_levels=3)
 
     xml_str = ('<mix:MrSID xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:zoomLevels>3</mix:zoomLevels>'

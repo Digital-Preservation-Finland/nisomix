@@ -5,7 +5,8 @@ References:
 
     * MIX http://www.loc.gov/standards/mix/
     * Schema documentation: Data Dictionary - Technical Metadata for
-                            Digital Still Images (ANSI/NISO Z39.87-2006)
+                            Digital Still Images
+                            (ANSI/NISO Z39.87-2006 (R2017))
     * ElementTree
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
@@ -85,7 +86,7 @@ def _rationaltype_element(tag, value, denominator='1'):
           <mix:denominator>1</denominator>
         </mix:{{ tag }}>
 
-    :tag: Element tagname
+    :tag: Element tag name
     :value: Contents of the numerator part of the element, or
             if it is a list, contains both the numerator and denominator
     :denominator: Contents of the denominator part of the element
@@ -93,10 +94,10 @@ def _rationaltype_element(tag, value, denominator='1'):
     """
     if not isinstance(value, list):
         value = [value]
-    numerator = value[0]
+    numerator = str(value[0])
 
     if len(value) == 2:
-        denominator = value[1]
+        denominator = str(value[1])
 
     elem = _element(tag)
     numerator_el = _subelement(elem, 'numerator')
@@ -118,7 +119,7 @@ def _rationaltype_subelement(parent, tag, value, denominator='1'):
         </mix:{{ tag }}>
 
     :parent: Parent element
-    :tag: Element tagname
+    :tag: Element tag name
     :value: Contents of the numerator part of the element, or
             if it is a list, contains both the numerator and denominator
     :denominator: Contents of the denominator part of the element
@@ -126,10 +127,10 @@ def _rationaltype_subelement(parent, tag, value, denominator='1'):
     """
     if not isinstance(value, list):
         value = [value]
-    numerator = value[0]
+    numerator = str(value[0])
 
     if len(value) == 2:
-        denominator = value[1]
+        denominator = str(value[1])
 
     elem = _subelement(parent, tag)
     numerator_el = _subelement(elem, 'numerator')

@@ -1,5 +1,9 @@
-"""Functions for reading and generating MIX
+"""
+Functions for reading and generating MIX
 BasicDigitalObjectInformation metadata and its contents.
+
+References:
+    * MIX http://www.loc.gov/standards/mix/
 
 """
 
@@ -11,16 +15,25 @@ from nisomix.utils import (basic_do_order, RestrictedElementError,
 
 def digital_object_information(byte_order=None, file_size=None,
                                child_elements=None):
-    """Returns MIX BasicDigitalObjectInformation element
+    """
+    Returns the MIX BasicDigitalObjectInformation element. The
+    subelements are sorted according to the order as noted in the
+    schema.
+
+    :byte_order: The byte order as a string
+    :file_size: The file size in bytes as an integer
+    :child_elements: Child elements as a list
 
     Returns the following sorted ElementTree structure::
 
         <mix:BasicDigitalObjectInformation>
-          {{ Child elements }}
+          <mix:ObjectIdentifier/>
           <mix:fileSize>1234</mix:fileSize>
-          {{ Child elements }}
+          <mix:FormatDesignation/>
+          <mix:FormatRegistry/>
           <mix:byteOrder>big endian</mix:byteOrder>
-          {{ Child elements }}
+          <mix:Compression/>
+          <mix:Fixity/>
         </mix:BasicDigitalObjectInformation>
 
     """
@@ -31,7 +44,7 @@ def digital_object_information(byte_order=None, file_size=None,
 
     if file_size:
         file_size_el = _element('fileSize')
-        file_size_el.text = file_size
+        file_size_el.text = str(file_size)
         child_elements.append(file_size_el)
     if byte_order:
         byte_order_el = _element('byteOrder')
@@ -47,7 +60,11 @@ def digital_object_information(byte_order=None, file_size=None,
 
 
 def identifier(id_type=None, id_value=None):
-    """Returns MIX ObjectIdentifier element.
+    """
+    Returns the MIX ObjectIdentifier element.
+
+    :id_type: The identifier type as a string
+    :id_value: The identifier value as a string
 
     Returns the following ElementTree structure::
 
@@ -71,7 +88,11 @@ def identifier(id_type=None, id_value=None):
 
 
 def format_designation(format_name=None, format_version=None):
-    """Returns MIX FormatDesignation element
+    """
+    Returns the MIX FormatDesignation element.
+
+    :format_name: The file format name as a string
+    :format_version: The file format version as a string
 
     Returns the following ElementTree structure::
 
@@ -95,7 +116,11 @@ def format_designation(format_name=None, format_version=None):
 
 
 def format_registry(registry_name=None, registry_key=None):
-    """Returns MIX FormatRegistry element
+    """
+    Returns the MIX FormatRegistry element.
+
+    :registry_name: The file format registry name as a string
+    :registry_key: The file format registry key as a string
 
     Returns the following ElementTree structure::
 
@@ -120,7 +145,14 @@ def format_registry(registry_name=None, registry_key=None):
 
 def compression(compression_scheme=None, local_list=None,
                 local_value=None, compression_ratio=None):
-    """Returns MIX Compression element
+    """
+    Returns the MIX Compression element.
+
+    :compression_scheme: The compression scheme as a string
+    :local_list: The location of the local enumerated list of
+                 compression schemes as a string
+    :local_value: The local compression scheme as a string
+    :compression_ratio: The compression ratio as a list (or integer)
 
     Returns the following ElementTree structure::
 
@@ -161,7 +193,13 @@ def compression(compression_scheme=None, local_list=None,
 
 
 def fixity(algorithm=None, digest=None, originator=None):
-    """Returns MIX Fixity element.
+    """
+    Returns the MIX Fixity element.
+
+    :algorithm: The message digest algorithm as a string
+    :digest: The message digest as a string
+    :originator: The message digest creator agent as a string
+
 
     Returns the following ElementTree structure::
 
@@ -202,6 +240,7 @@ def normalized_byteorder(byte_order):
     and capitalized letters. Raises an exception if bytOrder couldn't
     be normalized.
 
+    :byte_order: The input byte order as a string
     :returns: The (fixed) byte order as a string
     """
     byte_order = byte_order.replace('-', ' ').replace('_', ' ')
@@ -225,6 +264,9 @@ def parse_message_digest(elem):
     """
     Returns the message digest algorithm and value from a MIX metadata
     block in XML.
+
+    :elem: An ElementTree strucure
+    :returns: A tuple of (algorithm, value)
     """
     algorithm = None
     value = None
