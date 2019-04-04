@@ -3,7 +3,7 @@ Functions for reading and generating MIX BasicImageInformatio
 metadata and its contents.
 """
 
-from nisomix.base import _element, _subelement, _rationale_subelement
+from nisomix.base import _element, _subelement, _rationaltype_subelement
 from nisomix.utils import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
                            YCBCR_POSITIONING_TYPES,
                            COMPONENT_INTERPRETATION_TYPES,
@@ -58,6 +58,7 @@ def photometric_interpretation(color_space=None, child_elements=None):
     return container
 
 
+# pylint: disable=too-many-arguments
 def color_profile(icc_name=None, icc_version=None, icc_uri=None,
                   local_name=None, local_url=None, embedded_profile=None):
     """Creates the MIX ColorProfile element and its subelements."""
@@ -92,6 +93,7 @@ def color_profile(icc_name=None, icc_version=None, icc_uri=None,
     return container
 
 
+# pylint: disable=too-many-arguments, too-many-branches
 def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
           luma_red=None, luma_green=None, luma_blue=None):
     """Creates the MIX YCbCr element and its subelements."""
@@ -134,11 +136,11 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
     if luma_red or luma_green or luma_blue:
         luma_container = _subelement(container, 'YCbCrCoefficients')
         if luma_red:
-            _rationale_subelement(luma_container, 'lumaRed', luma_red)
+            _rationaltype_subelement(luma_container, 'lumaRed', luma_red)
         if luma_green:
-            _rationale_subelement(luma_container, 'lumaGreen', luma_green)
+            _rationaltype_subelement(luma_container, 'lumaGreen', luma_green)
         if luma_blue:
-            _rationale_subelement(luma_container, 'lumaBlue', luma_blue)
+            _rationaltype_subelement(luma_container, 'lumaBlue', luma_blue)
 
     return container
 
@@ -175,10 +177,10 @@ def component(c_photometric_interpretation=None, footroom=None,
                     '", "'.join(COMPONENT_INTERPRETATION_TYPES)))
 
     if footroom:
-        _rationale_subelement(container, 'footroom', footroom)
+        _rationaltype_subelement(container, 'footroom', footroom)
 
     if headroom:
-        _rationale_subelement(container, 'headroom', headroom)
+        _rationaltype_subelement(container, 'headroom', headroom)
 
     return container
 
@@ -195,6 +197,7 @@ def format_characteristics(child_elements=None):
     return container
 
 
+# pylint: disable=too-many-arguments, too-many-locals
 def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
              compliance_class=None, tile_width=None, tile_height=None,
              quality_layers=None, resolution_levels=None):

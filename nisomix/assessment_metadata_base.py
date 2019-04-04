@@ -3,7 +3,7 @@ xml.etree.ElementTree data structures.
 
 """
 
-from nisomix.base import _element, _subelement, _rationale_subelement
+from nisomix.base import _element, _subelement, _rationaltype_subelement
 from nisomix.utils import (SAMPLING_FREQUENCY_PLANES, SAMPLING_FREQUENCY_UNITS,
                            BITS_PER_SAMPLE_UNITS, EXTRA_SAMPLES_TYPES,
                            GRAY_RESPONSE_UNITS, TARGET_TYPES,
@@ -49,10 +49,10 @@ def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
                     unit, '", "'.join(SAMPLING_FREQUENCY_UNITS)))
 
     if x_sampling:
-        _rationale_subelement(container, 'xSamplingFrequency', x_sampling)
+        _rationaltype_subelement(container, 'xSamplingFrequency', x_sampling)
 
     if y_sampling:
-        _rationale_subelement(container, 'ySamplingFrequency', y_sampling)
+        _rationaltype_subelement(container, 'ySamplingFrequency', y_sampling)
 
     return container
 
@@ -160,44 +160,46 @@ def white_point(x_value=None, y_value=None):
     container = _element('WhitePoint')
 
     if x_value:
-        _rationale_subelement(container, 'whitePointXValue', x_value)
+        _rationaltype_subelement(container, 'whitePointXValue', x_value)
 
     if y_value:
-        _rationale_subelement(container, 'whitePointYValue', y_value)
+        _rationaltype_subelement(container, 'whitePointYValue', y_value)
 
     return container
 
 
+# pylint: disable=too-many-arguments
 def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
                            blue_x=None, blue_y=None):
     """Returns the MIX PrimaryChromaticities element."""
     container = _element('PrimaryChromaticities')
 
     if red_x:
-        _rationale_subelement(container, 'primaryChromaticitiesRedX', red_x)
+        _rationaltype_subelement(container, 'primaryChromaticitiesRedX', red_x)
 
     if red_y:
-        _rationale_subelement(container, 'primaryChromaticitiesRedY', red_y)
+        _rationaltype_subelement(container, 'primaryChromaticitiesRedY', red_y)
 
     if green_x:
-        _rationale_subelement(container, 'primaryChromaticitiesGreenX',
-                              green_x)
+        _rationaltype_subelement(container, 'primaryChromaticitiesGreenX',
+                                 green_x)
 
     if green_y:
-        _rationale_subelement(container, 'primaryChromaticitiesGreenY',
-                              green_y)
+        _rationaltype_subelement(container, 'primaryChromaticitiesGreenY',
+                                 green_y)
 
     if blue_x:
-        _rationale_subelement(container, 'primaryChromaticitiesBlueX',
-                              blue_x)
+        _rationaltype_subelement(container, 'primaryChromaticitiesBlueX',
+                                 blue_x)
 
     if blue_y:
-        _rationale_subelement(container, 'primaryChromaticitiesBlueY',
-                              blue_y)
+        _rationaltype_subelement(container, 'primaryChromaticitiesBlueY',
+                                 blue_y)
 
     return container
 
 
+# pylint: disable=too-many-branches
 def target_data(target_types=None, external_targets=None,
                 performance_data=None, child_elements=None):
     """Returns MIX TargetData element."""

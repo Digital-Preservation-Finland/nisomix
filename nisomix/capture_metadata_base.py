@@ -3,7 +3,7 @@ xml.etree.ElementTree data structures.
 """
 
 import six
-from nisomix.base import _element, _subelement, _rationale_element
+from nisomix.base import _element, _subelement, _rationaltype_element
 from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
                            CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
                            OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
@@ -453,7 +453,7 @@ def image_data(contents=None):
             child_elems.append(elem)
 
         if key in rationals and value:
-            elem = _rationale_element(rationals[key], value)
+            elem = _rationaltype_element(rationals[key], value)
             child_elems.append(elem)
 
     if contents.get("spectral_sensitivity"):
@@ -592,7 +592,7 @@ def gps_data(contents=None):
             child_elems.append(elem)
 
         if key in rationals and value:
-            elem = _rationale_element(rationals[key], value)
+            elem = _rationaltype_element(rationals[key], value)
             child_elems.append(elem)
 
     if contents.get("lat_degrees") or contents.get("lat_minutes") or \
@@ -660,15 +660,15 @@ def _gps_group(tag, degrees=None, minutes=None, seconds=None):
     container = _element(tag)
 
     if degrees:
-        degrees_el = _rationale_element('degrees', degrees)
+        degrees_el = _rationaltype_element('degrees', degrees)
         container.append(degrees_el)
 
     if minutes:
-        minutes_el = _rationale_element('minutes', minutes)
+        minutes_el = _rationaltype_element('minutes', minutes)
         container.append(minutes_el)
 
     if seconds:
-        seconds_el = _rationale_element('seconds', seconds)
+        seconds_el = _rationaltype_element('seconds', seconds)
         container.append(seconds_el)
 
     return container

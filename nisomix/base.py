@@ -75,8 +75,8 @@ def _subelement(parent, tag, prefix="", namespaces=None):
     return ET.SubElement(parent, mix_ns(tag, prefix), nsmap=namespaces)
 
 
-def _rationale_element(tag, numerator, denominator='1'):
-    """Return a rationale type element.
+def _rationaltype_element(tag, numerator, denominator='1'):
+    """Return a rational type element.
 
     Returns the following ElementTree strucure::
 
@@ -99,8 +99,8 @@ def _rationale_element(tag, numerator, denominator='1'):
     return elem
 
 
-def _rationale_subelement(parent, tag, numerator, denominator='1'):
-    """Return a rationale type element for the parent.
+def _rationaltype_subelement(parent, tag, numerator, denominator='1'):
+    """Return a rational type element for the parent.
 
     Returns the following ElementTree strucure::
 
@@ -124,7 +124,7 @@ def _rationale_subelement(parent, tag, numerator, denominator='1'):
     return elem
 
 
-def mix_mix(child_elements=None, namespaces=None):
+def mix(child_elements=None, namespaces=None):
     """Create MIX Data Dictionary root element.
 
     :child_elements: Any elements appended to the MIX dictionary
@@ -136,14 +136,14 @@ def mix_mix(child_elements=None, namespaces=None):
             xmlns:mix="http://www.loc.gov/mix/v20"
             xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
             xsi:schemalocation="http://www.loc.gov/mix/v20
-                                http://www.loc.gov/mix/mix.xsd"
+                                http://www.loc.gov/mix/mix.xsd"/>
 
     """
     if namespaces is None:
         namespaces = NAMESPACES
 
-    mix = _element('mix', namespaces=namespaces)
-    mix.set(
+    _mix = _element('mix', namespaces=namespaces)
+    _mix.set(
         xsi_ns('schemaLocation'),
         'http://www.loc.gov/mix/v20 '
         'http://www.loc.gov/mix/mix.xsd')
@@ -151,6 +151,6 @@ def mix_mix(child_elements=None, namespaces=None):
     if child_elements:
         child_elements.sort(key=mix_root_order)
         for element in child_elements:
-            mix.append(element)
+            _mix.append(element)
 
-    return mix
+    return _mix

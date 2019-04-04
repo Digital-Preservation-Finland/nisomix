@@ -3,7 +3,8 @@ BasicDigitalObjectInformation metadata and its contents.
 
 """
 
-from nisomix.base import mix_ns, _element, _subelement, _rationale_subelement
+from nisomix.base import (mix_ns, _element, _subelement,
+                          _rationaltype_subelement)
 from nisomix.utils import (basic_do_order, RestrictedElementError,
                            BYTE_ORDER_TYPES, DIGEST_ALGORITHMS, NAMESPACES)
 
@@ -153,7 +154,8 @@ def compression(compression_scheme=None, local_list=None,
         local_value_el.text = local_value
 
     if compression_ratio:
-        _rationale_subelement(container, 'compressionRatio', compression_ratio)
+        _rationaltype_subelement(container, 'compressionRatio',
+                                 compression_ratio)
 
     return container
 

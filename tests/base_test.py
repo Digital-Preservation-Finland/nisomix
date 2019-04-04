@@ -1,8 +1,8 @@
 """Test nisomix features."""
 import pytest
 import lxml.etree as ET
-from nisomix.base import (MIX_NS, mix_ns, mix_mix, _element, _subelement,
-                          _rationale_element, _rationale_subelement)
+from nisomix.base import (MIX_NS, mix_ns, mix, _element, _subelement,
+                          _rationaltype_element, _rationaltype_subelement)
 
 
 @pytest.mark.parametrize(('tag', 'prefix'), [
@@ -51,13 +51,13 @@ def test_subelement():
         '<mix:preTest/></mix:test>'))
 
 
-def test_rationale_element():
+def test_rationaltype_element():
     """
-    Tests the _rationale_element function by asserting that the
+    Tests the _rationaltype_element function by asserting that the
     element was created correctly, that it is containing both the
     numerator and denominator subelements.
     """
-    elem = _rationale_element('test', '30')
+    elem = _rationaltype_element('test', '30')
 
     assert ET.tostring(elem) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -65,14 +65,14 @@ def test_rationale_element():
         '<mix:denominator>1</mix:denominator></mix:test>'))
 
 
-def test_rationale_subelement():
+def test_rationaltype_subelement():
     """
-    Tests the _rationale_subelement function by asserting that the
+    Tests the _rationaltype_subelement function by asserting that the
     element was created correctly as a child element of its parent and
     that it is containing both the numerator and denominator subelements.
     """
     elem = _element('test')
-    _rationale_subelement(elem, 'subtest', '30')
+    _rationaltype_subelement(elem, 'subtest', '30')
 
     assert ET.tostring(elem) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -85,7 +85,7 @@ def test_mix():
     Tests that the mix root element is created and tests that the child
     elements in the mix root are sorted properly.
     """
-    mix1 = mix_mix()
+    mix1 = mix()
 
     assert mix1.xpath('.')[0].tag == '{http://www.loc.gov/mix/v20}mix'
     assert len(mix1) == 0
@@ -98,7 +98,7 @@ def test_mix():
     capture = _element('ImageCaptureMetadata')
     child_elems.append(capture)
 
-    mix2 = mix_mix(child_elements=child_elems)
+    mix2 = mix(child_elements=child_elems)
     assert len(mix2) == 3
     assert mix2.xpath('./*')[0].tag == \
         '{http://www.loc.gov/mix/v20}BasicDigitalObjectInformation'
