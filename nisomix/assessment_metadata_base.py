@@ -70,7 +70,9 @@ def color_encoding(samples_pixel=None, extra_samples=None,
         pixel_el.text = samples_pixel
         child_elements.append(pixel_el)
 
-    if isinstance(extra_samples, list):
+    if extra_samples:
+        if not isinstance(extra_samples, list):
+            extra_samples = [extra_samples]
         for item in extra_samples:
             if item in EXTRA_SAMPLES_TYPES:
                 samples_el = _element('extraSamples')
@@ -81,16 +83,6 @@ def color_encoding(samples_pixel=None, extra_samples=None,
                     'The value "%s" is invalid for extraSamples, '
                     'accepted values are: "%s".' % (
                         item, '", "'.join(EXTRA_SAMPLES_TYPES)))
-    elif extra_samples:
-        if extra_samples in EXTRA_SAMPLES_TYPES:
-            samples_el = _element('extraSamples')
-            samples_el.text = extra_samples
-            child_elements.append(samples_el)
-        else:
-            raise RestrictedElementError(
-                'The value "%s" is invalid for extraSamples, '
-                'accepted values are: "%s".' % (
-                    extra_samples, '", "'.join(EXTRA_SAMPLES_TYPES)))
 
     child_elements.sort(key=color_encoding_order)
 
@@ -104,13 +96,12 @@ def bits_per_sample(sample_values=None, sample_unit=None):
     """Returns the MIX BitsPerSample element."""
     container = _element('BitsPerSample')
 
-    if isinstance(sample_values, list):
+    if sample_values:
+        if not isinstance(sample_values, list):
+            sample_values = [sample_values]
         for item in sample_values:
             value_el = _subelement(container, 'bitsPerSampleValue')
             value_el.text = item
-    elif sample_values:
-        value_el = _subelement(container, 'bitsPerSampleValue')
-        value_el.text = sample_values
 
     if sample_unit:
         if sample_unit in BITS_PER_SAMPLE_UNITS:
@@ -144,13 +135,12 @@ def gray_response(curves=None, unit=None):
     """Returns the MIX GrayResponse element."""
     container = _element('GrayResponse')
 
-    if isinstance(curves, list):
+    if curves:
+        if not isinstance(curves, list):
+            curves = [curves]
         for item in curves:
             curve_el = _subelement(container, 'grayResponseCurve')
             curve_el.text = item
-    elif curves:
-        curve_el = _subelement(container, 'grayResponseCurve')
-        curve_el.text = curves
 
     if unit:
         if unit in GRAY_RESPONSE_UNITS:
@@ -216,7 +206,9 @@ def target_data(target_types=None, external_targets=None,
     if not child_elements:
         child_elements = []
 
-    if isinstance(target_types, list):
+    if target_types:
+        if not isinstance(target_types, list):
+            target_types = [target_types]
         for item in target_types:
             if item in TARGET_TYPES:
                 type_el = _element('targetType')
@@ -227,36 +219,22 @@ def target_data(target_types=None, external_targets=None,
                     'The value "%s" is invalid for targetType, '
                     'accepted values are: "%s".' % (
                         item, '", "'.join(TARGET_TYPES)))
-    elif target_types:
-        if target_types in TARGET_TYPES:
-            type_el = _element('targetType')
-            type_el.text = target_types
-            child_elements.append(type_el)
-        else:
-            raise RestrictedElementError(
-                'The value "%s" is invalid for targetType, '
-                'accepted values are: "%s".' % (
-                    target_types, '", "'.join(TARGET_TYPES)))
 
-    if isinstance(external_targets, list):
+    if external_targets:
+        if not isinstance(external_targets, list):
+            external_targets = [external_targets]
         for item in external_targets:
             target_el = _element('externalTarget')
             target_el.text = item
             child_elements.append(target_el)
-    elif external_targets:
-        target_el = _element('externalTarget')
-        target_el.text = external_targets
-        child_elements.append(target_el)
 
-    if isinstance(performance_data, list):
+    if performance_data:
+        if not isinstance(performance_data, list):
+            performance_data = [performance_data]
         for item in performance_data:
             data_el = _element('performanceData')
             data_el.text = item
             child_elements.append(data_el)
-    elif performance_data:
-        data_el = _element('performanceData')
-        data_el.text = performance_data
-        child_elements.append(data_el)
 
     child_elements.sort(key=target_data_order)
 

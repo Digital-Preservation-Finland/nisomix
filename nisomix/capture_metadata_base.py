@@ -195,13 +195,12 @@ def capture_information(created=None, producer=None, device=None):
         created_el = _subelement(container, 'dateTimeCreated')
         created_el.text = created
 
-    if isinstance(producer, list):
+    if producer:
+        if not isinstance(producer, list):
+            producer = [producer]
         for item in producer:
             producer_el = _subelement(container, 'imageProducer')
             producer_el.text = item
-    elif producer:
-        producer_el = _subelement(container, 'imageProducer')
-        producer_el.text = producer
 
     if device:
         if device in CAPTURE_DEVICE_TYPES:
@@ -457,39 +456,39 @@ def image_data(contents=None):
             elem = _rationale_element(rationals[key], value)
             child_elems.append(elem)
 
-    if isinstance(contents["spectral_sensitivity"], list):
+    if contents.get("spectral_sensitivity"):
+        if not isinstance(contents["spectral_sensitivity"], list):
+            contents["spectral_sensitivity"] = \
+                [contents["spectral_sensitivity"]]
         for item in contents["spectral_sensitivity"]:
             spec_sens_el = _element('spectralSensitivity')
             spec_sens_el.text = item
             child_elems.append(spec_sens_el)
-    elif contents["spectral_sensitivity"]:
-        spec_sens_el = _element('spectralSensitivity')
-        spec_sens_el.text = contents["spectral_sensitivity"]
-        child_elems.append(spec_sens_el)
 
-    if contents["distance"] or contents["min_distance"] \
-            or contents["max_distance"]:
+    if contents.get("distance") or contents.get("min_distance") \
+            or contents.get("max_distance"):
         subject_distance = _element('SubjectDistance')
         child_elems.append(subject_distance)
-    if contents["distance"]:
+    if contents.get("distance"):
         distance_el = _subelement(subject_distance, 'distance')
         distance_el.text = contents["distance"]
-    if contents["min_distance"] or contents["max_distance"]:
+    if contents.get("min_distance") or contents.get("max_distance"):
         min_max_distance = _subelement(subject_distance, 'MinMaxDistance')
-    if contents["min_distance"]:
+    if contents.get("min_distance"):
         min_distance_el = _subelement(min_max_distance, 'minDistance')
         min_distance_el.text = contents["min_distance"]
-    if contents["max_distance"]:
+    if contents.get("max_distance"):
         max_distance_el = _subelement(min_max_distance, 'maxDistance')
         max_distance_el.text = contents["max_distance"]
 
-    if contents["x_print_aspect_ratio"] or contents["y_print_aspect_ratio"]:
+    if contents.get("x_print_aspect_ratio") or \
+            contents.get("y_print_aspect_ratio"):
         print_ratio = _element('PrintAspectRatio')
         child_elems.append(print_ratio)
-    if contents["x_print_aspect_ratio"]:
+    if contents.get("x_print_aspect_ratio"):
         x_print_aspect_ratio_el = _subelement(print_ratio, 'xPrintAspectRatio')
         x_print_aspect_ratio_el.text = contents["x_print_aspect_ratio"]
-    if contents["y_print_aspect_ratio"]:
+    if contents.get("y_print_aspect_ratio"):
         y_print_aspect_ratio_el = _subelement(print_ratio, 'yPrintAspectRatio')
         y_print_aspect_ratio_el.text = contents["y_print_aspect_ratio"]
 
@@ -596,31 +595,33 @@ def gps_data(contents=None):
             elem = _rationale_element(rationals[key], value)
             child_elems.append(elem)
 
-    if contents["lat_degrees"] or contents["lat_minutes"] or \
-            contents["lat_seconds"]:
+    if contents.get("lat_degrees") or contents.get("lat_minutes") or \
+            contents.get("lat_seconds"):
         lat_group = _gps_group('GPSLatitude', degrees=contents["lat_degrees"],
                                minutes=contents["lat_minutes"],
                                seconds=contents["lat_seconds"])
         child_elems.append(lat_group)
 
-    if contents["long_degrees"] or contents["long_minutes"] or \
-            contents["long_seconds"]:
+    if contents.get("long_degrees") or contents.get("long_minutes") or \
+            contents.get("long_seconds"):
         long_group = _gps_group('GPSLongitude',
                                 degrees=contents["long_degrees"],
                                 minutes=contents["long_minutes"],
                                 seconds=contents["long_seconds"])
         child_elems.append(long_group)
 
-    if contents["dest_lat_degrees"] or contents["dest_lat_minutes"] or \
-            contents["dest_lat_seconds"]:
+    if contents.get("dest_lat_degrees") or \
+            contents.get("dest_lat_minutes") or \
+            contents.get("dest_lat_seconds"):
         dest_lat_group = _gps_group('GPSDestLatitude',
                                     degrees=contents["dest_lat_degrees"],
                                     minutes=contents["dest_lat_minutes"],
                                     seconds=contents["dest_lat_seconds"])
         child_elems.append(dest_lat_group)
 
-    if contents["dest_long_degrees"] or contents["dest_long_minutes"] or \
-            contents["dest_long_seconds"]:
+    if contents.get("dest_long_degrees") or \
+            contents.get("dest_long_minutes") or \
+            contents.get("dest_long_seconds"):
         dest_long_group = _gps_group('GPSDestLongitude',
                                      degrees=contents["dest_long_degrees"],
                                      minutes=contents["dest_long_minutes"],

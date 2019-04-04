@@ -100,6 +100,31 @@ def test_color_encoding_error():
         color_encoding(extra_samples='foo')
 
 
+def test_color_encoding_listelem():
+    """Tests that certain variables work as both lists and strings."""
+
+    mix = color_encoding(extra_samples=[
+        "unspecified data",
+        "associated alpha data (with pre-multiplied color)"])
+    xml_str = ('<mix:ImageColorEncoding '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:extraSamples>unspecified data</mix:extraSamples>'
+               '<mix:extraSamples>'
+               'associated alpha data (with pre-multiplied color)'
+               '</mix:extraSamples>'
+               '</mix:ImageColorEncoding>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+    mix = color_encoding(extra_samples="unspecified data")
+    xml_str = ('<mix:ImageColorEncoding '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:extraSamples>unspecified data</mix:extraSamples>'
+               '</mix:ImageColorEncoding>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
 def test_bits_per_sample():
     """Test that the element BitsPerSample is created correctly."""
 
@@ -123,6 +148,26 @@ def test_bits_per_sample_error():
 
     with pytest.raises(RestrictedElementError):
         bits_per_sample(sample_unit='foo')
+
+
+def test_bits_per_sample_listelem():
+    """Tests that certain variables work as both lists and strings."""
+
+    mix = bits_per_sample(sample_values=["4", "4b"])
+    xml_str = ('<mix:BitsPerSample '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:bitsPerSampleValue>4</mix:bitsPerSampleValue>'
+               '<mix:bitsPerSampleValue>4b</mix:bitsPerSampleValue>'
+               '</mix:BitsPerSample>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+    mix = bits_per_sample(sample_values="4")
+    xml_str = ('<mix:BitsPerSample xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:bitsPerSampleValue>4</mix:bitsPerSampleValue>'
+               '</mix:BitsPerSample>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
 
 
 def test_color_map():

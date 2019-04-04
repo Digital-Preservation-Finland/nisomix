@@ -137,6 +137,27 @@ def test_capture_information_error():
         capture_information(device='foo')
 
 
+def test_capture_info_listelem():
+    """Tests that certain variables work as both lists and strings."""
+
+    mix = capture_information(producer=["4", "4b"])
+    xml_str = ('<mix:GeneralCaptureInformation '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:imageProducer>4</mix:imageProducer>'
+               '<mix:imageProducer>4b</mix:imageProducer>'
+               '</mix:GeneralCaptureInformation>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+    mix = capture_information(producer="4")
+    xml_str = ('<mix:GeneralCaptureInformation '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:imageProducer>4</mix:imageProducer>'
+               '</mix:GeneralCaptureInformation>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
 def test_device_capture_scanner():
     """
     Tests that the element ScannerCapture is created correctly using
@@ -385,6 +406,44 @@ def test_image_data():
     assert h.compare_trees(mix, ET.fromstring(xml_str))
 
 
+def test_image_data_listelem():
+    """Tests that certain variables work as both lists and strings."""
+
+    contents = {"spectral_sensitivity": ["4", "4b"]}
+    mix = image_data(contents=contents)
+    xml_str = ('<mix:ImageData xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:spectralSensitivity>4</mix:spectralSensitivity>'
+               '<mix:spectralSensitivity>4b</mix:spectralSensitivity>'
+               '</mix:ImageData>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+    contents = {"spectral_sensitivity": "4"}
+    mix = image_data(contents=contents)
+    xml_str = ('<mix:ImageData xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:spectralSensitivity>4</mix:spectralSensitivity>'
+               '</mix:ImageData>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_image_data_empty_key():
+    """Tests that key with value None do not create elements."""
+    contents = {"spectral_sensitivity": None}
+    mix = image_data(contents=contents)
+    xml_str = ('<mix:ImageData xmlns:mix="http://www.loc.gov/mix/v20">'
+               '</mix:ImageData>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_image_data_dict_error():
+    """Tests that unwanted keys in dict return an exception."""
+    with pytest.raises(ValueError):
+        contents = {'foo': 'bar'}
+        image_data(contents=contents)
+
+
 def test_gps_group():
     """Test that the element group gpsGroup is
     created correctly.
@@ -512,3 +571,20 @@ def test_gps_data():
                '</mix:gpsDifferential></mix:GPSData>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_gps_data_empty_key():
+    """Tests that key with value None do not create elements."""
+    contents = {"lat_degrees": None}
+    mix = gps_data(contents=contents)
+    xml_str = ('<mix:GPSData xmlns:mix="http://www.loc.gov/mix/v20">'
+               '</mix:GPSData>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_gps_data_dict_error():
+    """Tests that unwanted keys in dict return an exception."""
+    with pytest.raises(ValueError):
+        contents = {'foo': 'bar'}
+        gps_data(contents=contents)

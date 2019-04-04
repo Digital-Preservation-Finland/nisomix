@@ -229,9 +229,9 @@ def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
             tile_height_el = _subelement(tiles_container, 'tileHeight')
             tile_height_el.text = tile_height
 
-    if tiles_container or quality_layers or resolution_levels:
+    if tiles_container is not None or quality_layers or resolution_levels:
         encoding_options = _subelement(container, 'EncodingOptions')
-        if tiles_container:
+        if tiles_container is not None:
             encoding_options.append(tiles_container)
         if quality_layers:
             quality_layers_el = _subelement(

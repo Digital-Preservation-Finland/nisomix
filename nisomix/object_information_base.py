@@ -230,7 +230,7 @@ def parse_message_digest(elem):
     if elem.tag != (mix_ns, 'Fixity'):
         elem = elem.xpath('//mix:Fixity', namespaces=NAMESPACES)[0]
 
-    if elem:
+    if elem is not None:
         algorithm_el = elem.find('./' + mix_ns('messageDigestAlgorithm'))
         if algorithm_el.text:
             algorithm = algorithm_el.text
