@@ -57,12 +57,19 @@ def test_rationaltype_element():
     element was created correctly, that it is containing both the
     numerator and denominator subelements.
     """
-    elem = _rationaltype_element('test', '30')
+    elem1 = _rationaltype_element('test', '30')
 
-    assert ET.tostring(elem) == ET.tostring(ET.fromstring(
+    assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:numerator>30</mix:numerator>'
         '<mix:denominator>1</mix:denominator></mix:test>'))
+
+    elem2 = _rationaltype_element('test', ['30', '3'])
+
+    assert ET.tostring(elem2) == ET.tostring(ET.fromstring(
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
+        '<mix:numerator>30</mix:numerator>'
+        '<mix:denominator>3</mix:denominator></mix:test>'))
 
 
 def test_rationaltype_subelement():
@@ -71,13 +78,21 @@ def test_rationaltype_subelement():
     element was created correctly as a child element of its parent and
     that it is containing both the numerator and denominator subelements.
     """
-    elem = _element('test')
-    _rationaltype_subelement(elem, 'subtest', '30')
+    elem1 = _element('test')
+    _rationaltype_subelement(elem1, 'subtest', '30')
 
-    assert ET.tostring(elem) == ET.tostring(ET.fromstring(
+    assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:subtest><mix:numerator>30</mix:numerator>'
         '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>'))
+
+    elem2 = _element('test')
+    _rationaltype_subelement(elem2, 'subtest', ['30', '3'])
+
+    assert ET.tostring(elem2) == ET.tostring(ET.fromstring(
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
+        '<mix:subtest><mix:numerator>30</mix:numerator>'
+        '<mix:denominator>3</mix:denominator></mix:subtest></mix:test>'))
 
 
 def test_mix():

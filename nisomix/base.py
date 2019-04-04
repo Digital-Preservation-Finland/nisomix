@@ -75,7 +75,7 @@ def _subelement(parent, tag, prefix="", namespaces=None):
     return ET.SubElement(parent, mix_ns(tag, prefix), nsmap=namespaces)
 
 
-def _rationaltype_element(tag, numerator, denominator='1'):
+def _rationaltype_element(tag, value, denominator='1'):
     """Return a rational type element.
 
     Returns the following ElementTree strucure::
@@ -86,10 +86,18 @@ def _rationaltype_element(tag, numerator, denominator='1'):
         </mix:{{ tag }}>
 
     :tag: Element tagname
-    :numerator: Contents of the numerator part of the element
+    :value: Contents of the numerator part of the element, or
+            if it is a list, contains both the numerator and denominator
     :denominator: Contents of the denominator part of the element
 
     """
+    if not isinstance(value, list):
+        value = [value]
+    numerator = value[0]
+
+    if len(value) == 2:
+        denominator = value[1]
+
     elem = _element(tag)
     numerator_el = _subelement(elem, 'numerator')
     numerator_el.text = numerator
@@ -99,7 +107,7 @@ def _rationaltype_element(tag, numerator, denominator='1'):
     return elem
 
 
-def _rationaltype_subelement(parent, tag, numerator, denominator='1'):
+def _rationaltype_subelement(parent, tag, value, denominator='1'):
     """Return a rational type element for the parent.
 
     Returns the following ElementTree strucure::
@@ -111,10 +119,18 @@ def _rationaltype_subelement(parent, tag, numerator, denominator='1'):
 
     :parent: Parent element
     :tag: Element tagname
-    :numerator: Contents of the numerator part of the element
+    :value: Contents of the numerator part of the element, or
+            if it is a list, contains both the numerator and denominator
     :denominator: Contents of the denominator part of the element
 
     """
+    if not isinstance(value, list):
+        value = [value]
+    numerator = value[0]
+
+    if len(value) == 2:
+        denominator = value[1]
+
     elem = _subelement(parent, tag)
     numerator_el = _subelement(elem, 'numerator')
     numerator_el.text = numerator
