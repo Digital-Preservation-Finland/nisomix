@@ -34,8 +34,8 @@ def test_assessment_metadata():
 def test_spatial_metrics():
     """Test that the element SpatialMetrics is created correctly."""
 
-    mix = spatial_metrics(plane='object plane', unit='cm', x_sampling='2',
-                          y_sampling='3')
+    mix = spatial_metrics(plane='object plane', unit='cm', x_sampling=2,
+                          y_sampling=3)
 
     xml_str = ('<mix:SpatialMetrics xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:samplingFrequencyPlane>object plane'
@@ -77,7 +77,7 @@ def test_color_encoding():
     primary = _element('PrimaryChromaticities')
 
     mix = color_encoding(
-        samples_pixel='3', extra_samples=['range or depth data'],
+        samples_pixel=3, extra_samples=['range or depth data'],
         child_elements=[white2, bits, gray, white, primary, cmap])
 
     xml_str = ('<mix:ImageColorEncoding '
@@ -128,7 +128,7 @@ def test_color_encoding_listelem():
 def test_bits_per_sample():
     """Test that the element BitsPerSample is created correctly."""
 
-    mix = bits_per_sample(sample_values=['8', '8', '8'], sample_unit='integer')
+    mix = bits_per_sample(sample_values=[8, 8, 8], sample_unit='integer')
 
     xml_str = ('<mix:BitsPerSample xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>'
@@ -186,7 +186,7 @@ def test_color_map():
 def test_gray_response():
     """Tests that the element GrayResponse is created correctly."""
 
-    mix = gray_response(curves=['1', '2'],
+    mix = gray_response(curves=[1, 2],
                         unit='Number represents tenths of a unit')
 
     xml_str = ('<mix:GrayResponse xmlns:mix="http://www.loc.gov/mix/v20">'
@@ -211,7 +211,7 @@ def test_gray_response_error():
 def test_white_point():
     """Tests that the element WhitePoint is created correctly."""
 
-    mix = white_point(x_value='1', y_value='2')
+    mix = white_point(x_value=1, y_value=2)
 
     xml_str = ('<mix:WhitePoint xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:whitePointXValue><mix:numerator>1</mix:numerator>'
@@ -229,8 +229,8 @@ def test_primary_chromaticities():
     correctly.
     """
 
-    mix = primary_chromaticities(red_x='1', red_y='2', green_x='3',
-                                 green_y='4', blue_x='5', blue_y='6')
+    mix = primary_chromaticities(red_x=1, red_y=2, green_x=3,
+                                 green_y=4, blue_x=5, blue_y=6)
 
     xml_str = ('<mix:PrimaryChromaticities '
                'xmlns:mix="http://www.loc.gov/mix/v20">'

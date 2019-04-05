@@ -319,11 +319,11 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
 
     if x_resolution:
         x_resolution_el = _subelement(container, 'xOpticalResolution')
-        x_resolution_el.text = x_resolution
+        x_resolution_el.text = str(x_resolution)
 
     if y_resolution:
         y_resolution_el = _subelement(container, 'yOpticalResolution')
-        y_resolution_el.text = y_resolution
+        y_resolution_el.text = str(y_resolution)
 
     if unit:
         if unit in OPTICAL_RESOLUTION_UNITS:
@@ -449,7 +449,7 @@ def image_data(contents=None):
     for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
-            elem.text = value
+            elem.text = str(value)
             child_elems.append(elem)
 
         if key in rationals and value:
