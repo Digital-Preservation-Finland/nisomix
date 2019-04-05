@@ -43,6 +43,15 @@ values.
 Several elements accepted only a restricted set of values. These values are
 documented in the MIX schema.
 
+The two functions image_data and gps_data that return the MIX <ImageData> and
+<GPSData> elements respectively accept a contents dictionary as argument. The
+dictionary keys are matched to corresponding elements. The empty dictionaries
+can be imported using the IMAGE_DATA_CONTENTS and GPS_DATA_CONTENTS global
+variables and then populated with data that is passed to the functions. Import
+the dictionaries like this::
+
+    contents = nisomix.IMAGE_DATA_CONTENTS
+
 Please, see the MIX documentation for more information:
 https://www.loc.gov/standards/mix/
 
