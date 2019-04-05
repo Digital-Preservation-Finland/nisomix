@@ -457,17 +457,17 @@ def image_data(contents=None):
                              'image_data.' % key)
 
     container = _element('ImageData')
-    child_elems = []
+    child_elements = []
 
     for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = str(value)
-            child_elems.append(elem)
+            child_elements.append(elem)
 
         if key in rationals and value:
             elem = _rationaltype_element(rationals[key], value)
-            child_elems.append(elem)
+            child_elements.append(elem)
 
     if contents.get("spectral_sensitivity"):
         if not isinstance(contents["spectral_sensitivity"], list):
@@ -476,12 +476,12 @@ def image_data(contents=None):
         for item in contents["spectral_sensitivity"]:
             spec_sens_el = _element('spectralSensitivity')
             spec_sens_el.text = item
-            child_elems.append(spec_sens_el)
+            child_elements.append(spec_sens_el)
 
     if contents.get("distance") or contents.get("min_distance") \
             or contents.get("max_distance"):
         subject_distance = _element('SubjectDistance')
-        child_elems.append(subject_distance)
+        child_elements.append(subject_distance)
     if contents.get("distance"):
         distance_el = _subelement(subject_distance, 'distance')
         distance_el.text = contents["distance"]
@@ -497,7 +497,7 @@ def image_data(contents=None):
     if contents.get("x_print_aspect_ratio") or \
             contents.get("y_print_aspect_ratio"):
         print_ratio = _element('PrintAspectRatio')
-        child_elems.append(print_ratio)
+        child_elements.append(print_ratio)
     if contents.get("x_print_aspect_ratio"):
         x_print_aspect_ratio_el = _subelement(print_ratio, 'xPrintAspectRatio')
         x_print_aspect_ratio_el.text = contents["x_print_aspect_ratio"]
@@ -505,9 +505,9 @@ def image_data(contents=None):
         y_print_aspect_ratio_el = _subelement(print_ratio, 'yPrintAspectRatio')
         y_print_aspect_ratio_el.text = contents["y_print_aspect_ratio"]
 
-    child_elems.sort(key=image_data_order)
+    child_elements.sort(key=image_data_order)
 
-    for element in child_elems:
+    for element in child_elements:
         container.append(element)
 
     return container
@@ -596,24 +596,24 @@ def gps_data(contents=None):
                              'for gps_data.' % key)
 
     container = _element('GPSData')
-    child_elems = []
+    child_elements = []
 
     for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
-            child_elems.append(elem)
+            child_elements.append(elem)
 
         if key in rationals and value:
             elem = _rationaltype_element(rationals[key], value)
-            child_elems.append(elem)
+            child_elements.append(elem)
 
     if contents.get("lat_degrees") or contents.get("lat_minutes") or \
             contents.get("lat_seconds"):
         lat_group = _gps_group('GPSLatitude', degrees=contents["lat_degrees"],
                                minutes=contents["lat_minutes"],
                                seconds=contents["lat_seconds"])
-        child_elems.append(lat_group)
+        child_elements.append(lat_group)
 
     if contents.get("long_degrees") or contents.get("long_minutes") or \
             contents.get("long_seconds"):
@@ -621,7 +621,7 @@ def gps_data(contents=None):
                                 degrees=contents["long_degrees"],
                                 minutes=contents["long_minutes"],
                                 seconds=contents["long_seconds"])
-        child_elems.append(long_group)
+        child_elements.append(long_group)
 
     if contents.get("dest_lat_degrees") or \
             contents.get("dest_lat_minutes") or \
@@ -630,7 +630,7 @@ def gps_data(contents=None):
                                     degrees=contents["dest_lat_degrees"],
                                     minutes=contents["dest_lat_minutes"],
                                     seconds=contents["dest_lat_seconds"])
-        child_elems.append(dest_lat_group)
+        child_elements.append(dest_lat_group)
 
     if contents.get("dest_long_degrees") or \
             contents.get("dest_long_minutes") or \
@@ -639,11 +639,11 @@ def gps_data(contents=None):
                                      degrees=contents["dest_long_degrees"],
                                      minutes=contents["dest_long_minutes"],
                                      seconds=contents["dest_long_seconds"])
-        child_elems.append(dest_long_group)
+        child_elements.append(dest_long_group)
 
-    child_elems.sort(key=gps_data_order)
+    child_elements.sort(key=gps_data_order)
 
-    for element in child_elems:
+    for element in child_elements:
         container.append(element)
 
     return container
