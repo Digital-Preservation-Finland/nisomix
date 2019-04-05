@@ -68,7 +68,7 @@ def source_information(source_type=None, child_elements=None):
     """
     container = _element('SourceInformation')
 
-    if not child_elements:
+    if child_elements is None:
         child_elements = []
 
     if source_type:
@@ -234,7 +234,7 @@ def device_capture(device_type, manufacturer=None, sensor=None,
         raise ValueError('Invalid value. Only "scanner" or "camera" are '
                          'valid device types.')
 
-    if not child_elements:
+    if child_elements is None:
         child_elements = []
 
     container = _element(

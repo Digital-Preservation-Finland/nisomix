@@ -63,7 +63,7 @@ def color_encoding(samples_pixel=None, extra_samples=None,
     """Returns the MIX ImageColorEncoding element."""
     container = _element('ImageColorEncoding')
 
-    if not child_elements:
+    if child_elements is None:
         child_elements = []
 
     if samples_pixel:
@@ -206,7 +206,7 @@ def target_data(target_types=None, external_targets=None,
     """Returns MIX TargetData element."""
     container = _element('TargetData')
 
-    if not child_elements:
+    if child_elements is None:
         child_elements = []
 
     if target_types:
