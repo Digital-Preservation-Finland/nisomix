@@ -10,7 +10,7 @@ from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
                            IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS,
                            image_capture_order, scanner_capture_order,
                            camera_capture_order, camera_capture_settings_order,
-                           RestrictedElementError,
+                           RestrictedElementError, source_information_order,
                            image_data_order, gps_data_order)
 
 
@@ -61,16 +61,22 @@ def source_information(source_type=None, child_elements=None):
 
         <mix:SourceInformation>
           <mix:sourceType>foo</mix:sourceType>
-          {{ Child elements }}
+          <mix:SourceID/>
+          <mix:SourceSize/>
         </mix:SourceInformation>
 
     """
     container = _element('SourceInformation')
 
-    if source_type:
-        source_type_el = _subelement(container, 'sourceType')
-        source_type_el.text = source_type
+    if not child_elements:
+        child_elements = []
 
+    if source_type:
+        source_type_el = _element('sourceType')
+        source_type_el.text = source_type
+        child_elements.append(source_type_el)
+
+    child_elements.sort(key=source_information_order)
     for element in child_elements:
         container.append(element)
 
@@ -83,9 +89,8 @@ def source_id(source_idtype=None, source_idvalue=None):
     Returns the following sorted ElementTree structure::
 
         <mix:SourceID>
-          <mix:sourceIDType>foo</mix:sourceIDType>
+          <mix:sourceIDType>local</mix:sourceIDType>
           <mix:sourceIDValue>foo</mix:sourceIDValue>
-          {{ Child elements }}
         </mix:SourceID>
 
     """
@@ -225,6 +230,10 @@ def device_capture(device_type, manufacturer=None, sensor=None,
     prefixes = {'scanner': 'scanner',
                 'camera': 'digitalCamera'}
 
+    if device_type not in prefixes:
+        raise ValueError('Invalid value. Only "scanner" or "camera" are '
+                         'valid device types.')
+
     if not child_elements:
         child_elements = []
 
@@ -279,6 +288,10 @@ def device_model(device_type, name=None, number=None,
     """
     prefixes = {'scanner': 'scanner',
                 'camera': 'digitalCamera'}
+
+    if device_type not in prefixes:
+        raise ValueError('Invalid value. Only "scanner" or "camera" are '
+                         'valid device types.')
 
     container = _element(
         'model',

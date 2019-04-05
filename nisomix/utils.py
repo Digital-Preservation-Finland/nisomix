@@ -211,6 +211,16 @@ def image_capture_order(elem):
             '{%s}methodology' % MIX_NS].index(elem.tag)
 
 
+def source_information_order(elem):
+    """
+    Sorts the elements in the SourceInformation parent
+    element in the correct sequence.
+    """
+    return ['{%s}sourceType' % MIX_NS,
+            '{%s}SourceID' % MIX_NS,
+            '{%s}SourceSize' % MIX_NS].index(elem.tag)
+
+
 def scanner_capture_order(elem):
     """
     Sorts the elements in the ScannerCapture parent

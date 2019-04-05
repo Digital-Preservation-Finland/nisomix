@@ -52,7 +52,7 @@ def test_source_information():
     s_id = _element('SourceID')
     size = _element('SourceSize')
     mix = source_information(source_type='test',
-                             child_elements=[s_id, size])
+                             child_elements=[size, s_id])
 
     xml_str = ('<mix:SourceInformation xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:sourceType>test</mix:sourceType><mix:SourceID/>'
@@ -204,6 +204,15 @@ def test_device_capture_camera():
     assert h.compare_trees(mix, ET.fromstring(xml_str))
 
 
+def test_device_capture_error():
+    """
+    Tests that the invalid values for device type raises an
+    exception.
+    """
+    with pytest.raises(ValueError):
+        device_capture(device_type='foo')
+
+
 def test_sensor_error():
     """
     Tests that invalid values for restricted elements return an
@@ -257,6 +266,15 @@ def test_device_model_camera():
                '</mix:DigitalCameraModel>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_device_model_error():
+    """
+    Tests that the invalid values for device type raises an
+    exception.
+    """
+    with pytest.raises(ValueError):
+        device_model(device_type='foo')
 
 
 def test_max_optical_resolution():
@@ -449,14 +467,14 @@ def test_gps_group():
     created correctly.
     """
 
-    mix = _gps_group('testGroup', degrees='1', minutes='2', seconds='3')
+    mix = _gps_group('testGroup', degrees=[1], minutes=[2, 3], seconds=4)
 
     xml_str = ('<mix:testGroup xmlns:mix="http://www.loc.gov/mix/v20">'
                '<mix:degrees><mix:numerator>1</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:degrees>'
                '<mix:minutes><mix:numerator>2</mix:numerator>'
-               '<mix:denominator>1</mix:denominator></mix:minutes>'
-               '<mix:seconds><mix:numerator>3</mix:numerator>'
+               '<mix:denominator>3</mix:denominator></mix:minutes>'
+               '<mix:seconds><mix:numerator>4</mix:numerator>'
                '<mix:denominator>1</mix:denominator></mix:seconds>'
                '</mix:testGroup>')
 
@@ -502,7 +520,7 @@ def test_gps_data():
                 "dest_bearing_ref": "32",
                 "dest_bearing": 33,
                 "dest_distance_ref": "34",
-                "dest_distance": "35",
+                "dest_distance": [35, 3],
                 "processing_method": "36",
                 "area_information": "37",
                 "datestamp": "38",
@@ -563,7 +581,7 @@ def test_gps_data():
                '</mix:numerator><mix:denominator>1</mix:denominator>'
                '</mix:gpsDestBearing><mix:gpsDestDistanceRef>34'
                '</mix:gpsDestDistanceRef><mix:gpsDestDistance>'
-               '<mix:numerator>35</mix:numerator><mix:denominator>1'
+               '<mix:numerator>35</mix:numerator><mix:denominator>3'
                '</mix:denominator></mix:gpsDestDistance>'
                '<mix:gpsProcessingMethod>36</mix:gpsProcessingMethod>'
                '<mix:gpsAreaInformation>37</mix:gpsAreaInformation>'
