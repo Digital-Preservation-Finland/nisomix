@@ -218,9 +218,7 @@ def fixity(algorithm=None, digest=None, originator=None):
             algorithm_el.text = algorithm
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for messageDigestAlgorithm, '
-                'accepted values are: "%s".' % (
-                    algorithm, '", "'.join(DIGEST_ALGORITHMS)))
+                algorithm, 'messageDigestAlgorithm', DIGEST_ALGORITHMS)
 
     if digest:
         digest_el = _subelement(container, 'messageDigest')
@@ -256,8 +254,7 @@ def normalized_byteorder(byte_order):
         return 'little endian'
 
     raise RestrictedElementError(
-        'The value "%s" is invalid for byteOrder, accepted values '
-        'are: "%s".' % (byte_order, '", "'.join(BYTE_ORDER_TYPES)))
+        byte_order, 'byteOrder', BYTE_ORDER_TYPES)
 
 
 def parse_message_digest(elem):

@@ -11,7 +11,11 @@ NAMESPACES = {'mix': MIX_NS,
 
 class RestrictedElementError(Exception):
     """Raised when the value of a restricted element is invalid."""
-    pass
+
+    def __str__(self):
+        return ('The value "%s" is invalid for %s, accepted values '
+                'are: "%s".' % (self.args[0], self.args[1],
+                                '", "'.join(self.args[2])))
 
 
 def mix_root_order(elem):

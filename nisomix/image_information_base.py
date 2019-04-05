@@ -215,9 +215,8 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
                 subsample_horiz_el.text = subsample_horiz
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for yCbCrSubsampleHoriz, '
-                    'accepted values are: "%s".' % (
-                        subsample_horiz, '", "'.join(YCBCR_SUBSAMPLE_TYPES)))
+                    subsample_horiz, 'yCbCrSubsampleHoriz',
+                    YCBCR_SUBSAMPLE_TYPES)
         if subsample_vert:
             if subsample_vert in YCBCR_SUBSAMPLE_TYPES:
                 subsample_vert_el = _subelement(
@@ -225,9 +224,8 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
                 subsample_vert_el.text = subsample_vert
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for yCbCrSubsampleVert, '
-                    'accepted values are: "%s".' % (
-                        subsample_vert, '", "'.join(YCBCR_SUBSAMPLE_TYPES)))
+                    subsample_vert, 'yCbCrSubsampleVert',
+                    YCBCR_SUBSAMPLE_TYPES)
 
     if positioning:
         if positioning in YCBCR_POSITIONING_TYPES:
@@ -235,9 +233,7 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
             positioning_el.text = positioning
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for yCbCrPositioning, '
-                'accepted values are: "%s".' % (
-                    positioning, '", "'.join(YCBCR_POSITIONING_TYPES)))
+                positioning, 'yCbCrPositioning', YCBCR_POSITIONING_TYPES)
 
     if luma_red or luma_green or luma_blue:
         luma_container = _subelement(container, 'YCbCrCoefficients')
@@ -309,11 +305,9 @@ def component(c_photometric_interpretation=None, footroom=None,
             cpi_el.text = c_photometric_interpretation
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for '
-                'componentPhotometricInterpretation, accepted values '
-                'are: "%s".' % (
-                    c_photometric_interpretation,
-                    '", "'.join(COMPONENT_INTERPRETATION_TYPES)))
+                c_photometric_interpretation,
+                'componentPhotometricInterpretation',
+                COMPONENT_INTERPRETATION_TYPES)
 
     if footroom:
         _rationaltype_subelement(container, 'footroom', footroom)
@@ -474,7 +468,6 @@ def djvu(djvu_format=None):
             djvu_format_el.text = djvu_format
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for djvuFormat, accepted '
-                'values are: "%s".' % (djvu_format, '", "'.join(DJVU_FORMATS)))
+                djvu_format, 'djvuFormat', DJVU_FORMATS)
 
     return container

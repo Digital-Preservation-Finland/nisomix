@@ -2,7 +2,8 @@
 import pytest
 import lxml.etree as ET
 from nisomix.base import (MIX_NS, mix_ns, mix, _element, _subelement,
-                          _rationaltype_element, _rationaltype_subelement)
+                          _rationaltype_element, _rationaltype_subelement,
+                          _ensure_list)
 
 
 @pytest.mark.parametrize(('tag', 'prefix'), [
@@ -93,6 +94,20 @@ def test_rationaltype_subelement():
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
         '<mix:subtest><mix:numerator>30</mix:numerator>'
         '<mix:denominator>3</mix:denominator></mix:subtest></mix:test>'))
+
+
+@pytest.mark.parametrize(('value', 'length'), [
+    ('test', 1),
+    (4, 1),
+    (['test', 'test2', 'test3'], 3),
+    ([4, 5], 2),
+])
+def test_ensure_list(value, length):
+    """Tests the _ensure_list function."""
+
+    list_value = _ensure_list(value)
+    assert isinstance(list_value, list)
+    assert len(list_value) == length
 
 
 def test_mix():

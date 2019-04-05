@@ -3,7 +3,8 @@ xml.etree.ElementTree data structures.
 
 """
 
-from nisomix.base import _element, _subelement, _rationaltype_subelement
+from nisomix.base import (_element, _subelement, _rationaltype_subelement,
+                          _ensure_list)
 from nisomix.constants import (SAMPLING_FREQUENCY_PLANES,
                                SAMPLING_FREQUENCY_UNITS, BITS_PER_SAMPLE_UNITS,
                                EXTRA_SAMPLES_TYPES, GRAY_RESPONSE_UNITS,
@@ -30,24 +31,20 @@ def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
     container = _element('SpatialMetrics')
 
     if plane:
+        plane_el = _subelement(container, 'samplingFrequencyPlane')
         if plane in SAMPLING_FREQUENCY_PLANES:
-            plane_el = _subelement(container, 'samplingFrequencyPlane')
             plane_el.text = plane
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for samplingFrequencyPlane, '
-                'accepted values are: "%s".' % (
-                    plane, '", "'.join(SAMPLING_FREQUENCY_PLANES)))
+                plane, 'samplingFrequencyPlane', SAMPLING_FREQUENCY_PLANES)
 
     if unit:
+        unit_el = _subelement(container, 'samplingFrequencyUnit')
         if unit in SAMPLING_FREQUENCY_UNITS:
-            unit_el = _subelement(container, 'samplingFrequencyUnit')
             unit_el.text = unit
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for samplingFrequencyUnit, '
-                'accepted values are: "%s".' % (
-                    unit, '", "'.join(SAMPLING_FREQUENCY_UNITS)))
+                unit, 'samplingFrequencyUnit', SAMPLING_FREQUENCY_UNITS)
 
     if x_sampling:
         _rationaltype_subelement(container, 'xSamplingFrequency', x_sampling)
@@ -72,8 +69,7 @@ def color_encoding(samples_pixel=None, extra_samples=None,
         child_elements.append(pixel_el)
 
     if extra_samples:
-        if not isinstance(extra_samples, list):
-            extra_samples = [extra_samples]
+        extra_samples = _ensure_list(extra_samples)
         for item in extra_samples:
             if item in EXTRA_SAMPLES_TYPES:
                 samples_el = _element('extraSamples')
@@ -81,9 +77,7 @@ def color_encoding(samples_pixel=None, extra_samples=None,
                 child_elements.append(samples_el)
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for extraSamples, '
-                    'accepted values are: "%s".' % (
-                        item, '", "'.join(EXTRA_SAMPLES_TYPES)))
+                    item, 'extraSamples', EXTRA_SAMPLES_TYPES)
 
     child_elements.sort(key=color_encoding_order)
 
@@ -98,8 +92,7 @@ def bits_per_sample(sample_values=None, sample_unit=None):
     container = _element('BitsPerSample')
 
     if sample_values:
-        if not isinstance(sample_values, list):
-            sample_values = [sample_values]
+        sample_values = _ensure_list(sample_values)
         for item in sample_values:
             value_el = _subelement(container, 'bitsPerSampleValue')
             value_el.text = str(item)
@@ -110,9 +103,7 @@ def bits_per_sample(sample_values=None, sample_unit=None):
             unit_el.text = sample_unit
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for bitsPerSampleUnit, '
-                'accepted values are: "%s".' % (
-                    sample_unit, '", "'.join(BITS_PER_SAMPLE_UNITS)))
+                sample_unit, 'bitsPerSampleUnit', BITS_PER_SAMPLE_UNITS)
 
     return container
 
@@ -137,8 +128,7 @@ def gray_response(curves=None, unit=None):
     container = _element('GrayResponse')
 
     if curves:
-        if not isinstance(curves, list):
-            curves = [curves]
+        curves = _ensure_list(curves)
         for item in curves:
             curve_el = _subelement(container, 'grayResponseCurve')
             curve_el.text = str(item)
@@ -149,9 +139,7 @@ def gray_response(curves=None, unit=None):
             unit_el.text = unit
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for grayResponseUnit, '
-                'accepted values are: "%s".' % (
-                    unit, '", "'.join(GRAY_RESPONSE_UNITS)))
+                unit, 'grayResponseUnit', GRAY_RESPONSE_UNITS)
 
     return container
 
@@ -210,8 +198,7 @@ def target_data(target_types=None, external_targets=None,
         child_elements = []
 
     if target_types:
-        if not isinstance(target_types, list):
-            target_types = [target_types]
+        target_types = _ensure_list(target_types)
         for item in target_types:
             if item in TARGET_TYPES:
                 type_el = _element('targetType')
@@ -219,21 +206,17 @@ def target_data(target_types=None, external_targets=None,
                 child_elements.append(type_el)
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for targetType, '
-                    'accepted values are: "%s".' % (
-                        item, '", "'.join(TARGET_TYPES)))
+                    item, 'targetType', TARGET_TYPES)
 
     if external_targets:
-        if not isinstance(external_targets, list):
-            external_targets = [external_targets]
+        external_targets = _ensure_list(external_targets)
         for item in external_targets:
             target_el = _element('externalTarget')
             target_el.text = item
             child_elements.append(target_el)
 
     if performance_data:
-        if not isinstance(performance_data, list):
-            performance_data = [performance_data]
+        performance_data = _ensure_list(performance_data)
         for item in performance_data:
             data_el = _element('performanceData')
             data_el.text = item

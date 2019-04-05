@@ -92,8 +92,7 @@ def _rationaltype_element(tag, value, denominator='1'):
     :denominator: Contents of the denominator part of the element
 
     """
-    if not isinstance(value, list):
-        value = [value]
+    value = _ensure_list(value)
     numerator = str(value[0])
 
     if len(value) == 2:
@@ -125,8 +124,7 @@ def _rationaltype_subelement(parent, tag, value, denominator='1'):
     :denominator: Contents of the denominator part of the element
 
     """
-    if not isinstance(value, list):
-        value = [value]
+    value = _ensure_list(value)
     numerator = str(value[0])
 
     if len(value) == 2:
@@ -139,6 +137,18 @@ def _rationaltype_subelement(parent, tag, value, denominator='1'):
     denominator_el.text = denominator
 
     return elem
+
+
+def _ensure_list(value):
+    """
+    Converts value if list if it isn't a list already. Used for
+    ensuring that repeating elements always are processed as a list
+    even if a string or integer value is given.
+    """
+    if not isinstance(value, list):
+        value = [value]
+
+    return value
 
 
 def mix(child_elements=None, namespaces=None):

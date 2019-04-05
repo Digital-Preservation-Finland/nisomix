@@ -3,7 +3,8 @@ xml.etree.ElementTree data structures.
 """
 
 import six
-from nisomix.base import _element, _subelement, _rationaltype_element
+from nisomix.base import (_element, _subelement, _rationaltype_element,
+                          _ensure_list)
 from nisomix.constants import (ORIENTATION_TYPES, DIMENSION_UNITS,
                                CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
                                OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
@@ -39,8 +40,7 @@ def image_capture_metadata(orientation=None, methodology=None,
             child_elements.append(orientation_el)
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for orientation, accepted values '
-                'are: "%s".' % (orientation, '", "'.join(ORIENTATION_TYPES)))
+                orientation, 'orientation', ORIENTATION_TYPES)
     if methodology:
         methodology_el = _element('methodology')
         methodology_el.text = methodology
@@ -145,9 +145,7 @@ def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
                 x_unit_el.text = x_unit
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for sourceXDimensionUnit, '
-                    'accepted values are: "%s".' % (
-                        x_unit, '", "'.join(DIMENSION_UNITS)))
+                    x_unit, 'sourceXDimensionUnit', DIMENSION_UNITS)
 
     if y_value or y_unit:
         y_dimension = _subelement(container, 'SourceYDimension')
@@ -160,9 +158,7 @@ def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
                 y_unit_el.text = y_unit
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for sourceYDimensionUnit, '
-                    'accepted values are: "%s".' % (
-                        y_unit, '", "'.join(DIMENSION_UNITS)))
+                    y_unit, 'sourceYDimensionUnit', DIMENSION_UNITS)
 
     if z_value or z_unit:
         z_dimension = _subelement(container, 'SourceZDimension')
@@ -175,9 +171,7 @@ def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
                 z_unit_el.text = z_unit
             else:
                 raise RestrictedElementError(
-                    'The value "%s" is invalid for sourceZDimensionUnit, '
-                    'accepted values are: "%s".' % (
-                        z_unit, '", "'.join(DIMENSION_UNITS)))
+                    z_unit, 'sourceZDimensionUnit', DIMENSION_UNITS)
 
     return container
 
@@ -201,8 +195,7 @@ def capture_information(created=None, producer=None, device=None):
         created_el.text = created
 
     if producer:
-        if not isinstance(producer, list):
-            producer = [producer]
+        producer = _ensure_list(producer)
         for item in producer:
             producer_el = _subelement(container, 'imageProducer')
             producer_el.text = item
@@ -213,9 +206,7 @@ def capture_information(created=None, producer=None, device=None):
             device_el.text = device
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for captureDevice, accepted '
-                'values are: "%s".' % (
-                    device, '", "'.join(CAPTURE_DEVICE_TYPES)))
+                device, 'captureDevice', CAPTURE_DEVICE_TYPES)
 
     return container
 
@@ -255,9 +246,7 @@ def device_capture(device_type, manufacturer=None, sensor=None,
             child_elements.append(sensor_el)
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for scannerSensor, accepted '
-                'values are: "%s".' % (
-                    sensor, '", "'.join(SCANNER_SENSOR_TYPES)))
+                sensor, 'scannerSensor', SCANNER_SENSOR_TYPES)
 
     if sensor and device_type == 'camera':
         if sensor in CAMERA_SENSOR_TYPES:
@@ -266,9 +255,7 @@ def device_capture(device_type, manufacturer=None, sensor=None,
             child_elements.append(sensor_el)
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for cameraSensor, accepted '
-                'values are: "%s".' % (
-                    sensor, '", "'.join(CAMERA_SENSOR_TYPES)))
+                sensor, 'cameraSensor', CAMERA_SENSOR_TYPES)
 
     if device_type == 'scanner':
         child_elements.sort(key=scanner_capture_order)
@@ -344,9 +331,7 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
             unit_el.text = unit
         else:
             raise RestrictedElementError(
-                'The value "%s" is invalid for opticalResolutionUnit, '
-                'accepted values are: "%s".' % (
-                    unit, '", "'.join(OPTICAL_RESOLUTION_UNITS)))
+                unit, 'opticalResolutionUnit', OPTICAL_RESOLUTION_UNITS)
 
     return container
 
@@ -470,13 +455,11 @@ def image_data(contents=None):
             child_elements.append(elem)
 
     if contents.get("spectral_sensitivity"):
-        if not isinstance(contents["spectral_sensitivity"], list):
-            contents["spectral_sensitivity"] = \
-                [contents["spectral_sensitivity"]]
-        for item in contents["spectral_sensitivity"]:
-            spec_sens_el = _element('spectralSensitivity')
-            spec_sens_el.text = item
-            child_elements.append(spec_sens_el)
+        spect_sens = _ensure_list(contents["spectral_sensitivity"])
+        for item in spect_sens:
+            spect_sens_el = _element('spectralSensitivity')
+            spect_sens_el.text = item
+            child_elements.append(spect_sens_el)
 
     if contents.get("distance") or contents.get("min_distance") \
             or contents.get("max_distance"):
