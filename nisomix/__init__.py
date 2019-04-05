@@ -6,3 +6,4 @@ from nisomix.image_information_base import *
 from nisomix.capture_metadata_base import *
 from nisomix.assessment_metadata_base import *
 from nisomix.utils import *
+from nisomix.constants import *

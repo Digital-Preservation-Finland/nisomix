@@ -8,10 +8,10 @@ References:
 """
 
 from nisomix.base import _element, _subelement, _rationaltype_subelement
-from nisomix.utils import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
-                           YCBCR_POSITIONING_TYPES,
-                           COMPONENT_INTERPRETATION_TYPES,
-                           RestrictedElementError, image_information_order,
+from nisomix.constants import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
+                               YCBCR_POSITIONING_TYPES,
+                               COMPONENT_INTERPRETATION_TYPES)
+from nisomix.utils import (RestrictedElementError, image_information_order,
                            photom_interpret_order)
 
 

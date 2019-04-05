@@ -9,8 +9,8 @@ References:
 
 from nisomix.base import (mix_ns, _element, _subelement,
                           _rationaltype_subelement)
-from nisomix.utils import (basic_do_order, RestrictedElementError,
-                           BYTE_ORDER_TYPES, DIGEST_ALGORITHMS, NAMESPACES)
+from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
+from nisomix.utils import NAMESPACES, basic_do_order, RestrictedElementError
 
 
 def digital_object_information(byte_order=None, file_size=None,

@@ -4,11 +4,11 @@ xml.etree.ElementTree data structures.
 
 import six
 from nisomix.base import _element, _subelement, _rationaltype_element
-from nisomix.utils import (ORIENTATION_TYPES, DIMENSION_UNITS,
-                           CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
-                           OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
-                           IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS,
-                           image_capture_order, scanner_capture_order,
+from nisomix.constants import (ORIENTATION_TYPES, DIMENSION_UNITS,
+                               CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
+                               OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
+                               IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS)
+from nisomix.utils import (image_capture_order, scanner_capture_order,
                            camera_capture_order, camera_capture_settings_order,
                            RestrictedElementError, source_information_order,
                            image_data_order, gps_data_order)
