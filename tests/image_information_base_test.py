@@ -1,4 +1,5 @@
-"""Test nisomix.imageinformatoion functions."""
+"""Test nisomix.image_information_base module functions."""
+
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h

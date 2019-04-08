@@ -1,4 +1,5 @@
-"""Test nisomix.assessment_metadata functions."""
+"""Test nisomix.assessment_metadata_base module functions."""
+
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h

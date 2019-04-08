@@ -1,4 +1,5 @@
-"""Test nisomix features."""
+"""Test nisomix.base module functions."""
+
 import pytest
 import lxml.etree as ET
 from nisomix.base import (MIX_NS, mix_ns, mix, _element, _subelement,

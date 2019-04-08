@@ -1,4 +1,5 @@
-"""Test nisomix features."""
+"""Test nisomix.object_information_base module features."""
+
 import pytest
 import lxml.etree as ET
 import xml_helpers.utils as h
@@ -14,7 +15,7 @@ from nisomix.object_information_base import (digital_object_information,
 
 def test_digitalobjectinformation():
     """Test that the element BasicDigitalObjectInformation is
-    created correctly and the element are sorted as intended.
+    created correctly and that the elements are sorted as intended.
     """
 
     compr = compression(compression_scheme='jpeg')

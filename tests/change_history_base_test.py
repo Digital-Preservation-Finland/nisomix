@@ -1,4 +1,4 @@
-"""Test nisomix.change_history module functions."""
+"""Test nisomix.change_history_base module functions."""
 
 import lxml.etree as ET
 import xml_helpers.utils as h
