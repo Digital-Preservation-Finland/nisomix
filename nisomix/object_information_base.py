@@ -20,6 +20,11 @@ from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
 from nisomix.utils import NAMESPACES, basic_do_order, RestrictedElementError
 
 
+__all__ = ['digital_object_information', 'identifier', 'format_designation',
+           'format_registry', 'compression', 'fixity',
+           'parse_message_digest']
+
+
 def digital_object_information(byte_order=None, file_size=None,
                                child_elements=None):
     """
@@ -55,7 +60,7 @@ def digital_object_information(byte_order=None, file_size=None,
         child_elements.append(file_size_el)
     if byte_order:
         byte_order_el = _element('byteOrder')
-        byte_order_el.text = normalized_byteorder(byte_order)
+        byte_order_el.text = _normalized_byteorder(byte_order)
         child_elements.append(byte_order_el)
 
     child_elements.sort(key=basic_do_order)
@@ -238,7 +243,7 @@ def fixity(algorithm=None, digest=None, originator=None):
     return container
 
 
-def normalized_byteorder(byte_order):
+def _normalized_byteorder(byte_order):
     """
     Tries to fix the byte_order so that the value corresponds to the
     values allowed in the MIX schema. Normalizes hyphens, underscores

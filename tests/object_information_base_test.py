@@ -9,7 +9,7 @@ from nisomix.object_information_base import (digital_object_information,
                                              identifier, compression,
                                              format_designation,
                                              format_registry, fixity,
-                                             normalized_byteorder,
+                                             _normalized_byteorder,
                                              parse_message_digest)
 
 
@@ -149,15 +149,15 @@ def test_fixity_error():
 ])
 def test_normalized_byteorder(input_str, expected_output):
     """
-    Tests the normalized_byteorder function by asserting that it outputs
+    Tests the _normalized_byteorder function by asserting that it outputs
     allowed values from different srings, or raises an exception if it
     couldn't determine the value.
     """
     if expected_output:
-        assert normalized_byteorder(input_str) == expected_output
+        assert _normalized_byteorder(input_str) == expected_output
     else:
         with pytest.raises(RestrictedElementError):
-            normalized_byteorder(input_str)
+            _normalized_byteorder(input_str)
 
 
 def test_parse_message_digest():

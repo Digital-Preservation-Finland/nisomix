@@ -17,6 +17,9 @@ from nisomix.base import _element, _subelement, _ensure_list
 from nisomix.utils import change_history_order, image_processing_order
 
 
+__all__ = ['change_history', 'image_processing', 'processing_software']
+
+
 def change_history(child_elements=None):
     """
     Returns the MIX ChangeHistory element. The subelements are sorted

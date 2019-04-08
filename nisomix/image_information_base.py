@@ -21,6 +21,12 @@ from nisomix.utils import (RestrictedElementError, image_information_order,
                            photom_interpret_order)
 
 
+__all__ = ['image_information', 'image_characteristics',
+           'photometric_interpretation', 'color_profile', 'ycbcr',
+           'ref_black_white', 'component', 'format_characteristics',
+           'jpeg2000', 'mrsid', 'djvu']
+
+
 def image_information(child_elements=None):
     """
     Returns the MIX BasicImageInformation element. The

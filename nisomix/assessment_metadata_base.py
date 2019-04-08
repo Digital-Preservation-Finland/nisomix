@@ -22,6 +22,11 @@ from nisomix.utils import (RestrictedElementError, assessment_metadata_order,
                            color_encoding_order, target_data_order)
 
 
+__all__ = ['image_assessment_metadata', 'spatial_metrics', 'color_encoding',
+           'bits_per_sample', 'color_map', 'gray_response', 'white_point',
+           'primary_chromaticities', 'target_data', 'target_id']
+
+
 def image_assessment_metadata(child_elements=None):
     """
     Returns the MIX ImageAssessmentMetadata element.

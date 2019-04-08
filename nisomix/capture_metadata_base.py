@@ -27,6 +27,12 @@ from nisomix.utils import (image_capture_order, scanner_capture_order,
                            image_data_order, gps_data_order)
 
 
+__all__ = ['image_capture_metadata', 'source_information', 'source_id',
+           'source_size', 'capture_information', 'device_capture',
+           'device_model', 'max_optical_resolution', 'scanning_software',
+           'camera_capture_settings', 'image_data', 'gps_data']
+
+
 def image_capture_metadata(orientation=None, methodology=None,
                            child_elements=None):
     """

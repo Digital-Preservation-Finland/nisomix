@@ -18,6 +18,9 @@ from xml_helpers.utils import xsi_ns
 from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
 
 
+__all__ = ['mix_ns', 'mix']
+
+
 def mix_ns(tag, prefix=""):
     """Prefix ElementTree tags with MIX namespace.
 

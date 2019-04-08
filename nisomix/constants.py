@@ -2,6 +2,9 @@
 """Global variables for nisomix."""
 
 
+__all__ = ['IMAGE_DATA_CONTENTS', 'GPS_DATA_CONTENTS']
+
+
 BYTE_ORDER_TYPES = ['big endian', 'little endian']
 
 DIGEST_ALGORITHMS = ['Adler-32', 'CRC32', 'HAVAL', 'MD5', 'MNP', 'SHA-1',
