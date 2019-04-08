@@ -19,7 +19,10 @@ class RestrictedElementError(Exception):
 
 
 def mix_root_order(elem):
-    """Sorts the elements in the mix root element in the correct sequence."""
+    """
+    Sorts the elements in the mix root element in the correct
+    sequence.
+    """
     return ['{%s}BasicDigitalObjectInformation' % MIX_NS,
             '{%s}BasicImageInformation' % MIX_NS,
             '{%s}ImageCaptureMetadata' % MIX_NS,
@@ -44,8 +47,8 @@ def basic_do_order(elem):
 
 def image_information_order(elem):
     """
-    Sorts the elements in the BasicImageInformation parent
-    element in the correct sequence.
+    Sorts the elements in the BasicImageInformation parent element in
+    the correct sequence.
     """
     return ['{%s}BasicImageCharacteristics' % MIX_NS,
             '{%s}SpecialFormatCharacteristics' % MIX_NS].index(elem.tag)
@@ -53,8 +56,8 @@ def image_information_order(elem):
 
 def photom_interpret_order(elem):
     """
-    Sorts the elements in the PhotometricInterpretation parent
-    element in the correct sequence.
+    Sorts the elements in the PhotometricInterpretation parent element
+    in the correct sequence.
     """
     return ['{%s}colorSpace' % MIX_NS,
             '{%s}ColorProfile' % MIX_NS,
@@ -64,8 +67,8 @@ def photom_interpret_order(elem):
 
 def image_capture_order(elem):
     """
-    Sorts the elements in the ImageCaptureMetadataType parent
-    element in the correct sequence.
+    Sorts the elements in the ImageCaptureMetadataType parent element in
+    the correct sequence.
     """
     return ['{%s}SourceInformation' % MIX_NS,
             '{%s}GeneralCaptureInformation' % MIX_NS,
@@ -77,8 +80,8 @@ def image_capture_order(elem):
 
 def source_information_order(elem):
     """
-    Sorts the elements in the SourceInformation parent
-    element in the correct sequence.
+    Sorts the elements in the SourceInformation parent element in the
+    correct sequence.
     """
     return ['{%s}sourceType' % MIX_NS,
             '{%s}SourceID' % MIX_NS,
@@ -87,8 +90,8 @@ def source_information_order(elem):
 
 def scanner_capture_order(elem):
     """
-    Sorts the elements in the ScannerCapture parent
-    element in the correct sequence.
+    Sorts the elements in the ScannerCapture parent element in the
+    correct sequence.
     """
     return ['{%s}scannerManufacturer' % MIX_NS,
             '{%s}ScannerModel' % MIX_NS,
@@ -99,8 +102,8 @@ def scanner_capture_order(elem):
 
 def camera_capture_order(elem):
     """
-    Sorts the elements in the DigitalCameraCapture parent
-    element in the correct sequence.
+    Sorts the elements in the DigitalCameraCapture parent element in
+    the correct sequence.
     """
     return ['{%s}digitalCameraManufacturer' % MIX_NS,
             '{%s}DigitalCameraModel' % MIX_NS,
@@ -110,8 +113,8 @@ def camera_capture_order(elem):
 
 def camera_capture_settings_order(elem):
     """
-    Sorts the elements in the CameraCaptureSettings parent
-    element in the correct sequence.
+    Sorts the elements in the CameraCaptureSettings parent element in
+    the correct sequence.
     """
     return ['{%s}ImageData' % MIX_NS,
             '{%s}GPSData' % MIX_NS].index(elem.tag)
@@ -119,8 +122,8 @@ def camera_capture_settings_order(elem):
 
 def image_data_order(elem):
     """
-    Sorts the elements in the ImageData parent
-    element in the correct sequence.
+    Sorts the elements in the ImageData parent element in the correct
+    sequence.
     """
     return ['{%s}fNumber' % MIX_NS,
             '{%s}exposureTime' % MIX_NS,
@@ -150,8 +153,8 @@ def image_data_order(elem):
 
 def gps_data_order(elem):
     """
-    Sorts the elements in the GPSData parent
-    element in the correct sequence.
+    Sorts the elements in the GPSData parent element in the correct
+    sequence.
     """
     return ['{%s}gpsVersionID' % MIX_NS,
             '{%s}gpsLatitudeRef' % MIX_NS,
@@ -188,8 +191,8 @@ def gps_data_order(elem):
 
 def assessment_metadata_order(elem):
     """
-    Sorts the elements in the ImageAssessmentMetadata
-    parent element in the correct sequence.
+    Sorts the elements in the ImageAssessmentMetadata parent element in
+    the correct sequence.
     """
     return ['{%s}SpatialMetrics' % MIX_NS,
             '{%s}ImageColorEncoding' % MIX_NS,
@@ -198,8 +201,8 @@ def assessment_metadata_order(elem):
 
 def color_encoding_order(elem):
     """
-    Sorts the elements in the ImageColorEncoding
-    parent element in the correct sequence.
+    Sorts the elements in the ImageColorEncoding parent element in the
+    correct sequence.
     """
     return ['{%s}BitsPerSample' % MIX_NS,
             '{%s}samplesPerPixel' % MIX_NS,
@@ -212,10 +215,32 @@ def color_encoding_order(elem):
 
 def target_data_order(elem):
     """
-    Sorts the elements in the TargetData
-    parent element in the correct sequence.
+    Sorts the elements in the TargetData parent element in the correct
+    sequence.
     """
     return ['{%s}targetType' % MIX_NS,
             '{%s}TargetID' % MIX_NS,
             '{%s}externalTarget' % MIX_NS,
             '{%s}performanceData' % MIX_NS].index(elem.tag)
+
+
+def change_history_order(elem):
+    """
+    Sorts the elements in the ChangeHistory parent element in the
+    correct sequence.
+    """
+    return ['{%s}ImageProcessing' % MIX_NS,
+            '{%s}PreviousImageMetadata' % MIX_NS].index(elem.tag)
+
+
+def image_processing_order(elem):
+    """
+    Sorts the elements in the ImageProcessing parent element in the
+    correct sequence.
+    """
+    return ['{%s}dateTimeProcessed' % MIX_NS,
+            '{%s}sourceData' % MIX_NS,
+            '{%s}processingAgency' % MIX_NS,
+            '{%s}processingRationale' % MIX_NS,
+            '{%s}ProcessingSoftware' % MIX_NS,
+            '{%s}processingActions' % MIX_NS].index(elem.tag)
