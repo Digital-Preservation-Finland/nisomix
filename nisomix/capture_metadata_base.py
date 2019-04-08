@@ -1,5 +1,17 @@
-"""Functions for reading and generating MIX Data Dictionaries as
+"""
+Functions for reading and generating MIX Image Capture Metadata as
 xml.etree.ElementTree data structures.
+
+References:
+
+    * MIX http://www.loc.gov/standards/mix/
+    * Schema documentation: Data Dictionary - Technical Metadata for
+                            Digital Still Images
+                            (ANSI/NISO Z39.87-2006 (R2017))
+                            Chapter 8: Image Capture Metadata
+    * ElementTree
+    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+
 """
 
 import six
@@ -17,7 +29,12 @@ from nisomix.utils import (image_capture_order, scanner_capture_order,
 
 def image_capture_metadata(orientation=None, methodology=None,
                            child_elements=None):
-    """Returns MIX ImageCaptureMetadata element
+    """
+    Returns the MIX ImageCaptureMetadata element.
+
+    :orientation: The image orientation as a string
+    :methodology: The digitization methodology as a string
+    :child_elements: Child elements as a list
 
     Returns the following sorted ElementTree structure::
 
@@ -55,7 +72,11 @@ def image_capture_metadata(orientation=None, methodology=None,
 
 
 def source_information(source_type=None, child_elements=None):
-    """Returns MIX SourceInformation element
+    """
+    Returns the MIX SourceInformation element.
+
+    :source_type: The source type as a string
+    :child_elements: Child elements as a list
 
     Returns the following sorted ElementTree structure::
 
@@ -84,7 +105,11 @@ def source_information(source_type=None, child_elements=None):
 
 
 def source_id(source_idtype=None, source_idvalue=None):
-    """Returns MIX SourceID element
+    """
+    Returns the MIX SourceID element.
+
+    :source_idtype: The source ID type as a string
+    :source_idvalue: The source ID value as a string
 
     Returns the following sorted ElementTree structure::
 
@@ -112,7 +137,15 @@ def source_id(source_idtype=None, source_idvalue=None):
 # too-many-locals: The arguments are many, hence a lot of local variables
 def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
                 z_value=None, z_unit=None):
-    """Returns MIX SourceSize element
+    """
+    Returns the MIX SourceSize element.
+
+    :x_value: The source X value (width) as an integer
+    :x_unit: The unit of the source X value (width) as a string
+    :y_value: The source Y value (height) as an integer
+    :y_unit: The unit of the source Y value (height) as a string
+    :z_value: The source Z value (depth) as an integer
+    :z_unit: The unit of the source z value (depth) as a string
 
     Returns the following sorted ElementTree structure::
 
@@ -177,7 +210,12 @@ def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
 
 
 def capture_information(created=None, producer=None, device=None):
-    """Returns MIX GeneralCaptureInformation element
+    """
+    Returns the MIX GeneralCaptureInformation element.
+
+    :created: The image datetime created as a string
+    :producer: The image producer as a string
+    :device: The image creation device classification as a string
 
     Returns the following sorted ElementTree structure::
 
@@ -214,8 +252,13 @@ def capture_information(created=None, producer=None, device=None):
 def device_capture(device_type, manufacturer=None, sensor=None,
                    child_elements=None):
     """
-    Returns either MIX ScannerCapture or the DigitalCameraCapture
-    element.
+    Returns either the MIX ScannerCapture or the DigitalCameraCapture
+    element depending on the device_type.
+
+    :device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :manufacturer: The manufacturer of the capture device as a string
+    :sensor: The type of image sensor of the capture device as a string
+    :child_elements: Child elements as a list
 
     """
     prefixes = {'scanner': 'scanner',
@@ -271,7 +314,14 @@ def device_capture(device_type, manufacturer=None, sensor=None,
 def device_model(device_type, name=None, number=None,
                  serialno=None):
     """
-    Returns either the ScannerModel or the DigitalCameraModel element.
+    Returns either the MIX ScannerModel or the DigitalCameraModel element
+    depending on the device_type.
+
+    :device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :name: The model name of the capture device as a string
+    :number: The model number of the capture device as a string
+    :serialno: The serial number of the capture device as a string
+
     """
     prefixes = {'scanner': 'scanner',
                 'camera': 'digitalCamera'}
@@ -304,7 +354,12 @@ def device_model(device_type, name=None, number=None,
 
 
 def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
-    """Returns MIX MaximumOpticalResolution element
+    """
+    Returns the MIX MaximumOpticalResolution element.
+
+    :x_resolution: The x resolution of the scanning sensor as an integer
+    :y_resolution: The y resolution of the scanning sensor as an integer
+    :unit: The unit of the scanning sensor resolution as a string
 
     Returns the following sorted ElementTree structure::
 
@@ -337,7 +392,11 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
 
 
 def scanning_software(name=None, version=None):
-    """Returns MIX ScanningSystemSoftware element
+    """
+    Returns the MIX ScanningSystemSoftware element.
+
+    :name: The scanning software name as a string
+    :version: The scanning software version as a string
 
     Returns the following sorted ElementTree structure::
 
@@ -361,7 +420,10 @@ def scanning_software(name=None, version=None):
 
 
 def camera_capture_settings(child_elements=None):
-    """Returns MIX CameraCaptureSettings element
+    """
+    Returns the MIX CameraCaptureSettings element.
+
+    :child_elements: Child elements as a list
 
     Returns the following sorted ElementTree structure::
 
@@ -384,8 +446,9 @@ def camera_capture_settings(child_elements=None):
 def image_data(contents=None):
     """
     Returns the MIX ImageData element. The function argument contents
-    is a dict. The keys from contents are matched to create the MIX
-    element and its substructure. The dict should look like this::
+    is a dict, that can be retrieved from nisomix.IMAGE_DATA_CONTENTS.
+    The keys from contents are matched to create the MIX element and its
+    substructure. The dict should look like this::
 
         contents = {"fnumber": None,
                     "exposure_time": None,
@@ -415,8 +478,7 @@ def image_data(contents=None):
                     "x_print_aspect_ratio": None,
                     "y_print_aspect_ratio": None}
 
-        """
-
+    """
     tags = {
         'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
         'exposure_program': 'exposureProgram',
@@ -499,9 +561,9 @@ def image_data(contents=None):
 def gps_data(contents=None):
     """
     Returns the MIX GPSData element. The function argument contents
-    is a dict, see global variable GPS_DATA_CONTENTS. The keys from
-    contents are matched to create the MIX element and its substructure.
-    The dict should look like this::
+    is a dict, from nisomix.GPS_DATA_CONTENTS. The keys from the
+    contents dict are matched to create the MIX element and its
+    substructure. The dict should look like this::
 
         contents = {"version_id": None,
                     "lat_ref": None,
@@ -545,7 +607,6 @@ def gps_data(contents=None):
                     "gps_groups": None}
 
     """
-
     tags = {'version_id': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
             'long_ref': 'gpsLongitudeRef',
             'altitude_ref': 'gpsAltitudeRef',
@@ -633,7 +694,13 @@ def gps_data(contents=None):
 
 
 def _gps_group(tag, degrees=None, minutes=None, seconds=None):
-    """Returns MIX gpsGroup type element.
+    """
+    Returns the MIX gpsGroup type element.
+
+    :tag: the tag name of the container element
+    :degrees: The degrees of the coordinates as a list (or integer)
+    :minutes: The minutes of the coordinates as a list (or integer)
+    :seconds: The seconds of the coordinates as a list (or integer)
 
     Returns the following ElementTree structure::
 

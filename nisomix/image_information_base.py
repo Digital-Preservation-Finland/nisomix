@@ -1,9 +1,15 @@
 """
-Functions for reading and generating MIX BasicImageInformation
-metadata and its contents.
+Functions for reading and generating MIX Basic Image Information
+metadata and its contents as xml.etree.ElementTree data strucures.
 
 References:
     * MIX http://www.loc.gov/standards/mix/
+    * Schema documentation: Data Dictionary - Technical Metadata for
+                            Digital Still Images
+                            (ANSI/NISO Z39.87-2006 (R2017))
+                            Chapter 7: Basic Image Information
+    * ElementTree
+    https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
 

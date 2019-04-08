@@ -1,5 +1,14 @@
-"""Functions for reading and generating MIX Data Dictionaries as
-xml.etree.ElementTree data structures.
+"""Functions for reading and generating MIX Image Assessment Metadata and
+its contents as xml.etree.ElementTree data structures.
+
+References:
+    * MIX http://www.loc.gov/standards/mix/
+    * Schema documentation: Data Dictionary - Technical Metadata for
+                            Digital Still Images
+                            (ANSI/NISO Z39.87-2006 (R2017))
+                            Chapter 9: Image Assessment Metadata
+    * ElementTree
+    https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
 
@@ -14,8 +23,20 @@ from nisomix.utils import (RestrictedElementError, assessment_metadata_order,
 
 
 def image_assessment_metadata(child_elements=None):
-    """Returns the MIX ImageAssessmentMetadata element."""
+    """
+    Returns the MIX ImageAssessmentMetadata element.
 
+    :child_elements: Child elements as a list
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:ImageAssessmentMetadata>
+          <mix:SpatialMetrics/>
+          <mix:ImageColorEncoding/>
+          <mix:TargetData/>
+        </mix:ImageAssessmentMetadata>
+
+    """
     container = _element('ImageAssessmentMetadata')
     if child_elements:
         child_elements.sort(key=assessment_metadata_order)
@@ -26,8 +47,32 @@ def image_assessment_metadata(child_elements=None):
 
 
 def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
-    """Returns the MIX SpatialMetrics element."""
+    """
+    Returns the MIX SpatialMetrics element.
 
+    :plane: The sampling frequency plane as a string
+    :unit: The sampling frequency unit as a string
+    :x_sampling: The y sampling frequency as a list (or integer)
+    :y_sampling: The x sampling frequency as a list (or integer)
+
+    Returns the following ElementTree structure::
+
+        <mix:SpatialMetrics>
+          <mix:samplingFrequencyPlane>
+            object plane
+          </mix:samplingFrequencyPlane>
+          <mix:samplingFrequencyUnit>cm</mix:samplingFrequencyUnit>
+          <mix:xSamplingFrequency>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:xSamplingFrequency>
+          <mix:ySamplingFrequency>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:ySamplingFrequency>
+        </mix:SpatialMetrics>
+
+    """
     container = _element('SpatialMetrics')
 
     if plane:
@@ -57,7 +102,26 @@ def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
 
 def color_encoding(samples_pixel=None, extra_samples=None,
                    child_elements=None):
-    """Returns the MIX ImageColorEncoding element."""
+    """
+    Returns the MIX ImageColorEncoding element.
+
+    :samples_pixel: The number of samples per pixel as an integer
+    :extra_samples: The types of extra samples as a list
+    :child_elements: Child elements as a list
+
+    Returns the following sorted ElementTree structure::
+
+        <mix:ImageColorEncoding>
+          <mix:BitsPerSample/>
+          <mix:samplesPerPixel>3</mix:samplesPerPixel>
+          <mix:extraSamples>unspecified data</mix:extraSamples>
+          <mix:Colormap/>
+          <mix:GrayResponse/>
+          <mix:WhitePoint/>
+          <mix:PrimaryChromaticities/>
+        </mix:ImageColorEncoding>
+
+    """
     container = _element('ImageColorEncoding')
 
     if child_elements is None:
@@ -88,7 +152,20 @@ def color_encoding(samples_pixel=None, extra_samples=None,
 
 
 def bits_per_sample(sample_values=None, sample_unit=None):
-    """Returns the MIX BitsPerSample element."""
+    """
+    Returns the MIX BitsPerSample element.
+
+    :sample_values: The bits per sample values as a list
+    :sample_unit: The bits per sample unit as a string
+
+    Returns the following ElementTree structure::
+
+        <mix:BitsPerSample>
+          <mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+          <mix:bitsPerSampleUnit>integer</mix:bitsPerSampleUnit>
+        </mix:BitsPerSample>
+
+    """
     container = _element('BitsPerSample')
 
     if sample_values:
@@ -109,7 +186,20 @@ def bits_per_sample(sample_values=None, sample_unit=None):
 
 
 def color_map(reference=None, embedded=None):
-    """Returns the MIX Colormap element."""
+    """
+    Returns the MIX Colormap element.
+
+    :reference: The location of the referenced color map as a string
+    :embedded: The embedded color map as base64-encoded data
+
+    Returns the following ElementTree structure::
+
+        <mix:Colormap>
+          <mix:colormapReference>http://foo</mix:colormapReference>
+          <mix:embeddedColormap>foo</mix:embeddedColormap>
+        </mix:Colormap>
+
+    """
     container = _element('Colormap')
 
     if reference:
@@ -124,7 +214,22 @@ def color_map(reference=None, embedded=None):
 
 
 def gray_response(curves=None, unit=None):
-    """Returns the MIX GrayResponse element."""
+    """
+    Returns the MIX GrayResponse element.
+
+    :curves: The optical density of pixels as a list (of integers)
+    :unit: The precision recorded in grayResponseCurve
+
+    Returns the following ElementTree structure::
+
+        <mix:GrayResponse>
+          <mix:grayResponseCurve>10</mix:grayResponseCurve>
+          <mix:grayResponseUnit>
+            Number represents tenths of a unit
+          </mix:grayResponseUnit>
+        </mix:GrayResponse>
+
+    """
     container = _element('GrayResponse')
 
     if curves:
@@ -145,7 +250,26 @@ def gray_response(curves=None, unit=None):
 
 
 def white_point(x_value=None, y_value=None):
-    """Returns the MIX WhitePoint element."""
+    """
+    Returns the MIX WhitePoint element.
+
+    :x_value: The X value of white point chromaticity as a list
+    :y_value: The Y value of white point chromaticity as a list
+
+    Returns the following ElementTree structure::
+
+        <mix:WhitePoint>
+          <mix:whitePointXValue>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:whitePointXValue>
+          <mix:whitePointYValue>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:whitePointYValue>
+        </mix:WhitePoint>
+
+    """
     container = _element('WhitePoint')
 
     if x_value:
@@ -160,7 +284,46 @@ def white_point(x_value=None, y_value=None):
 # pylint: disable=too-many-arguments
 def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
                            blue_x=None, blue_y=None):
-    """Returns the MIX PrimaryChromaticities element."""
+    """
+    Returns the MIX PrimaryChromaticities element.
+
+    :red_x: The red X value for the chromaticities as a list
+    :red_x: The red Y value for the chromaticities as a list
+    :red_x: The green X value for the chromaticities as a list
+    :red_x: The green Y value for the chromaticities as a list
+    :red_x: The blue X value for the chromaticities as a list
+    :red_x: The blue Y value for the chromaticities as a list
+
+    Returns the following ElementTree structure::
+
+        <mix:PrimaryChromaticities>
+          <mix:primaryChromaticitiesRedX>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesRedX>
+          <mix:primaryChromaticitiesRedY>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesRedY>
+          <mix:primaryChromaticitiesGreenX>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesGreenX>
+          <mix:primaryChromaticitiesGreenY>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesGreenY>
+          <mix:primaryChromaticitiesBlueX>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesBlueX>
+          <mix:primaryChromaticitiesBlueY>
+            <mix:numerator>10</mix:numerator>
+            <mix:denominator>1</mix:denominator>
+          </mix:primaryChromaticitiesBlueY>
+        </mix:PrimaryChromaticities>
+
+    """
     container = _element('PrimaryChromaticities')
 
     if red_x:
@@ -191,7 +354,24 @@ def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
 # pylint: disable=too-many-branches
 def target_data(target_types=None, external_targets=None,
                 performance_data=None, child_elements=None):
-    """Returns MIX TargetData element."""
+    """
+    Returns MIX TargetData element.
+
+    :target_types: The target types as a list (or string)
+    :external_targets: The locations of external targets as a list
+    :performance_data: The location of performance data as a string
+    :child_elements: Child elements as a list
+
+    Returns the following ElementTree structure::
+
+        <mix:TargetData>
+          <mix:targetType>internal</mix:targetType>
+          <mix:TargetID/>
+          <mix:externalTarget>http://foo</mix:externalTarget>
+          <mix:performanceData>http://foo</mix:performanceData>
+        </mix:TargetData>
+
+    """
     container = _element('TargetData')
 
     if child_elements is None:
@@ -231,7 +411,24 @@ def target_data(target_types=None, external_targets=None,
 
 
 def target_id(manufacturer=None, name=None, target_no=None, media=None):
-    """Returns MIX TargetID element."""
+    """
+    Returns MIX TargetID element.
+
+    :manufacturer: The target manufacturer as a  string
+    :name: The target name as a string
+    :target_no: The target version or number as a string
+    :media: The target media as a string
+
+    Returns the following ElementTree structure::
+
+        <mix:TargetID>
+          <mix:targetManufacturer>acme</mix:targetManufacturer>
+          <mix:targetName>my target</mix:targetName>
+          <mix:targetNo>1.0</mix:targetNo>
+          <mix:targetMedia>foo</mix:targetMedia>
+        </mix:TargetID>
+
+    """
     container = _element('TargetID')
 
     if manufacturer:

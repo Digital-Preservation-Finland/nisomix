@@ -1,4 +1,5 @@
-"""Functions for reading and generating MIX Data Dictionaries as
+"""
+Functions for reading and generating MIX metadata as
 xml.etree.ElementTree data structures.
 
 References:
