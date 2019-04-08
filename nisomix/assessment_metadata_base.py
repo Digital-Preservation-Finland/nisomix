@@ -12,7 +12,7 @@ References:
 
 """
 
-from nisomix.base import (_element, _subelement, _rationaltype_subelement,
+from nisomix.base import (_element, _subelement, _rationaltype_element,
                           _ensure_list)
 from nisomix.constants import (SAMPLING_FREQUENCY_PLANES,
                                SAMPLING_FREQUENCY_UNITS, BITS_PER_SAMPLE_UNITS,
@@ -97,10 +97,12 @@ def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
                 unit, 'samplingFrequencyUnit', SAMPLING_FREQUENCY_UNITS)
 
     if x_sampling:
-        _rationaltype_subelement(container, 'xSamplingFrequency', x_sampling)
+        _rationaltype_element('xSamplingFrequency', x_sampling,
+                              parent=container)
 
     if y_sampling:
-        _rationaltype_subelement(container, 'ySamplingFrequency', y_sampling)
+        _rationaltype_element('ySamplingFrequency', y_sampling,
+                              parent=container)
 
     return container
 
@@ -278,10 +280,10 @@ def white_point(x_value=None, y_value=None):
     container = _element('WhitePoint')
 
     if x_value:
-        _rationaltype_subelement(container, 'whitePointXValue', x_value)
+        _rationaltype_element('whitePointXValue', x_value, parent=container)
 
     if y_value:
-        _rationaltype_subelement(container, 'whitePointYValue', y_value)
+        _rationaltype_element('whitePointYValue', y_value, parent=container)
 
     return container
 
@@ -332,26 +334,28 @@ def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
     container = _element('PrimaryChromaticities')
 
     if red_x:
-        _rationaltype_subelement(container, 'primaryChromaticitiesRedX', red_x)
+        _rationaltype_element('primaryChromaticitiesRedX', red_x,
+                              parent=container)
 
     if red_y:
-        _rationaltype_subelement(container, 'primaryChromaticitiesRedY', red_y)
+        _rationaltype_element('primaryChromaticitiesRedY', red_y,
+                              parent=container)
 
     if green_x:
-        _rationaltype_subelement(container, 'primaryChromaticitiesGreenX',
-                                 green_x)
+        _rationaltype_element('primaryChromaticitiesGreenX', green_x,
+                              parent=container)
 
     if green_y:
-        _rationaltype_subelement(container, 'primaryChromaticitiesGreenY',
-                                 green_y)
+        _rationaltype_element('primaryChromaticitiesGreenY', green_y,
+                              parent=container)
 
     if blue_x:
-        _rationaltype_subelement(container, 'primaryChromaticitiesBlueX',
-                                 blue_x)
+        _rationaltype_element('primaryChromaticitiesBlueX', blue_x,
+                              parent=container)
 
     if blue_y:
-        _rationaltype_subelement(container, 'primaryChromaticitiesBlueY',
-                                 blue_y)
+        _rationaltype_element('primaryChromaticitiesBlueY', blue_y,
+                              parent=container)
 
     return container
 

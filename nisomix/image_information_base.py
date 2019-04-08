@@ -13,7 +13,7 @@ References:
 
 """
 
-from nisomix.base import _element, _subelement, _rationaltype_subelement
+from nisomix.base import _element, _subelement, _rationaltype_element
 from nisomix.constants import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
                                YCBCR_POSITIONING_TYPES,
                                COMPONENT_INTERPRETATION_TYPES)
@@ -250,11 +250,12 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
     if luma_red or luma_green or luma_blue:
         luma_container = _subelement(container, 'YCbCrCoefficients')
         if luma_red:
-            _rationaltype_subelement(luma_container, 'lumaRed', luma_red)
+            _rationaltype_element('lumaRed', luma_red, parent=luma_container)
         if luma_green:
-            _rationaltype_subelement(luma_container, 'lumaGreen', luma_green)
+            _rationaltype_element('lumaGreen', luma_green,
+                                  parent=luma_container)
         if luma_blue:
-            _rationaltype_subelement(luma_container, 'lumaBlue', luma_blue)
+            _rationaltype_element('lumaBlue', luma_blue, parent=luma_container)
 
     return container
 
@@ -322,10 +323,10 @@ def component(c_photometric_interpretation=None, footroom=None,
                 COMPONENT_INTERPRETATION_TYPES)
 
     if footroom:
-        _rationaltype_subelement(container, 'footroom', footroom)
+        _rationaltype_element('footroom', footroom, parent=container)
 
     if headroom:
-        _rationaltype_subelement(container, 'headroom', headroom)
+        _rationaltype_element('headroom', headroom, parent=container)
 
     return container
 

@@ -15,7 +15,7 @@ References:
 """
 
 from nisomix.base import (mix_ns, _element, _subelement,
-                          _rationaltype_subelement)
+                          _rationaltype_element)
 from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
 from nisomix.utils import NAMESPACES, basic_do_order, RestrictedElementError
 
@@ -198,8 +198,8 @@ def compression(compression_scheme=None, local_list=None,
         local_value_el.text = local_value
 
     if compression_ratio:
-        _rationaltype_subelement(container, 'compressionRatio',
-                                 compression_ratio)
+        _rationaltype_element('compressionRatio', compression_ratio,
+                              parent=container)
 
     return container
 

@@ -80,8 +80,9 @@ def _subelement(parent, tag, prefix="", namespaces=None):
     return ET.SubElement(parent, mix_ns(tag, prefix), nsmap=namespaces)
 
 
-def _rationaltype_element(tag, value, denominator='1'):
-    """Return a rational type element.
+def _rationaltype_element(tag, value, denominator='1', parent=None):
+    """Return a rational type element. If parent element is given,
+    return the rational element as a subelement of the parent.
 
     Returns the following ElementTree strucure::
 
@@ -94,47 +95,19 @@ def _rationaltype_element(tag, value, denominator='1'):
     :value: Contents of the numerator part of the element, or
             if it is a list, contains both the numerator and denominator
     :denominator: Contents of the denominator part of the element
+    :parent: The tag name of the parent element
 
     """
     value = _ensure_list(value)
     numerator = str(value[0])
 
-    if len(value) == 2:
+    if len(value) == 2 and value[1]:
         denominator = str(value[1])
 
-    elem = _element(tag)
-    numerator_el = _subelement(elem, 'numerator')
-    numerator_el.text = numerator
-    denominator_el = _subelement(elem, 'denominator')
-    denominator_el.text = denominator
-
-    return elem
-
-
-def _rationaltype_subelement(parent, tag, value, denominator='1'):
-    """Return a rational type element for the parent.
-
-    Returns the following ElementTree strucure::
-
-        <mix:{{ tag }}>
-          <mix:numerator>foo</numerator>
-          <mix:denominator>1</denominator>
-        </mix:{{ tag }}>
-
-    :parent: Parent element
-    :tag: Element tag name
-    :value: Contents of the numerator part of the element, or
-            if it is a list, contains both the numerator and denominator
-    :denominator: Contents of the denominator part of the element
-
-    """
-    value = _ensure_list(value)
-    numerator = str(value[0])
-
-    if len(value) == 2:
-        denominator = str(value[1])
-
-    elem = _subelement(parent, tag)
+    if parent is not None:
+        elem = _subelement(parent, tag)
+    else:
+        elem = _element(tag)
     numerator_el = _subelement(elem, 'numerator')
     numerator_el.text = numerator
     denominator_el = _subelement(elem, 'denominator')

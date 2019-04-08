@@ -3,8 +3,7 @@
 import pytest
 import lxml.etree as ET
 from nisomix.base import (MIX_NS, mix_ns, mix, _element, _subelement,
-                          _rationaltype_element, _rationaltype_subelement,
-                          _ensure_list)
+                          _rationaltype_element, _ensure_list)
 
 
 @pytest.mark.parametrize(('tag', 'prefix'), [
@@ -57,7 +56,10 @@ def test_rationaltype_element():
     """
     Tests the _rationaltype_element function by asserting that the
     element was created correctly, that it is containing both the
-    numerator and denominator subelements.
+    numerator and denominator subelements even though the numerator
+    sometimes is missing or is None. Also assert that the rational
+    element is a subelement of its parent element if parent argument is
+    given.
     """
     elem1 = _rationaltype_element('test', 30)
 
@@ -73,28 +75,28 @@ def test_rationaltype_element():
         '<mix:numerator>30</mix:numerator>'
         '<mix:denominator>3</mix:denominator></mix:test>'))
 
+    elem3 = _rationaltype_element('test', [30, None])
 
-def test_rationaltype_subelement():
-    """
-    Tests the _rationaltype_subelement function by asserting that the
-    element was created correctly as a child element of its parent and
-    that it is containing both the numerator and denominator subelements.
-    """
-    elem1 = _element('test')
-    _rationaltype_subelement(elem1, 'subtest', 30)
-
-    assert ET.tostring(elem1) == ET.tostring(ET.fromstring(
+    assert ET.tostring(elem3) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
-        '<mix:subtest><mix:numerator>30</mix:numerator>'
-        '<mix:denominator>1</mix:denominator></mix:subtest></mix:test>'))
+        '<mix:numerator>30</mix:numerator>'
+        '<mix:denominator>1</mix:denominator></mix:test>'))
 
-    elem2 = _element('test')
-    _rationaltype_subelement(elem2, 'subtest', [30, 3])
+    elem4 = _rationaltype_element('test', [30, ''])
 
-    assert ET.tostring(elem2) == ET.tostring(ET.fromstring(
+    assert ET.tostring(elem4) == ET.tostring(ET.fromstring(
         '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
-        '<mix:subtest><mix:numerator>30</mix:numerator>'
-        '<mix:denominator>3</mix:denominator></mix:subtest></mix:test>'))
+        '<mix:numerator>30</mix:numerator>'
+        '<mix:denominator>1</mix:denominator></mix:test>'))
+
+    parent = _element('parent')
+    elem5 = _rationaltype_element('test', [30], parent=parent)
+
+    assert ET.tostring(elem5) == ET.tostring(ET.fromstring(
+        '<mix:test xmlns:mix="http://www.loc.gov/mix/v20">'
+        '<mix:numerator>30</mix:numerator>'
+        '<mix:denominator>1</mix:denominator></mix:test>'))
+    assert elem5.getparent().tag == '{http://www.loc.gov/mix/v20}parent'
 
 
 @pytest.mark.parametrize(('value', 'length'), [
