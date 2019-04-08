@@ -17,7 +17,40 @@ Usage
 
 Import the library with::
 
-    import nisomix.mix as mix
+    import nisomix
+  
+All the functions can now be used with calling nisomix.<function>.
+
+For example, the image_characteristics() function in image_information_base.py
+can be used with::
+
+    img = nisomix.image_characteristics(width=200, height=400, ...)
+
+This creats a MIX <BasicImageCharacteristics> element with <imageWidth> and 
+<imageHeight> to img as lxml.etree.
+
+Most container elements are created using own functions. Subelements as
+lxml.etree data types are added to the parent as a list using the
+child_elements function argument where applicable.
+
+Elements with textual content are added as arguments for their parent function.
+They accept strings or integers when applicable (see the MIX schema for
+element content types). Repeating elements can be given as a list containing
+the element values as list items. Rational type elements can likewise be given
+as a list, with the list items containing the numerator and the denominator
+values.
+
+Several elements accepted only a restricted set of values. These values are
+documented in the MIX schema.
+
+The two functions image_data and gps_data that return the MIX <ImageData> and
+<GPSData> elements respectively accept a contents dictionary as argument. The
+dictionary keys are matched to corresponding elements. The empty dictionaries
+can be imported using the IMAGE_DATA_CONTENTS and GPS_DATA_CONTENTS global
+variables and then populated with data that is passed to the functions. Import
+the dictionaries like this::
+
+    contents = nisomix.IMAGE_DATA_CONTENTS
 
 Please, see the MIX documentation for more information:
 https://www.loc.gov/standards/mix/
