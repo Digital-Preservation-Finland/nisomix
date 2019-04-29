@@ -15,14 +15,15 @@ References:
 """
 
 import six
-from nisomix.base import (_element, _subelement, _rationaltype_element,
+from nisomix.base import (mix_ns, _element, _subelement, _rationaltype_element,
                           _ensure_list)
 from nisomix.constants import (ORIENTATION_TYPES, DIMENSION_UNITS,
                                CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
                                OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
                                IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS)
-from nisomix.utils import (image_capture_order, scanner_capture_order,
-                           camera_capture_order, camera_capture_settings_order,
+from nisomix.utils import (NAMESPACES, image_capture_order,
+                           scanner_capture_order, camera_capture_order,
+                           camera_capture_settings_order,
                            RestrictedElementError, source_information_order,
                            image_data_order, gps_data_order)
 
@@ -30,7 +31,8 @@ from nisomix.utils import (image_capture_order, scanner_capture_order,
 __all__ = ['image_capture_metadata', 'source_information', 'source_id',
            'source_size', 'capture_information', 'device_capture',
            'device_model', 'max_optical_resolution', 'scanning_software',
-           'camera_capture_settings', 'image_data', 'gps_data']
+           'camera_capture_settings', 'image_data', 'gps_data',
+           'parse_datetime_created']
 
 
 def image_capture_metadata(orientation=None, methodology=None,
@@ -741,3 +743,23 @@ def _gps_group(tag, degrees=None, minutes=None, seconds=None):
         container.append(seconds_el)
 
     return container
+
+
+def parse_datetime_created(elem):
+    """
+    Returns the dateTimeCreated from a MIX metadata
+    block in XML.
+
+    :elem: An ElementTree strucure
+    :returns: The datetime created as a string
+    """
+    created = None
+
+    if elem.tag != (mix_ns, 'dateTimeCreated'):
+        elem = elem.xpath('//mix:dateTimeCreated', namespaces=NAMESPACES)[0]
+
+    if elem is not None:
+        if elem.text:
+            created = elem.text
+
+    return created
