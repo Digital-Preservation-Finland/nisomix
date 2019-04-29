@@ -12,6 +12,7 @@ from nisomix.capture_metadata_base import (image_capture_metadata,
                                            max_optical_resolution,
                                            scanning_software,
                                            camera_capture_settings,
+                                           parse_datetime_created,
                                            image_data, gps_data, _gps_group)
 
 
@@ -607,3 +608,18 @@ def test_gps_data_dict_error():
     with pytest.raises(ValueError):
         contents = {'foo': 'bar'}
         gps_data(contents=contents)
+
+
+def test_parse_datetime_created():
+    """Tests the parse_datetime_created function."""
+
+    xml_str = ('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:GeneralCaptureInformation>'
+               '<mix:dateTimeCreated>2019-04-29T10:10:05</mix:dateTimeCreated>'
+               '<mix:imageProducer>test</mix:imageProducer>'
+               '<mix:imageProducer>test2</mix:imageProducer>'
+               '<mix:captureDevice>still from video</mix:captureDevice>'
+               '</mix:GeneralCaptureInformation></mix:mix>')
+
+    assert parse_datetime_created(
+        ET.fromstring(xml_str)) == '2019-04-29T10:10:05'
