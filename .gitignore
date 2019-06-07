@@ -4,6 +4,7 @@
 .project*
 *.pyc
 .cache
+.tox
 __pycache__
 INSTALLED_FILES*
 PKG-INFO
@@ -23,4 +24,5 @@ ehthumbs.db
 Thumbs.db
 rpmbuild
 .venv/
+venv*/
 junit*.xml
