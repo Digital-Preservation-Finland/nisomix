@@ -12,11 +12,13 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
+
+import six
 
 import lxml.etree as ET
-from xml_helpers.utils import xsi_ns
 from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
-
+from xml_helpers.utils import xsi_ns
 
 __all__ = ['mix_ns', 'mix']
 
@@ -99,10 +101,10 @@ def _rationaltype_element(tag, value, denominator='1', parent=None):
 
     """
     value = _ensure_list(value)
-    numerator = str(value[0])
+    numerator = six.text_type(value[0])
 
     if len(value) == 2 and value[1]:
-        denominator = str(value[1])
+        denominator = six.text_type(value[1])
 
     if parent is not None:
         elem = _subelement(parent, tag)

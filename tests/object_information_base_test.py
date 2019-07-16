@@ -1,16 +1,18 @@
 """Test nisomix.object_information_base module features."""
+from __future__ import unicode_literals
 
 import pytest
+
 import lxml.etree as ET
 import xml_helpers.utils as h
-from nisomix.utils import RestrictedElementError
 from nisomix.base import _element
-from nisomix.object_information_base import (digital_object_information,
-                                             identifier, compression,
-                                             format_designation,
-                                             format_registry, fixity,
-                                             _normalized_byteorder,
+from nisomix.object_information_base import (_normalized_byteorder,
+                                             compression,
+                                             digital_object_information,
+                                             fixity, format_designation,
+                                             format_registry, identifier,
                                              parse_message_digest)
+from nisomix.utils import RestrictedElementError
 
 
 def test_digitalobjectinformation():

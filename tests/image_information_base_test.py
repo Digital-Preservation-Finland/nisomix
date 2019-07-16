@@ -1,17 +1,18 @@
 """Test nisomix.image_information_base module functions."""
+from __future__ import unicode_literals
 
 import pytest
+
 import lxml.etree as ET
 import xml_helpers.utils as h
 from nisomix.base import _element
-from nisomix.utils import RestrictedElementError
-from nisomix.image_information_base import (image_information,
-                                            image_characteristics,
-                                            photometric_interpretation,
-                                            color_profile, ycbcr,
-                                            ref_black_white, component,
+from nisomix.image_information_base import (color_profile, component, djvu,
                                             format_characteristics,
-                                            jpeg2000, mrsid, djvu)
+                                            image_characteristics,
+                                            image_information, jpeg2000, mrsid,
+                                            photometric_interpretation,
+                                            ref_black_white, ycbcr)
+from nisomix.utils import RestrictedElementError
 
 
 def test_image_information():

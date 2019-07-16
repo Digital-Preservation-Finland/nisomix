@@ -1,16 +1,18 @@
 """Test nisomix.assessment_metadata_base module functions."""
+from __future__ import unicode_literals
 
 import pytest
+
 import lxml.etree as ET
 import xml_helpers.utils as h
+from nisomix.assessment_metadata_base import (bits_per_sample, color_encoding,
+                                              color_map, gray_response,
+                                              image_assessment_metadata,
+                                              primary_chromaticities,
+                                              spatial_metrics, target_data,
+                                              target_id, white_point)
 from nisomix.base import _element
 from nisomix.utils import RestrictedElementError
-from nisomix.assessment_metadata_base import (image_assessment_metadata,
-                                              spatial_metrics, color_encoding,
-                                              bits_per_sample, color_map,
-                                              gray_response, white_point,
-                                              primary_chromaticities,
-                                              target_data, target_id)
 
 
 def test_assessment_metadata():

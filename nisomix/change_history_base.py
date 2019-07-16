@@ -12,10 +12,10 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
 
-from nisomix.base import _element, _subelement, _ensure_list
+from nisomix.base import _element, _ensure_list, _subelement
 from nisomix.utils import change_history_order, image_processing_order
-
 
 __all__ = ['change_history', 'image_processing', 'processing_software']
 

@@ -1,19 +1,20 @@
 """Test nisomix.capture_metadata_base module functions."""
+from __future__ import unicode_literals
 
 import pytest
+
 import lxml.etree as ET
 import xml_helpers.utils as h
 from nisomix.base import _element
-from nisomix.utils import RestrictedElementError
-from nisomix.capture_metadata_base import (image_capture_metadata,
-                                           source_information, source_id,
-                                           source_size, capture_information,
-                                           device_capture, device_model,
+from nisomix.capture_metadata_base import (_gps_group, camera_capture_settings,
+                                           capture_information, device_capture,
+                                           device_model, gps_data,
+                                           image_capture_metadata, image_data,
                                            max_optical_resolution,
-                                           scanning_software,
-                                           camera_capture_settings,
                                            parse_datetime_created,
-                                           image_data, gps_data, _gps_group)
+                                           scanning_software, source_id,
+                                           source_information, source_size)
+from nisomix.utils import RestrictedElementError
 
 
 def test_capture_metadata():

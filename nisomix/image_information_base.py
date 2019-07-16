@@ -12,6 +12,9 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
+
+import six
 
 from nisomix.base import _element, _subelement, _rationaltype_element
 from nisomix.constants import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
@@ -76,10 +79,10 @@ def image_characteristics(width=None, height=None,
 
     if width:
         width_el = _subelement(container, 'imageWidth')
-        width_el.text = str(width)
+        width_el.text = six.text_type(width)
     if height:
         height_el = _subelement(container, 'imageHeight')
-        height_el.text = str(height)
+        height_el.text = six.text_type(height)
     if child_elements:
         for element in child_elements:
             container.append(element)
@@ -173,7 +176,7 @@ def color_profile(icc_name=None, icc_version=None, icc_uri=None,
 
     if embedded_profile:
         embedded_profile_el = _subelement(container, 'embeddedProfile')
-        embedded_profile_el.text = str(embedded_profile)
+        embedded_profile_el.text = six.text_type(embedded_profile)
 
     return container
 
@@ -416,10 +419,10 @@ def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
         tiles_container = _element('Tiles')
         if tile_width:
             tile_width_el = _subelement(tiles_container, 'tileWidth')
-            tile_width_el.text = str(tile_width)
+            tile_width_el.text = six.text_type(tile_width)
         if tile_height:
             tile_height_el = _subelement(tiles_container, 'tileHeight')
-            tile_height_el.text = str(tile_height)
+            tile_height_el.text = six.text_type(tile_height)
 
     if tiles_container is not None or quality_layers or resolution_levels:
         encoding_options = _subelement(container, 'EncodingOptions')
@@ -428,11 +431,11 @@ def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
         if quality_layers:
             quality_layers_el = _subelement(
                 encoding_options, 'qualityLayers')
-            quality_layers_el.text = str(quality_layers)
+            quality_layers_el.text = six.text_type(quality_layers)
         if resolution_levels:
             resolution_levels_el = _subelement(
                 encoding_options, 'resolutionLevels')
-            resolution_levels_el.text = str(resolution_levels)
+            resolution_levels_el.text = six.text_type(resolution_levels)
 
     return container
 
@@ -454,7 +457,7 @@ def mrsid(zoom_levels=None):
 
     if zoom_levels:
         zoom_levels_el = _subelement(container, 'zoomLevels')
-        zoom_levels_el.text = str(zoom_levels)
+        zoom_levels_el.text = six.text_type(zoom_levels)
 
     return container
 

@@ -11,16 +11,17 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
 
-from nisomix.base import (_element, _subelement, _rationaltype_element,
-                          _ensure_list)
-from nisomix.constants import (SAMPLING_FREQUENCY_PLANES,
-                               SAMPLING_FREQUENCY_UNITS, BITS_PER_SAMPLE_UNITS,
-                               EXTRA_SAMPLES_TYPES, GRAY_RESPONSE_UNITS,
-                               TARGET_TYPES)
+import six
+
+from nisomix.base import (_element, _ensure_list, _rationaltype_element,
+                          _subelement)
+from nisomix.constants import (BITS_PER_SAMPLE_UNITS, EXTRA_SAMPLES_TYPES,
+                               GRAY_RESPONSE_UNITS, SAMPLING_FREQUENCY_PLANES,
+                               SAMPLING_FREQUENCY_UNITS, TARGET_TYPES)
 from nisomix.utils import (RestrictedElementError, assessment_metadata_order,
                            color_encoding_order, target_data_order)
-
 
 __all__ = ['image_assessment_metadata', 'spatial_metrics', 'color_encoding',
            'bits_per_sample', 'color_map', 'gray_response', 'white_point',
@@ -136,7 +137,7 @@ def color_encoding(samples_pixel=None, extra_samples=None,
 
     if samples_pixel:
         pixel_el = _element('samplesPerPixel')
-        pixel_el.text = str(samples_pixel)
+        pixel_el.text = six.text_type(samples_pixel)
         child_elements.append(pixel_el)
 
     if extra_samples:
@@ -179,7 +180,7 @@ def bits_per_sample(sample_values=None, sample_unit=None):
         sample_values = _ensure_list(sample_values)
         for item in sample_values:
             value_el = _subelement(container, 'bitsPerSampleValue')
-            value_el.text = str(item)
+            value_el.text = six.text_type(item)
 
     if sample_unit:
         if sample_unit in BITS_PER_SAMPLE_UNITS:
@@ -215,7 +216,7 @@ def color_map(reference=None, embedded=None):
 
     if embedded:
         embedded_el = _subelement(container, 'embeddedColormap')
-        embedded_el.text = str(embedded)
+        embedded_el.text = six.text_type(embedded)
 
     return container
 
@@ -243,7 +244,7 @@ def gray_response(curves=None, unit=None):
         curves = _ensure_list(curves)
         for item in curves:
             curve_el = _subelement(container, 'grayResponseCurve')
-            curve_el.text = str(item)
+            curve_el.text = six.text_type(item)
 
     if unit:
         if unit in GRAY_RESPONSE_UNITS:
