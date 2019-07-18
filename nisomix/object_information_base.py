@@ -13,12 +13,13 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
 
-from nisomix.base import (mix_ns, _element, _subelement,
-                          _rationaltype_element)
+import six
+
+from nisomix.base import _element, _rationaltype_element, _subelement, mix_ns
 from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
-from nisomix.utils import NAMESPACES, basic_do_order, RestrictedElementError
-
+from nisomix.utils import NAMESPACES, RestrictedElementError, basic_do_order
 
 __all__ = ['digital_object_information', 'identifier', 'format_designation',
            'format_registry', 'compression', 'fixity',
@@ -56,7 +57,7 @@ def digital_object_information(byte_order=None, file_size=None,
 
     if file_size:
         file_size_el = _element('fileSize')
-        file_size_el.text = str(file_size)
+        file_size_el.text = six.text_type(file_size)
         child_elements.append(file_size_el)
     if byte_order:
         byte_order_el = _element('byteOrder')

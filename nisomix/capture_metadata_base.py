@@ -13,20 +13,21 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
+from __future__ import unicode_literals
 
 import six
-from nisomix.base import (mix_ns, _element, _subelement, _rationaltype_element,
-                          _ensure_list)
-from nisomix.constants import (ORIENTATION_TYPES, DIMENSION_UNITS,
-                               CAPTURE_DEVICE_TYPES, SCANNER_SENSOR_TYPES,
-                               OPTICAL_RESOLUTION_UNITS, CAMERA_SENSOR_TYPES,
-                               IMAGE_DATA_CONTENTS, GPS_DATA_CONTENTS)
-from nisomix.utils import (NAMESPACES, image_capture_order,
-                           scanner_capture_order, camera_capture_order,
-                           camera_capture_settings_order,
-                           RestrictedElementError, source_information_order,
-                           image_data_order, gps_data_order)
 
+from nisomix.base import (_element, _ensure_list, _rationaltype_element,
+                          _subelement, mix_ns)
+from nisomix.constants import (CAMERA_SENSOR_TYPES, CAPTURE_DEVICE_TYPES,
+                               DIMENSION_UNITS, GPS_DATA_CONTENTS,
+                               IMAGE_DATA_CONTENTS, OPTICAL_RESOLUTION_UNITS,
+                               ORIENTATION_TYPES, SCANNER_SENSOR_TYPES)
+from nisomix.utils import (NAMESPACES, RestrictedElementError,
+                           camera_capture_order, camera_capture_settings_order,
+                           gps_data_order, image_capture_order,
+                           image_data_order, scanner_capture_order,
+                           source_information_order)
 
 __all__ = ['image_capture_metadata', 'source_information', 'source_id',
            'source_size', 'capture_information', 'device_capture',
@@ -382,11 +383,11 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
 
     if x_resolution:
         x_resolution_el = _subelement(container, 'xOpticalResolution')
-        x_resolution_el.text = str(x_resolution)
+        x_resolution_el.text = six.text_type(x_resolution)
 
     if y_resolution:
         y_resolution_el = _subelement(container, 'yOpticalResolution')
-        y_resolution_el.text = str(y_resolution)
+        y_resolution_el.text = six.text_type(y_resolution)
 
     if unit:
         if unit in OPTICAL_RESOLUTION_UNITS:
@@ -517,7 +518,7 @@ def image_data(contents=None):
     for key, value in six.iteritems(contents):
         if key in tags and value:
             elem = _element(tags[key])
-            elem.text = str(value)
+            elem.text = six.text_type(value)
             child_elements.append(elem)
 
         if key in rationals and value:
