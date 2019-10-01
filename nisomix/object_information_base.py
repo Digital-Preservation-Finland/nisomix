@@ -23,7 +23,7 @@ from nisomix.utils import NAMESPACES, RestrictedElementError, basic_do_order
 
 __all__ = ['digital_object_information', 'identifier', 'format_designation',
            'format_registry', 'compression', 'fixity',
-           'parse_message_digest']
+           'parse_message_digest', 'parse_object_identifier']
 
 
 def digital_object_information(byte_order=None, file_size=None,
