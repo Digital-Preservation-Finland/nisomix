@@ -149,7 +149,12 @@ def test_fixity_error():
     ('big_endian', 'big endian'),
     ('Big-endian (something)', 'big endian'),
     ('foo', None),
-])
+    ], ids=['Input "big endian", expected "big endian"',
+            'Input "little endian", expected "little endian"',
+            'Input "Little endian", expected "little endian"',
+            'Input "big_endian", expected "big endian"',
+            'Input "Big-endian (something)", expected "big endian"',
+            'Input "foo", expected that an exception is raised'])
 def test_normalized_byteorder(input_str, expected_output):
     """
     Tests the _normalized_byteorder function by asserting that it outputs
@@ -194,7 +199,11 @@ def test_normalized_byteorder(input_str, expected_output):
       '<mix:messageDigest>test2</mix:messageDigest></mix:Fixity>'
       '</mix:BasicDigitalObjectInformation></mix:mix>'),
      [('MD5', 'test'), ('SHA-1', 'test2')]),
-])
+    ], ids=['Fixity container with data',
+            'Empty Fixity container',
+            'Missing Fixity container',
+            'XML root is Fixity container',
+            'Multiple Fixity containers'])
 def test_parse_message_digest(mix_xml, fixities):
     """
     Tests the parse_message_digest function with test data that
@@ -248,7 +257,11 @@ def test_parse_message_digest(mix_xml, fixities):
       '</mix:ObjectIdentifier>'
       '</mix:BasicDigitalObjectInformation></mix:mix>'),
      [('local', '1234'), (None, '12345')]),
-])
+    ], ids=['ObjectIdentifier container with data',
+            'Empty ObjectIdentifier container',
+            'Missing ObjectIdentifier container',
+            'XML root is ObjectIdentifier container',
+            'Multiple ObjectIdentifier containers'])
 def test_parse_object_identifier(mix_xml, identifiers):
     """
     Tests the parse_object_identifier function with test data that
