@@ -23,7 +23,7 @@ from nisomix.utils import NAMESPACES, RestrictedElementError, basic_do_order
 
 __all__ = ['digital_object_information', 'identifier', 'format_designation',
            'format_registry', 'compression', 'fixity',
-           'parse_message_digest']
+           'parse_message_digest', 'parse_object_identifier']
 
 
 def digital_object_information(byte_order=None, file_size=None,
@@ -273,23 +273,71 @@ def _normalized_byteorder(byte_order):
 def parse_message_digest(elem):
     """
     Returns the message digest algorithm and value from a MIX metadata
-    block in XML.
+    block in XML if the data exists. A mix can contain multiple
+    Fixity containers, so the data is returned as a list of
+    tuples.
 
     :elem: An ElementTree strucure
-    :returns: A tuple of (algorithm, value)
+    :returns: A list of tuples of (algorithm, value)
     """
-    algorithm = None
-    value = None
+    fixities = []
 
-    if elem.tag != (mix_ns, 'Fixity'):
-        elem = elem.xpath('//mix:Fixity', namespaces=NAMESPACES)[0]
+    if elem.tag != mix_ns('Fixity'):
+        try:
+            elems = elem.xpath('//mix:Fixity', namespaces=NAMESPACES)
+        except IndexError:
+            return []
 
-    if elem is not None:
-        algorithm_el = elem.find('./' + mix_ns('messageDigestAlgorithm'))
-        if algorithm_el.text:
+    else:
+        elems = [elem]
+
+    for fixity_el in elems:
+        algorithm = None
+        value = None
+        algorithm_el = fixity_el.find('./' + mix_ns('messageDigestAlgorithm'))
+        if algorithm_el is not None and algorithm_el.text:
             algorithm = algorithm_el.text
-        value_el = elem.find('./' + mix_ns('messageDigest'))
-        if value_el.text:
+        value_el = fixity_el.find('./' + mix_ns('messageDigest'))
+        if value_el is not None and value_el.text:
             value = value_el.text
+        if algorithm or value:
+            fixities.append((algorithm, value))
 
-    return algorithm, value
+    return fixities
+
+
+def parse_object_identifier(elem):
+    """
+    Returns the object identifier type and value from a MIX metadata
+    block in XML if the data exists. A mix can contain multiple
+    ObjectIdentifier containers, so the data is returned as a list of
+    tuples.
+
+    :elem: An ElementTree strucure
+    :returns: A a list of tuples of (id_type, id_value)
+    """
+    identifiers = []
+
+    if elem.tag != mix_ns('ObjectIdentifier'):
+        try:
+            elems = elem.xpath('//mix:ObjectIdentifier',
+                               namespaces=NAMESPACES)
+        except IndexError:
+            return []
+
+    else:
+        elems = [elem]
+
+    for id_elem in elems:
+        id_type = None
+        id_value = None
+        id_type_el = id_elem.find('./' + mix_ns('objectIdentifierType'))
+        if id_type_el is not None and id_type_el.text:
+            id_type = id_type_el.text
+        id_value_el = id_elem.find('./' + mix_ns('objectIdentifierValue'))
+        if id_value_el is not None and id_value_el.text:
+            id_value = id_value_el.text
+        if id_type or id_value:
+            identifiers.append((id_type, id_value))
+
+    return identifiers

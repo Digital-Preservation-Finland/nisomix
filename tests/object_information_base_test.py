@@ -11,7 +11,8 @@ from nisomix.object_information_base import (_normalized_byteorder,
                                              digital_object_information,
                                              fixity, format_designation,
                                              format_registry, identifier,
-                                             parse_message_digest)
+                                             parse_message_digest,
+                                             parse_object_identifier)
 from nisomix.utils import RestrictedElementError
 
 
@@ -148,7 +149,12 @@ def test_fixity_error():
     ('big_endian', 'big endian'),
     ('Big-endian (something)', 'big endian'),
     ('foo', None),
-])
+    ], ids=['Input "big endian", expected "big endian"',
+            'Input "little endian", expected "little endian"',
+            'Input "Little endian", expected "little endian"',
+            'Input "big_endian", expected "big endian"',
+            'Input "Big-endian (something)", expected "big endian"',
+            'Input "foo", expected that an exception is raised'])
 def test_normalized_byteorder(input_str, expected_output):
     """
     Tests the _normalized_byteorder function by asserting that it outputs
@@ -162,20 +168,114 @@ def test_normalized_byteorder(input_str, expected_output):
             _normalized_byteorder(input_str)
 
 
-def test_parse_message_digest():
-    """Tests the parse_message_digest function."""
+@pytest.mark.parametrize(('mix_xml', 'fixities'), [
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation><mix:Fixity>'
+      '<mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>'
+      '<mix:messageDigest>test</mix:messageDigest></mix:Fixity>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     [('MD5', 'test')]),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '<mix:Fixity />'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     []),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     []),
+    (('<mix:Fixity xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:messageDigestAlgorithm />'
+      '<mix:messageDigest>test</mix:messageDigest>'
+      '</mix:Fixity>'),
+     [(None, 'test')]),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '<mix:Fixity>'
+      '<mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>'
+      '<mix:messageDigest>test</mix:messageDigest></mix:Fixity>'
+      '<mix:Fixity>'
+      '<mix:messageDigestAlgorithm>SHA-1</mix:messageDigestAlgorithm>'
+      '<mix:messageDigest>test2</mix:messageDigest></mix:Fixity>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     [('MD5', 'test'), ('SHA-1', 'test2')]),
+    ], ids=['Fixity container with data',
+            'Empty Fixity container',
+            'Missing Fixity container',
+            'XML root is Fixity container',
+            'Multiple Fixity containers'])
+def test_parse_message_digest(mix_xml, fixities):
+    """
+    Tests the parse_message_digest function with test data that
+    contains:
 
-    xml_str = ('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
-               '<mix:BasicDigitalObjectInformation><mix:ObjectIdentifier/>'
-               '<mix:fileSize>1234</mix:fileSize><mix:FormatDesignation>'
-               '<mix:formatName>jpeg</mix:formatName><mix:formatVersion>1.01'
-               '</mix:formatVersion></mix:FormatDesignation>'
-               '<mix:FormatRegistry/><mix:byteOrder>big endian</mix:byteOrder>'
-               '<mix:Compression><mix:compressionScheme>jpeg'
-               '</mix:compressionScheme></mix:Compression><mix:Fixity>'
-               '<mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>'
-               '<mix:messageDigest>test</mix:messageDigest></mix:Fixity>'
-               '</mix:BasicDigitalObjectInformation></mix:mix>')
+        1. A Fixity container with data
+        2. An empty Fixity container
+        3. The Fixity container missing
+        4. The Fixity container and its children directly
+        5. Multiple Fixity containers
 
-    mix = ET.fromstring(xml_str)
-    assert parse_message_digest(mix) == ('MD5', 'test')
+    The test checks that the function returns the tuple(s) of
+    messageDigestAlgorithm and messageDigest correctly.
+    """
+
+    mix = ET.fromstring(mix_xml)
+    assert parse_message_digest(mix) == fixities
+
+
+@pytest.mark.parametrize(('mix_xml', 'identifiers'), [
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '<mix:ObjectIdentifier>'
+      '<mix:objectIdentifierType>local</mix:objectIdentifierType>'
+      '<mix:objectIdentifierValue>1234</mix:objectIdentifierValue>'
+      '</mix:ObjectIdentifier>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     [('local', '1234')]),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '<mix:ObjectIdentifier />'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     []),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     []),
+    (('<mix:ObjectIdentifier xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:objectIdentifierType>local</mix:objectIdentifierType>'
+      '<mix:objectIdentifierValue>1234</mix:objectIdentifierValue>'
+      '</mix:ObjectIdentifier>'),
+     [('local', '1234')]),
+    (('<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">'
+      '<mix:BasicDigitalObjectInformation>'
+      '<mix:ObjectIdentifier>'
+      '<mix:objectIdentifierType>local</mix:objectIdentifierType>'
+      '<mix:objectIdentifierValue>1234</mix:objectIdentifierValue>'
+      '</mix:ObjectIdentifier>'
+      '<mix:ObjectIdentifier>'
+      '<mix:objectIdentifierValue>12345</mix:objectIdentifierValue>'
+      '</mix:ObjectIdentifier>'
+      '</mix:BasicDigitalObjectInformation></mix:mix>'),
+     [('local', '1234'), (None, '12345')]),
+    ], ids=['ObjectIdentifier container with data',
+            'Empty ObjectIdentifier container',
+            'Missing ObjectIdentifier container',
+            'XML root is ObjectIdentifier container',
+            'Multiple ObjectIdentifier containers'])
+def test_parse_object_identifier(mix_xml, identifiers):
+    """
+    Tests the parse_object_identifier function with test data that
+    contains:
+
+        1. An ObjectIdentifier container with data
+        2. An empty ObjectIdentifier container
+        3. The ObjectIdentifier container missing
+        4. The ObjectIdentifier container and its children directly
+        5. Multiple ObjectIdentifier containers
+
+    The test checks that the function returns the tuple(s) of
+    objectIdentifierType and objectIdentifierValue correctly.
+    """
+
+    mix = ET.fromstring(mix_xml)
+    assert parse_object_identifier(mix) == identifiers
