@@ -11,10 +11,17 @@ stages:
   - local-test
   - rpm-stable
 
-rpm-package:
+rpm-package-rhel7:
   stage: rpm-package
   script:
-    - 'rpm-package.sh'
+    - 'rpm-package.sh rhel7'
+  except:
+    - master
+
+rpm-package-rhel8:
+  stage: rpm-package
+  script:
+    - 'rpm-package.sh rhel8'
   except:
     - master
 
