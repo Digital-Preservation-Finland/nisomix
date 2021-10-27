@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 import lxml.etree as ET
 import xml_helpers.utils as h
 from nisomix.base import _element
-from nisomix.change_history_base import (change_history, image_processing,
+from nisomix.change_history_base import (change_history,
+                                         image_processing,
+                                         previous_image_metadata,
                                          processing_software)
 
 
@@ -87,5 +89,21 @@ def test_processing_software():
                '<mix:processingOperatingSystemVersion>2.0'
                '</mix:processingOperatingSystemVersion>'
                '</mix:ProcessingSoftware>')
+
+    assert h.compare_trees(mix, ET.fromstring(xml_str))
+
+
+def test_previous_image_metadata():
+    """Test that the element PreviousImageMetadata is created
+    correctly.
+    """
+
+    processing = _element('BasicDigitalObjectInformation')
+    mix = previous_image_metadata(child_elements=[processing])
+
+    xml_str = ('<mix:PreviousImageMetadata '
+               'xmlns:mix="http://www.loc.gov/mix/v20">'
+               '<mix:BasicDigitalObjectInformation/>'
+               '</mix:PreviousImageMetadata>')
 
     assert h.compare_trees(mix, ET.fromstring(xml_str))

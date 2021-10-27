@@ -15,9 +15,14 @@ References:
 from __future__ import unicode_literals
 
 from nisomix.base import _element, _ensure_list, _subelement
-from nisomix.utils import change_history_order, image_processing_order
+from nisomix.utils import (change_history_order,
+                           image_processing_order,
+                           mix_root_order)
 
-__all__ = ['change_history', 'image_processing', 'processing_software']
+__all__ = ['change_history',
+           'image_processing',
+           'previous_image_metadata',
+           'processing_software']
 
 
 def change_history(child_elements=None):
@@ -158,5 +163,31 @@ def processing_software(name=None, version=None, os_name=None,
         os_version_el = _subelement(container,
                                     'processingOperatingSystemVersion')
         os_version_el.text = os_version
+
+    return container
+
+
+def previous_image_metadata(child_elements=None):
+    """
+    Returns the MIX PreviousImageMetadata element.
+
+    :child_elements: Child elements as a list
+
+    Returns the following ElementTree structure::
+
+        <mix:PreviousImageMetadata>
+            [child elements]
+        </mix:PreviousImageMetadata>
+
+    """
+    container = _element('PreviousImageMetadata')
+
+    if child_elements is None:
+        child_elements = []
+
+    child_elements.sort(key=mix_root_order)
+
+    for element in child_elements:
+        container.append(element)
 
     return container
