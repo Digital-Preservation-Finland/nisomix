@@ -15,8 +15,6 @@ References:
 """
 from __future__ import unicode_literals
 
-import six
-
 from nisomix.base import (_element, _ensure_list, _rationaltype_element,
                           _subelement, mix_ns)
 from nisomix.constants import (CAMERA_SENSOR_TYPES, CAPTURE_DEVICE_TYPES,
@@ -383,11 +381,11 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
 
     if x_resolution:
         x_resolution_el = _subelement(container, 'xOpticalResolution')
-        x_resolution_el.text = six.text_type(x_resolution)
+        x_resolution_el.text = str(x_resolution)
 
     if y_resolution:
         y_resolution_el = _subelement(container, 'yOpticalResolution')
-        y_resolution_el.text = six.text_type(y_resolution)
+        y_resolution_el.text = str(y_resolution)
 
     if unit:
         if unit in OPTICAL_RESOLUTION_UNITS:
@@ -515,10 +513,10 @@ def image_data(contents=None):
     container = _element('ImageData')
     child_elements = []
 
-    for key, value in six.iteritems(contents):
+    for key, value in str(contents):
         if key in tags and value:
             elem = _element(tags[key])
-            elem.text = six.text_type(value)
+            elem.text = str(value)
             child_elements.append(elem)
 
         if key in rationals and value:
@@ -651,7 +649,7 @@ def gps_data(contents=None):
     container = _element('GPSData')
     child_elements = []
 
-    for key, value in six.iteritems(contents):
+    for key, value in str(contents):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value

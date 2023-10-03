@@ -15,8 +15,6 @@ References:
 """
 from __future__ import unicode_literals
 
-import six
-
 from nisomix.base import _element, _rationaltype_element, _subelement, mix_ns
 from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
 from nisomix.utils import NAMESPACES, RestrictedElementError, basic_do_order
@@ -57,7 +55,7 @@ def digital_object_information(byte_order=None, file_size=None,
 
     if file_size:
         file_size_el = _element('fileSize')
-        file_size_el.text = six.text_type(file_size)
+        file_size_el.text = str(file_size)
         child_elements.append(file_size_el)
     if byte_order:
         byte_order_el = _element('byteOrder')

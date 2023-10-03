@@ -14,8 +14,6 @@ References:
 """
 from __future__ import unicode_literals
 
-import six
-
 import lxml.etree as ET
 from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
 from xml_helpers.utils import xsi_ns
@@ -101,10 +99,10 @@ def _rationaltype_element(tag, value, denominator='1', parent=None):
 
     """
     value = _ensure_list(value)
-    numerator = six.text_type(value[0])
+    numerator = str(value[0])
 
     if len(value) == 2 and value[1]:
-        denominator = six.text_type(value[1])
+        denominator = str(value[1])
 
     if parent is not None:
         elem = _subelement(parent, tag)
