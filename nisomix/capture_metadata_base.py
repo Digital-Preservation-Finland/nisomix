@@ -513,7 +513,7 @@ def image_data(contents=None):
     container = _element('ImageData')
     child_elements = []
 
-    for key, value in dict.items(contents):
+    for key, value in iter(dict.items(contents)):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = str(value)
@@ -649,7 +649,7 @@ def gps_data(contents=None):
     container = _element('GPSData')
     child_elements = []
 
-    for key, value in dict.items(contents):
+    for key, value in iter(dict.items(contents)):
         if key in tags and value:
             elem = _element(tags[key])
             elem.text = value
