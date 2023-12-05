@@ -1,5 +1,4 @@
 """Test nisomix.change_history_base module functions."""
-from __future__ import unicode_literals
 
 import lxml.etree as ET
 import xml_helpers.utils as h

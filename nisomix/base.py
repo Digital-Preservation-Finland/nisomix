@@ -12,7 +12,6 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
-from __future__ import unicode_literals
 
 import lxml.etree as ET
 from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
@@ -42,8 +41,8 @@ def mix_ns(tag, prefix=""):
     """
     if prefix:
         tag = tag[0].upper() + tag[1:]
-        return '{%s}%s%s' % (MIX_NS, prefix, tag)
-    return '{%s}%s' % (MIX_NS, tag)
+        return '{{{}}}{}{}'.format(MIX_NS, prefix, tag)
+    return '{{{}}}{}'.format(MIX_NS, tag)
 
 
 def _element(tag, prefix="", namespaces=None):

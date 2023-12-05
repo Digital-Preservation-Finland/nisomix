@@ -12,7 +12,6 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
-from __future__ import unicode_literals
 
 from nisomix.base import _element, _subelement, _rationaltype_element
 from nisomix.constants import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,

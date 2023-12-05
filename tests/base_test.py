@@ -1,5 +1,4 @@
 """Test nisomix.base module functions."""
-from __future__ import unicode_literals
 
 import pytest
 import lxml.etree as ET
@@ -16,7 +15,7 @@ def test_mix_ns(tag, prefix):
     new_ns = mix_ns(tag, prefix)
     if prefix:
         tag = prefix + tag[0].upper() + tag[1:]
-    assert new_ns == '{%s}%s' % (MIX_NS, tag)
+    assert new_ns == '{{{}}}{}'.format(MIX_NS, tag)
 
 
 def test_element():

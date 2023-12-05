@@ -1,6 +1,4 @@
-# encoding=utf8
 """Global variables for nisomix."""
-from __future__ import unicode_literals
 
 __all__ = ['IMAGE_DATA_CONTENTS', 'GPS_DATA_CONTENTS']
 

@@ -1,5 +1,4 @@
 """Tests the init module."""
-from __future__ import unicode_literals
 
 import nisomix
 

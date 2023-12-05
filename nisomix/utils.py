@@ -1,5 +1,4 @@
 """Utility functions for nisomix."""
-from __future__ import unicode_literals
 
 from xml_helpers.utils import XSI_NS
 

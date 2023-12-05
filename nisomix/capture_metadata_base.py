@@ -13,7 +13,6 @@ References:
     https://docs.python.org/2.6/library/xml.etree.elementtree.html
 
 """
-from __future__ import unicode_literals
 
 from nisomix.base import (_element, _ensure_list, _rationaltype_element,
                           _subelement, mix_ns)

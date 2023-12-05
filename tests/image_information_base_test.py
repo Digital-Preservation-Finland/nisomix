@@ -1,5 +1,4 @@
 """Test nisomix.image_information_base module functions."""
-from __future__ import unicode_literals
 
 import pytest
 
