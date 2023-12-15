@@ -41,8 +41,8 @@ def mix_ns(tag, prefix=""):
     """
     if prefix:
         tag = tag[0].upper() + tag[1:]
-        return '{{{}}}{}{}'.format(MIX_NS, prefix, tag)
-    return '{{{}}}{}'.format(MIX_NS, tag)
+        return f'{{{MIX_NS}}}{prefix}{tag}'
+    return f'{{{MIX_NS}}}{tag}'
 
 
 def _element(tag, prefix="", namespaces=None):

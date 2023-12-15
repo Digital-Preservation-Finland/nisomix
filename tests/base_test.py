@@ -15,7 +15,7 @@ def test_mix_ns(tag, prefix):
     new_ns = mix_ns(tag, prefix)
     if prefix:
         tag = prefix + tag[0].upper() + tag[1:]
-    assert new_ns == '{{{}}}{}'.format(MIX_NS, tag)
+    assert new_ns == f'{{{MIX_NS}}}{tag}'
 
 
 def test_element():
