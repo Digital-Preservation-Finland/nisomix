@@ -8,35 +8,63 @@ References:
                             (ANSI/NISO Z39.87-2006 (R2017))
                             Chapter 9: Image Assessment Metadata
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
 
-from nisomix.base import (_element, _ensure_list, _rationaltype_element,
-                          _subelement)
-from nisomix.constants import (BITS_PER_SAMPLE_UNITS, EXTRA_SAMPLES_TYPES,
-                               GRAY_RESPONSE_UNITS, SAMPLING_FREQUENCY_PLANES,
-                               SAMPLING_FREQUENCY_UNITS, TARGET_TYPES)
-from nisomix.utils import (RestrictedElementError, assessment_metadata_order,
-                           color_encoding_order, target_data_order)
+import lxml.etree as ET
 
-__all__ = ['image_assessment_metadata', 'spatial_metrics', 'color_encoding',
-           'bits_per_sample', 'color_map', 'gray_response', 'white_point',
-           'primary_chromaticities', 'target_data', 'target_id']
+from nisomix.base import (
+    _element,
+    _ensure_list,
+    _rationaltype_element,
+    _subelement,
+)
+from nisomix.constants import (
+    BITS_PER_SAMPLE_UNITS,
+    EXTRA_SAMPLES_TYPES,
+    GRAY_RESPONSE_UNITS,
+    SAMPLING_FREQUENCY_PLANES,
+    SAMPLING_FREQUENCY_UNITS,
+    TARGET_TYPES,
+)
+from nisomix.utils import (
+    RestrictedElementError,
+    assessment_metadata_order,
+    color_encoding_order,
+    target_data_order,
+)
+
+__all__ = [
+    'bits_per_sample',
+    'color_encoding',
+    'color_map',
+    'gray_response',
+    'image_assessment_metadata',
+    'primary_chromaticities',
+    'spatial_metrics',
+    'target_data',
+    'target_id',
+    'white_point',
+]
 
 
-def image_assessment_metadata(child_elements=None):
+def image_assessment_metadata(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ImageAssessmentMetadata element.
 
-    :child_elements: Child elements as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ImageAssessmentMetadata>
-          <mix:SpatialMetrics/>
-          <mix:ImageColorEncoding/>
-          <mix:TargetData/>
+            <mix:SpatialMetrics/>
+            <mix:ImageColorEncoding/>
+            <mix:TargetData/>
         </mix:ImageAssessmentMetadata>
 
     """
@@ -49,30 +77,36 @@ def image_assessment_metadata(child_elements=None):
     return container
 
 
-def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
+def spatial_metrics(
+    plane: str | None = None,
+    unit: str | None = None,
+    x_sampling: int | list[int] | None = None,
+    y_sampling: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns the MIX SpatialMetrics element.
 
-    :plane: The sampling frequency plane as a string
-    :unit: The sampling frequency unit as a string
-    :x_sampling: The y sampling frequency as a list (or integer)
-    :y_sampling: The x sampling frequency as a list (or integer)
+    :param plane: The sampling frequency plane as a string
+    :param unit: The sampling frequency unit as a string
+    :param x_sampling: The y sampling frequency as a list (or integer)
+    :param y_sampling: The x sampling frequency as a list (or integer)
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:SpatialMetrics>
-          <mix:samplingFrequencyPlane>
-            object plane
-          </mix:samplingFrequencyPlane>
-          <mix:samplingFrequencyUnit>cm</mix:samplingFrequencyUnit>
-          <mix:xSamplingFrequency>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:xSamplingFrequency>
-          <mix:ySamplingFrequency>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:ySamplingFrequency>
+            <mix:samplingFrequencyPlane>
+                object plane
+            </mix:samplingFrequencyPlane>
+            <mix:samplingFrequencyUnit>cm</mix:samplingFrequencyUnit>
+            <mix:xSamplingFrequency>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:xSamplingFrequency>
+            <mix:ySamplingFrequency>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:ySamplingFrequency>
         </mix:SpatialMetrics>
 
     """
@@ -105,25 +139,29 @@ def spatial_metrics(plane=None, unit=None, x_sampling=None, y_sampling=None):
     return container
 
 
-def color_encoding(samples_pixel=None, extra_samples=None,
-                   child_elements=None):
+def color_encoding(
+    samples_pixel: int | None = None,
+    extra_samples: str | list[str] | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ImageColorEncoding element.
 
-    :samples_pixel: The number of samples per pixel as an integer
-    :extra_samples: The types of extra samples as a list
-    :child_elements: Child elements as a list
+    :param samples_pixel: The number of samples per pixel as an integer
+    :param extra_samples: The types of extra samples as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ImageColorEncoding>
-          <mix:BitsPerSample/>
-          <mix:samplesPerPixel>3</mix:samplesPerPixel>
-          <mix:extraSamples>unspecified data</mix:extraSamples>
-          <mix:Colormap/>
-          <mix:GrayResponse/>
-          <mix:WhitePoint/>
-          <mix:PrimaryChromaticities/>
+            <mix:BitsPerSample/>
+            <mix:samplesPerPixel>3</mix:samplesPerPixel>
+            <mix:extraSamples>unspecified data</mix:extraSamples>
+            <mix:Colormap/>
+            <mix:GrayResponse/>
+            <mix:WhitePoint/>
+            <mix:PrimaryChromaticities/>
         </mix:ImageColorEncoding>
 
     """
@@ -156,18 +194,22 @@ def color_encoding(samples_pixel=None, extra_samples=None,
     return container
 
 
-def bits_per_sample(sample_values=None, sample_unit=None):
+def bits_per_sample(
+    sample_values: str | list[str] | None = None,
+    sample_unit: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX BitsPerSample element.
 
-    :sample_values: The bits per sample values as a list
-    :sample_unit: The bits per sample unit as a string
+    :param sample_values: The bits per sample values as a list
+    :param sample_unit: The bits per sample unit as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:BitsPerSample>
-          <mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
-          <mix:bitsPerSampleUnit>integer</mix:bitsPerSampleUnit>
+            <mix:bitsPerSampleValue>8</mix:bitsPerSampleValue>
+            <mix:bitsPerSampleUnit>integer</mix:bitsPerSampleUnit>
         </mix:BitsPerSample>
 
     """
@@ -190,18 +232,21 @@ def bits_per_sample(sample_values=None, sample_unit=None):
     return container
 
 
-def color_map(reference=None, embedded=None):
+def color_map(
+    reference: str | None = None, embedded: str | None = None
+) -> ET._Element:
     """
     Returns the MIX Colormap element.
 
-    :reference: The location of the referenced color map as a string
-    :embedded: The embedded color map as base64-encoded data
+    :param reference: The location of the referenced color map as a string
+    :param embedded: The embedded color map as base64-encoded data
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:Colormap>
-          <mix:colormapReference>http://foo</mix:colormapReference>
-          <mix:embeddedColormap>foo</mix:embeddedColormap>
+            <mix:colormapReference>http://foo</mix:colormapReference>
+            <mix:embeddedColormap>foo</mix:embeddedColormap>
         </mix:Colormap>
 
     """
@@ -218,20 +263,23 @@ def color_map(reference=None, embedded=None):
     return container
 
 
-def gray_response(curves=None, unit=None):
+def gray_response(
+    curves: int | list[int] | None = None, unit: str | None = None
+) -> ET._Element:
     """
     Returns the MIX GrayResponse element.
 
-    :curves: The optical density of pixels as a list (of integers)
-    :unit: The precision recorded in grayResponseCurve
+    :param curves: The optical density of pixels as a list (of integers)
+    :param unit: The precision recorded in grayResponseCurve
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:GrayResponse>
-          <mix:grayResponseCurve>10</mix:grayResponseCurve>
-          <mix:grayResponseUnit>
-            Number represents tenths of a unit
-          </mix:grayResponseUnit>
+            <mix:grayResponseCurve>10</mix:grayResponseCurve>
+            <mix:grayResponseUnit>
+                Number represents tenths of a unit
+            </mix:grayResponseUnit>
         </mix:GrayResponse>
 
     """
@@ -254,24 +302,28 @@ def gray_response(curves=None, unit=None):
     return container
 
 
-def white_point(x_value=None, y_value=None):
+def white_point(
+    x_value: int | list[int] | None = None,
+    y_value: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns the MIX WhitePoint element.
 
-    :x_value: The X value of white point chromaticity as a list
-    :y_value: The Y value of white point chromaticity as a list
+    :param x_value: The X value of white point chromaticity as a list
+    :param y_value: The Y value of white point chromaticity as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:WhitePoint>
-          <mix:whitePointXValue>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:whitePointXValue>
-          <mix:whitePointYValue>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:whitePointYValue>
+            <mix:whitePointXValue>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:whitePointXValue>
+            <mix:whitePointYValue>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:whitePointYValue>
         </mix:WhitePoint>
 
     """
@@ -287,45 +339,52 @@ def white_point(x_value=None, y_value=None):
 
 
 # pylint: disable=too-many-arguments
-def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
-                           blue_x=None, blue_y=None):
+def primary_chromaticities(
+    red_x: int | list[int] | None = None,
+    red_y: int | list[int] | None = None,
+    green_x: int | list[int] | None = None,
+    green_y: int | list[int] | None = None,
+    blue_x: int | list[int] | None = None,
+    blue_y: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns the MIX PrimaryChromaticities element.
 
-    :red_x: The red X value for the chromaticities as a list
-    :red_x: The red Y value for the chromaticities as a list
-    :red_x: The green X value for the chromaticities as a list
-    :red_x: The green Y value for the chromaticities as a list
-    :red_x: The blue X value for the chromaticities as a list
-    :red_x: The blue Y value for the chromaticities as a list
+    :param red_x: The red X value for the chromaticities as a list
+    :param red_x: The red Y value for the chromaticities as a list
+    :param red_x: The green X value for the chromaticities as a list
+    :param red_x: The green Y value for the chromaticities as a list
+    :param red_x: The blue X value for the chromaticities as a list
+    :param red_x: The blue Y value for the chromaticities as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:PrimaryChromaticities>
-          <mix:primaryChromaticitiesRedX>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesRedX>
-          <mix:primaryChromaticitiesRedY>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesRedY>
-          <mix:primaryChromaticitiesGreenX>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesGreenX>
-          <mix:primaryChromaticitiesGreenY>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesGreenY>
-          <mix:primaryChromaticitiesBlueX>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesBlueX>
-          <mix:primaryChromaticitiesBlueY>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:primaryChromaticitiesBlueY>
+            <mix:primaryChromaticitiesRedX>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesRedX>
+            <mix:primaryChromaticitiesRedY>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesRedY>
+            <mix:primaryChromaticitiesGreenX>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesGreenX>
+            <mix:primaryChromaticitiesGreenY>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesGreenY>
+            <mix:primaryChromaticitiesBlueX>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesBlueX>
+            <mix:primaryChromaticitiesBlueY>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:primaryChromaticitiesBlueY>
         </mix:PrimaryChromaticities>
 
     """
@@ -359,23 +418,28 @@ def primary_chromaticities(red_x=None, red_y=None, green_x=None, green_y=None,
 
 
 # pylint: disable=too-many-branches
-def target_data(target_types=None, external_targets=None,
-                performance_data=None, child_elements=None):
+def target_data(
+    target_types: str | list[str] | None = None,
+    external_targets: str | list[str] | None = None,
+    performance_data: str | list[str] | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns MIX TargetData element.
 
-    :target_types: The target types as a list (or string)
-    :external_targets: The locations of external targets as a list
-    :performance_data: The location of performance data as a string
-    :child_elements: Child elements as a list
+    :param target_types: The target types as a list (or string)
+    :param external_targets: The locations of external targets as a list
+    :param performance_data: The location of performance data as a string
+    :param child_elements: Child elements as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:TargetData>
-          <mix:targetType>internal</mix:targetType>
-          <mix:TargetID/>
-          <mix:externalTarget>http://foo</mix:externalTarget>
-          <mix:performanceData>http://foo</mix:performanceData>
+            <mix:targetType>internal</mix:targetType>
+            <mix:TargetID/>
+            <mix:externalTarget>http://foo</mix:externalTarget>
+            <mix:performanceData>http://foo</mix:performanceData>
         </mix:TargetData>
 
     """
@@ -417,22 +481,28 @@ def target_data(target_types=None, external_targets=None,
     return container
 
 
-def target_id(manufacturer=None, name=None, target_no=None, media=None):
+def target_id(
+    manufacturer: str | None = None,
+    name: str | None = None,
+    target_no: str | None = None,
+    media: str | None = None
+) -> ET._Element:
     """
     Returns MIX TargetID element.
 
-    :manufacturer: The target manufacturer as a  string
-    :name: The target name as a string
-    :target_no: The target version or number as a string
-    :media: The target media as a string
+    :param manufacturer: The target manufacturer as a  string
+    :param name: The target name as a string
+    :param target_no: The target version or number as a string
+    :param media: The target media as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:TargetID>
-          <mix:targetManufacturer>acme</mix:targetManufacturer>
-          <mix:targetName>my target</mix:targetName>
-          <mix:targetNo>1.0</mix:targetNo>
-          <mix:targetMedia>foo</mix:targetMedia>
+            <mix:targetManufacturer>acme</mix:targetManufacturer>
+            <mix:targetName>my target</mix:targetName>
+            <mix:targetNo>1.0</mix:targetNo>
+            <mix:targetMedia>foo</mix:targetMedia>
         </mix:TargetID>
 
     """

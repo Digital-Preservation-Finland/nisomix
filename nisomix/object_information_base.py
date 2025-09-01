@@ -10,40 +10,54 @@ References:
                             (ANSI/NISO Z39.87-2006 (R2017))
                             Chapter 6: Basic Digital Object Information
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
+
+import lxml.etree as ET
 
 from nisomix.base import _element, _rationaltype_element, _subelement, mix_ns
 from nisomix.constants import BYTE_ORDER_TYPES, DIGEST_ALGORITHMS
 from nisomix.utils import NAMESPACES, RestrictedElementError, basic_do_order
 
-__all__ = ['digital_object_information', 'identifier', 'format_designation',
-           'format_registry', 'compression', 'fixity',
-           'parse_message_digest', 'parse_object_identifier']
+__all__ = [
+    'compression',
+    'digital_object_information',
+    'fixity',
+    'format_designation',
+    'format_registry',
+    'identifier',
+    'parse_message_digest',
+    'parse_object_identifier',
+]
 
 
-def digital_object_information(byte_order=None, file_size=None,
-                               child_elements=None):
+def digital_object_information(
+    byte_order: str | None = None,
+    file_size: int | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX BasicDigitalObjectInformation element. The
     subelements are sorted according to the order as noted in the
     schema.
 
-    :byte_order: The byte order as a string
-    :file_size: The file size in bytes as an integer
-    :child_elements: Child elements as a list
+    :param byte_order: The byte order as a string
+    :param file_size: The file size in bytes as an integer
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:BasicDigitalObjectInformation>
-          <mix:ObjectIdentifier/>
-          <mix:fileSize>1234</mix:fileSize>
-          <mix:FormatDesignation/>
-          <mix:FormatRegistry/>
-          <mix:byteOrder>big endian</mix:byteOrder>
-          <mix:Compression/>
-          <mix:Fixity/>
+            <mix:ObjectIdentifier/>
+            <mix:fileSize>1234</mix:fileSize>
+            <mix:FormatDesignation/>
+            <mix:FormatRegistry/>
+            <mix:byteOrder>big endian</mix:byteOrder>
+            <mix:Compression/>
+            <mix:Fixity/>
         </mix:BasicDigitalObjectInformation>
 
     """
@@ -69,14 +83,17 @@ def digital_object_information(byte_order=None, file_size=None,
     return container
 
 
-def identifier(id_type=None, id_value=None):
+def identifier(
+    id_type: str | None = None, id_value: str | None = None
+) -> ET._Element:
     """
     Returns the MIX ObjectIdentifier element.
 
-    :id_type: The identifier type as a string
-    :id_value: The identifier value as a string
+    :param id_type: The identifier type as a string
+    :param id_value: The identifier value as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:ObjectIdentifier>
           <mix:objectIdentifierType>local</mix:objectIdentifierType>
@@ -97,14 +114,17 @@ def identifier(id_type=None, id_value=None):
     return container
 
 
-def format_designation(format_name=None, format_version=None):
+def format_designation(
+    format_name: str | None = None, format_version: str | None = None
+) -> ET._Element:
     """
     Returns the MIX FormatDesignation element.
 
-    :format_name: The file format name as a string
-    :format_version: The file format version as a string
+    :param format_name: The file format name as a string
+    :param format_version: The file format version as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:FormatDesignation>
           <mix:formatName>image/jpeg</mix:formatName>
@@ -125,14 +145,17 @@ def format_designation(format_name=None, format_version=None):
     return container
 
 
-def format_registry(registry_name=None, registry_key=None):
+def format_registry(
+    registry_name: str | None = None, registry_key: str | None = None
+) -> ET._Element:
     """
     Returns the MIX FormatRegistry element.
 
-    :registry_name: The file format registry name as a string
-    :registry_key: The file format registry key as a string
+    :param registry_name: The file format registry name as a string
+    :param registry_key: The file format registry key as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:FormatRegistry>
           <mix:formatRegistryName>pronom</mix:formatRegistryName>
@@ -153,16 +176,20 @@ def format_registry(registry_name=None, registry_key=None):
     return container
 
 
-def compression(compression_scheme=None, local_list=None,
-                local_value=None, compression_ratio=None):
+def compression(
+    compression_scheme: str | None = None,
+    local_list: str | None = None,
+    local_value: str | None = None,
+    compression_ratio: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns the MIX Compression element.
 
-    :compression_scheme: The compression scheme as a string
-    :local_list: The location of the local enumerated list of
-                 compression schemes as a string
-    :local_value: The local compression scheme as a string
-    :compression_ratio: The compression ratio as a list (or integer)
+    :param compression_scheme: The compression scheme as a string
+    :param local_list: The location of the local enumerated list of
+            compression schemes as a string
+    :param local_value: The local compression scheme as a string
+    :param compression_ratio: The compression ratio as a list (or integer)
 
     Returns the following ElementTree structure::
 
@@ -202,21 +229,25 @@ def compression(compression_scheme=None, local_list=None,
     return container
 
 
-def fixity(algorithm=None, digest=None, originator=None):
+def fixity(
+    algorithm: str | None = None,
+    digest: str | None = None,
+    originator: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX Fixity element.
 
-    :algorithm: The message digest algorithm as a string
-    :digest: The message digest as a string
-    :originator: The message digest creator agent as a string
+    :param algorithm: The message digest algorithm as a string
+    :param digest: The message digest as a string
+    :param originator: The message digest creator agent as a string
 
-
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:Fixity>
-          <mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>
-          <mix:messageDigest>foo</mix:messageDigest>
-          <mix:messageDigestOriginator>foo</mix:messageDigestOriginator>
+            <mix:messageDigestAlgorithm>MD5</mix:messageDigestAlgorithm>
+            <mix:messageDigest>foo</mix:messageDigest>
+            <mix:messageDigestOriginator>foo</mix:messageDigestOriginator>
         </mix:Fixity>
 
     """
@@ -241,14 +272,14 @@ def fixity(algorithm=None, digest=None, originator=None):
     return container
 
 
-def _normalized_byteorder(byte_order):
+def _normalized_byteorder(byte_order: str) -> str:
     """
     Tries to fix the byte_order so that the value corresponds to the
     values allowed in the MIX schema. Normalizes hyphens, underscores
     and capitalized letters. Raises an exception if bytOrder couldn't
     be normalized.
 
-    :byte_order: The input byte order as a string
+    :param byte_order: The input byte order as a string
     :returns: The (fixed) byte order as a string
     """
     byte_order = byte_order.replace('-', ' ').replace('_', ' ')
@@ -267,14 +298,16 @@ def _normalized_byteorder(byte_order):
         byte_order, 'byteOrder', BYTE_ORDER_TYPES)
 
 
-def parse_message_digest(elem):
+def parse_message_digest(
+    elem: ET._Element,
+) -> list[tuple[str | None, str | None]]:
     """
     Returns the message digest algorithm and value from a MIX metadata
     block in XML if the data exists. A mix can contain multiple
     Fixity containers, so the data is returned as a list of
     tuples.
 
-    :elem: An ElementTree strucure
+    :param elem: An ElementTree strucure
     :returns: A list of tuples of (algorithm, value)
     """
     fixities = []
@@ -303,14 +336,16 @@ def parse_message_digest(elem):
     return fixities
 
 
-def parse_object_identifier(elem):
+def parse_object_identifier(
+    elem: ET._Element,
+) -> list[tuple[str | None, str | None]]:
     """
     Returns the object identifier type and value from a MIX metadata
     block in XML if the data exists. A mix can contain multiple
     ObjectIdentifier containers, so the data is returned as a list of
     tuples.
 
-    :elem: An ElementTree strucure
+    :param elem: An ElementTree strucure
     :returns: A a list of tuples of (id_type, id_value)
     """
     identifiers = []

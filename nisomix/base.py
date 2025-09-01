@@ -9,18 +9,23 @@ References:
                             Digital Still Images
                             (ANSI/NISO Z39.87-2006 (R2017))
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TypeVar
 
 import lxml.etree as ET
-from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
 from xml_helpers.utils import xsi_ns
 
-__all__ = ['mix_ns', 'mix']
+from nisomix.utils import MIX_NS, NAMESPACES, mix_root_order
+
+__all__ = ['mix', 'mix_ns']
 
 
-def mix_ns(tag, prefix=""):
+def mix_ns(tag: str, prefix: str = "") -> str:
     """Prefix ElementTree tags with MIX namespace.
 
     object -> {http://www.loc.gov/mix/v20}object
@@ -33,9 +38,9 @@ def mix_ns(tag, prefix=""):
         element.tag
         'linkingObjectIdentifier'
 
-    :tag: The tag name as string
-    :prefix: Prefix for the tag to be appended to the tag name
-             (default="")
+    :param tag: The tag name as string
+    :param prefix: Prefix for the tag to be appended to the tag name
+        (default="")
     :returns: Tag name with the namespace and prefix appended
 
     """
@@ -45,13 +50,15 @@ def mix_ns(tag, prefix=""):
     return f'{{{MIX_NS}}}{tag}'
 
 
-def _element(tag, prefix="", namespaces=None):
+def _element(
+    tag: str, prefix: str = "", namespaces: dict[str, str] | None = None
+) -> ET._Element:
     """Return lxml Element with MIX namespace. Given namespaces are
     mapped to the given prefixes.
 
-    :tag: Tagname
-    :prefix: Prefix for the tag (default="")
-    :namespaces: The namespaces and their prefixes as a dict
+    :param tag: Tagname
+    :param prefix: Prefix for the tag (default="")
+    :param namespaces: The namespaces and their prefixes as a dict
     :returns: ElementTree element object
 
     """
@@ -61,15 +68,20 @@ def _element(tag, prefix="", namespaces=None):
     return ET.Element(mix_ns(tag, prefix), nsmap=namespaces)
 
 
-def _subelement(parent, tag, prefix="", namespaces=None):
+def _subelement(
+    parent: ET._Element,
+    tag: str,
+    prefix: str = "",
+    namespaces: dict[str, str] | None = None,
+) -> ET._Element:
     """Return subelement for the given parent element. Created element
     is appended to parent element Given namespaces are mapped to the
     given prefixes.
 
-    :parent: Parent element
-    :tag: Element tagname
-    :prefix: Prefix for the tag
-    :ns: The namespaces and their prefixes as a dict
+    :param parent: Parent element
+    :param tag: Element tagname
+    :param prefix: Prefix for the tag
+    :param ns: The namespaces and their prefixes as a dict
     :returns: Created subelement
 
     """
@@ -79,34 +91,36 @@ def _subelement(parent, tag, prefix="", namespaces=None):
     return ET.SubElement(parent, mix_ns(tag, prefix), nsmap=namespaces)
 
 
-def _rationaltype_element(tag, value, denominator='1', parent=None):
+def _rationaltype_element(
+    tag: str,
+    value: int | str | Sequence[str | int | None] | None,
+    denominator: str = "1",
+    parent: ET._Element | None = None,
+) -> ET._Element:
     """Return a rational type element. If parent element is given,
     return the rational element as a subelement of the parent.
 
     Returns the following ElementTree strucure::
 
         <mix:{{ tag }}>
-          <mix:numerator>foo</numerator>
-          <mix:denominator>1</denominator>
+            <mix:numerator>foo</numerator>
+            <mix:denominator>1</denominator>
         </mix:{{ tag }}>
 
-    :tag: Element tag name
-    :value: Contents of the numerator part of the element, or
-            if it is a list, contains both the numerator and denominator
-    :denominator: Contents of the denominator part of the element
-    :parent: The tag name of the parent element
+    :param tag: Element tag name
+    :param value: Contents of the numerator part of the element, or
+        if it is a list, contains both the numerator and denominator
+    :param denominator: Contents of the denominator part of the element
+    :param parent: The tag name of the parent element
 
     """
-    value = _ensure_list(value)
-    numerator = str(value[0])
+    value_list = _ensure_list(value)
+    numerator = str(value_list[0])
 
-    if len(value) == 2 and value[1]:
-        denominator = str(value[1])
+    if len(value_list) == 2 and value_list[1]:
+        denominator = str(value_list[1])
 
-    if parent is not None:
-        elem = _subelement(parent, tag)
-    else:
-        elem = _element(tag)
+    elem = _subelement(parent, tag) if parent is not None else _element(tag)
     numerator_el = _subelement(elem, 'numerator')
     numerator_el.text = numerator
     denominator_el = _subelement(elem, 'denominator')
@@ -115,7 +129,10 @@ def _rationaltype_element(tag, value, denominator='1', parent=None):
     return elem
 
 
-def _ensure_list(value):
+T = TypeVar("T")
+
+
+def _ensure_list(value: T | list[T]) -> list[T]:
     """
     Converts value if list if it isn't a list already. Used for
     ensuring that repeating elements always are processed as a list
@@ -127,13 +144,16 @@ def _ensure_list(value):
     return value
 
 
-def mix(child_elements=None, namespaces=None):
+def mix(
+    child_elements: list[ET._Element] | None = None,
+    namespaces: dict[str, str] | None = None,
+) -> ET._Element:
     """Create MIX Data Dictionary root element.
 
-    :child_elements: Any elements appended to the MIX dictionary
-
-    Returns the following ElementTree structure::
-
+    :param child_elements: Any elements appended to the MIX dictionary
+    :param namespaces: The namespaces and their prefixes as a dict
+    :returns:
+    The following ElementTree structure::
 
         <mix:mix
             xmlns:mix="http://www.loc.gov/mix/v20"
@@ -145,8 +165,8 @@ def mix(child_elements=None, namespaces=None):
     if namespaces is None:
         namespaces = NAMESPACES
 
-    _mix = _element('mix', namespaces=namespaces)
-    _mix.set(
+    mix_ = _element('mix', namespaces=namespaces)
+    mix_.set(
         xsi_ns('schemaLocation'),
         'http://www.loc.gov/mix/v20 '
         'http://www.loc.gov/mix/mix.xsd')
@@ -154,6 +174,6 @@ def mix(child_elements=None, namespaces=None):
     if child_elements:
         child_elements.sort(key=mix_root_order)
         for element in child_elements:
-            _mix.append(element)
+            mix_.append(element)
 
-    return _mix
+    return mix_

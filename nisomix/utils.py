@@ -1,5 +1,6 @@
 """Utility functions for nisomix."""
 
+import lxml.etree as ET
 from xml_helpers.utils import XSI_NS
 
 MIX_NS = 'http://www.loc.gov/mix/v20'
@@ -12,234 +13,283 @@ class RestrictedElementError(Exception):
     """Raised when the value of a restricted element is invalid."""
 
     def __str__(self):
-        return ('The value "%s" is invalid for %s, accepted values '
-                'are: "%s".' % (self.args[0], self.args[1],
-                                '", "'.join(self.args[2])))
+        """List accepted values for the restricted element."""
+        accepted_values = '", "'.join(self.args[2])
+        return (f'The value "{self.args[0]}" is invalid for {self.args[1]}, '
+                f'accepted values are: "{accepted_values}".')
 
 
-def mix_root_order(elem):
+def mix_root_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the mix root element in the correct
     sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}BasicDigitalObjectInformation' % MIX_NS,
-            '{%s}BasicImageInformation' % MIX_NS,
-            '{%s}ImageCaptureMetadata' % MIX_NS,
-            '{%s}ImageAssessmentMetadata' % MIX_NS,
-            '{%s}ChangeHistory' % MIX_NS,
-            '{%s}Extension' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}BasicDigitalObjectInformation",
+            f"{{{MIX_NS}}}BasicImageInformation",
+            f"{{{MIX_NS}}}ImageCaptureMetadata",
+            f"{{{MIX_NS}}}ImageAssessmentMetadata",
+            f"{{{MIX_NS}}}ChangeHistory",
+            f"{{{MIX_NS}}}Extension"].index(elem.tag)
 
 
-def basic_do_order(elem):
+def basic_do_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the BasicDigitalObjectInformation parent
     element in the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}ObjectIdentifier' % MIX_NS,
-            '{%s}fileSize' % MIX_NS,
-            '{%s}FormatDesignation' % MIX_NS,
-            '{%s}FormatRegistry' % MIX_NS,
-            '{%s}byteOrder' % MIX_NS,
-            '{%s}Compression' % MIX_NS,
-            '{%s}Fixity' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}ObjectIdentifier",
+            f"{{{MIX_NS}}}fileSize",
+            f"{{{MIX_NS}}}FormatDesignation",
+            f"{{{MIX_NS}}}FormatRegistry",
+            f"{{{MIX_NS}}}byteOrder",
+            f"{{{MIX_NS}}}Compression",
+            f"{{{MIX_NS}}}Fixity"].index(elem.tag)
 
 
-def image_information_order(elem):
+def image_information_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the BasicImageInformation parent element in
     the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}BasicImageCharacteristics' % MIX_NS,
-            '{%s}SpecialFormatCharacteristics' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}BasicImageCharacteristics",
+            f"{{{MIX_NS}}}SpecialFormatCharacteristics"].index(elem.tag)
 
 
-def photom_interpret_order(elem):
+def photom_interpret_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the PhotometricInterpretation parent element
     in the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}colorSpace' % MIX_NS,
-            '{%s}ColorProfile' % MIX_NS,
-            '{%s}YCbCr' % MIX_NS,
-            '{%s}ReferenceBlackWhite' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}colorSpace",
+            f"{{{MIX_NS}}}ColorProfile",
+            f"{{{MIX_NS}}}YCbCr",
+            f"{{{MIX_NS}}}ReferenceBlackWhite"].index(elem.tag)
 
 
-def image_capture_order(elem):
+def image_capture_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ImageCaptureMetadataType parent element in
     the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}SourceInformation' % MIX_NS,
-            '{%s}GeneralCaptureInformation' % MIX_NS,
-            '{%s}ScannerCapture' % MIX_NS,
-            '{%s}DigitalCameraCapture' % MIX_NS,
-            '{%s}orientation' % MIX_NS,
-            '{%s}methodology' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}SourceInformation",
+            f"{{{MIX_NS}}}GeneralCaptureInformation",
+            f"{{{MIX_NS}}}ScannerCapture",
+            f"{{{MIX_NS}}}DigitalCameraCapture",
+            f"{{{MIX_NS}}}orientation",
+            f"{{{MIX_NS}}}methodology"].index(elem.tag)
 
 
-def source_information_order(elem):
+def source_information_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the SourceInformation parent element in the
     correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}sourceType' % MIX_NS,
-            '{%s}SourceID' % MIX_NS,
-            '{%s}SourceSize' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}sourceType",
+            f"{{{MIX_NS}}}SourceID",
+            f"{{{MIX_NS}}}SourceSize"].index(elem.tag)
 
 
-def scanner_capture_order(elem):
+def scanner_capture_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ScannerCapture parent element in the
     correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}scannerManufacturer' % MIX_NS,
-            '{%s}ScannerModel' % MIX_NS,
-            '{%s}MaximumOpticalResolution' % MIX_NS,
-            '{%s}scannerSensor' % MIX_NS,
-            '{%s}ScanningSystemSoftware' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}scannerManufacturer",
+            f"{{{MIX_NS}}}ScannerModel",
+            f"{{{MIX_NS}}}MaximumOpticalResolution",
+            f"{{{MIX_NS}}}scannerSensor",
+            f"{{{MIX_NS}}}ScanningSystemSoftware"].index(elem.tag)
 
 
-def camera_capture_order(elem):
+def camera_capture_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the DigitalCameraCapture parent element in
     the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}digitalCameraManufacturer' % MIX_NS,
-            '{%s}DigitalCameraModel' % MIX_NS,
-            '{%s}cameraSensor' % MIX_NS,
-            '{%s}CameraCaptureSettings' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}digitalCameraManufacturer",
+            f"{{{MIX_NS}}}DigitalCameraModel",
+            f"{{{MIX_NS}}}cameraSensor",
+            f"{{{MIX_NS}}}CameraCaptureSettings"].index(elem.tag)
 
 
-def camera_capture_settings_order(elem):
+def camera_capture_settings_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the CameraCaptureSettings parent element in
     the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}ImageData' % MIX_NS,
-            '{%s}GPSData' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}ImageData",
+            f"{{{MIX_NS}}}GPSData"].index(elem.tag)
 
 
-def image_data_order(elem):
+def image_data_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ImageData parent element in the correct
     sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}fNumber' % MIX_NS,
-            '{%s}exposureTime' % MIX_NS,
-            '{%s}exposureProgram' % MIX_NS,
-            '{%s}spectralSensitivity' % MIX_NS,
-            '{%s}isoSpeedRatings' % MIX_NS,
-            '{%s}oECF' % MIX_NS,
-            '{%s}exifVersion' % MIX_NS,
-            '{%s}shutterSpeedValue' % MIX_NS,
-            '{%s}apertureValue' % MIX_NS,
-            '{%s}brightnessValue' % MIX_NS,
-            '{%s}exposureBiasValue' % MIX_NS,
-            '{%s}maxApertureValue' % MIX_NS,
-            '{%s}SubjectDistance' % MIX_NS,
-            '{%s}meteringMode' % MIX_NS,
-            '{%s}lightSource' % MIX_NS,
-            '{%s}flash' % MIX_NS,
-            '{%s}focalLength' % MIX_NS,
-            '{%s}flashEnergy' % MIX_NS,
-            '{%s}backLight' % MIX_NS,
-            '{%s}exposureIndex' % MIX_NS,
-            '{%s}sensingMethod' % MIX_NS,
-            '{%s}cfaPattern' % MIX_NS,
-            '{%s}autoFocus' % MIX_NS,
-            '{%s}PrintAspectRatio' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}fNumber",
+            f"{{{MIX_NS}}}exposureTime",
+            f"{{{MIX_NS}}}exposureProgram",
+            f"{{{MIX_NS}}}spectralSensitivity",
+            f"{{{MIX_NS}}}isoSpeedRatings",
+            f"{{{MIX_NS}}}oECF",
+            f"{{{MIX_NS}}}exifVersion",
+            f"{{{MIX_NS}}}shutterSpeedValue",
+            f"{{{MIX_NS}}}apertureValue",
+            f"{{{MIX_NS}}}brightnessValue",
+            f"{{{MIX_NS}}}exposureBiasValue",
+            f"{{{MIX_NS}}}maxApertureValue",
+            f"{{{MIX_NS}}}SubjectDistance",
+            f"{{{MIX_NS}}}meteringMode",
+            f"{{{MIX_NS}}}lightSource",
+            f"{{{MIX_NS}}}flash",
+            f"{{{MIX_NS}}}focalLength",
+            f"{{{MIX_NS}}}flashEnergy",
+            f"{{{MIX_NS}}}backLight",
+            f"{{{MIX_NS}}}exposureIndex",
+            f"{{{MIX_NS}}}sensingMethod",
+            f"{{{MIX_NS}}}cfaPattern",
+            f"{{{MIX_NS}}}autoFocus",
+            f"{{{MIX_NS}}}PrintAspectRatio"].index(elem.tag)
 
 
-def gps_data_order(elem):
+def gps_data_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the GPSData parent element in the correct
     sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}gpsVersionID' % MIX_NS,
-            '{%s}gpsLatitudeRef' % MIX_NS,
-            '{%s}GPSLatitude' % MIX_NS,
-            '{%s}gpsLongitudeRef' % MIX_NS,
-            '{%s}GPSLongitude' % MIX_NS,
-            '{%s}gpsAltitudeRef' % MIX_NS,
-            '{%s}gpsAltitude' % MIX_NS,
-            '{%s}gpsTimeStamp' % MIX_NS,
-            '{%s}gpsSatellites' % MIX_NS,
-            '{%s}gpsStatus' % MIX_NS,
-            '{%s}gpsMeasureMode' % MIX_NS,
-            '{%s}gpsDOP' % MIX_NS,
-            '{%s}gpsSpeedRef' % MIX_NS,
-            '{%s}gpsSpeed' % MIX_NS,
-            '{%s}gpsTrackRef' % MIX_NS,
-            '{%s}gpsTrack' % MIX_NS,
-            '{%s}gpsImgDirectionRef' % MIX_NS,
-            '{%s}gpsImgDirection' % MIX_NS,
-            '{%s}gpsMapDatum' % MIX_NS,
-            '{%s}gpsDestLatitudeRef' % MIX_NS,
-            '{%s}GPSDestLatitude' % MIX_NS,
-            '{%s}gpsDestLongitudeRef' % MIX_NS,
-            '{%s}GPSDestLongitude' % MIX_NS,
-            '{%s}gpsDestBearingRef' % MIX_NS,
-            '{%s}gpsDestBearing' % MIX_NS,
-            '{%s}gpsDestDistanceRef' % MIX_NS,
-            '{%s}gpsDestDistance' % MIX_NS,
-            '{%s}gpsProcessingMethod' % MIX_NS,
-            '{%s}gpsAreaInformation' % MIX_NS,
-            '{%s}gpsDateStamp' % MIX_NS,
-            '{%s}gpsDifferential' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}gpsVersionID",
+            f"{{{MIX_NS}}}gpsLatitudeRef",
+            f"{{{MIX_NS}}}GPSLatitude",
+            f"{{{MIX_NS}}}gpsLongitudeRef",
+            f"{{{MIX_NS}}}GPSLongitude",
+            f"{{{MIX_NS}}}gpsAltitudeRef",
+            f"{{{MIX_NS}}}gpsAltitude",
+            f"{{{MIX_NS}}}gpsTimeStamp",
+            f"{{{MIX_NS}}}gpsSatellites",
+            f"{{{MIX_NS}}}gpsStatus",
+            f"{{{MIX_NS}}}gpsMeasureMode",
+            f"{{{MIX_NS}}}gpsDOP",
+            f"{{{MIX_NS}}}gpsSpeedRef",
+            f"{{{MIX_NS}}}gpsSpeed",
+            f"{{{MIX_NS}}}gpsTrackRef",
+            f"{{{MIX_NS}}}gpsTrack",
+            f"{{{MIX_NS}}}gpsImgDirectionRef",
+            f"{{{MIX_NS}}}gpsImgDirection",
+            f"{{{MIX_NS}}}gpsMapDatum",
+            f"{{{MIX_NS}}}gpsDestLatitudeRef",
+            f"{{{MIX_NS}}}GPSDestLatitude",
+            f"{{{MIX_NS}}}gpsDestLongitudeRef",
+            f"{{{MIX_NS}}}GPSDestLongitude",
+            f"{{{MIX_NS}}}gpsDestBearingRef",
+            f"{{{MIX_NS}}}gpsDestBearing",
+            f"{{{MIX_NS}}}gpsDestDistanceRef",
+            f"{{{MIX_NS}}}gpsDestDistance",
+            f"{{{MIX_NS}}}gpsProcessingMethod",
+            f"{{{MIX_NS}}}gpsAreaInformation",
+            f"{{{MIX_NS}}}gpsDateStamp",
+            f"{{{MIX_NS}}}gpsDifferential"].index(elem.tag)
 
 
-def assessment_metadata_order(elem):
+def assessment_metadata_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ImageAssessmentMetadata parent element in
     the correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}SpatialMetrics' % MIX_NS,
-            '{%s}ImageColorEncoding' % MIX_NS,
-            '{%s}TargetData' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}SpatialMetrics",
+            f"{{{MIX_NS}}}ImageColorEncoding",
+            f"{{{MIX_NS}}}TargetData"].index(elem.tag)
 
 
-def color_encoding_order(elem):
+def color_encoding_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ImageColorEncoding parent element in the
     correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}BitsPerSample' % MIX_NS,
-            '{%s}samplesPerPixel' % MIX_NS,
-            '{%s}extraSamples' % MIX_NS,
-            '{%s}Colormap' % MIX_NS,
-            '{%s}GrayResponse' % MIX_NS,
-            '{%s}WhitePoint' % MIX_NS,
-            '{%s}PrimaryChromaticities' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}BitsPerSample",
+            f"{{{MIX_NS}}}samplesPerPixel",
+            f"{{{MIX_NS}}}extraSamples",
+            f"{{{MIX_NS}}}Colormap",
+            f"{{{MIX_NS}}}GrayResponse",
+            f"{{{MIX_NS}}}WhitePoint",
+            f"{{{MIX_NS}}}PrimaryChromaticities"].index(elem.tag)
 
 
-def target_data_order(elem):
+def target_data_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the TargetData parent element in the correct
     sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}targetType' % MIX_NS,
-            '{%s}TargetID' % MIX_NS,
-            '{%s}externalTarget' % MIX_NS,
-            '{%s}performanceData' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}targetType",
+            f"{{{MIX_NS}}}TargetID",
+            f"{{{MIX_NS}}}externalTarget",
+            f"{{{MIX_NS}}}performanceData"].index(elem.tag)
 
 
-def change_history_order(elem):
+def change_history_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ChangeHistory parent element in the
     correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}ImageProcessing' % MIX_NS,
-            '{%s}PreviousImageMetadata' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}ImageProcessing",
+            f"{{{MIX_NS}}}PreviousImageMetadata"].index(elem.tag)
 
 
-def image_processing_order(elem):
+def image_processing_order(elem: ET._Element) -> int:
     """
     Sorts the elements in the ImageProcessing parent element in the
     correct sequence.
+
+    :param elem: XML Element
+    :returns: Index of the element's tag in the expected order
     """
-    return ['{%s}dateTimeProcessed' % MIX_NS,
-            '{%s}sourceData' % MIX_NS,
-            '{%s}processingAgency' % MIX_NS,
-            '{%s}processingRationale' % MIX_NS,
-            '{%s}ProcessingSoftware' % MIX_NS,
-            '{%s}processingActions' % MIX_NS].index(elem.tag)
+    return [f"{{{MIX_NS}}}dateTimeProcessed",
+            f"{{{MIX_NS}}}sourceData",
+            f"{{{MIX_NS}}}processingAgency",
+            f"{{{MIX_NS}}}processingRationale",
+            f"{{{MIX_NS}}}ProcessingSoftware",
+            f"{{{MIX_NS}}}processingActions"].index(elem.tag)

@@ -9,14 +9,19 @@ References:
                             (ANSI/NISO Z39.87-2006 (R2017))
                             Chapter 10: Change History
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
+
+import lxml.etree as ET
 
 from nisomix.base import _element, _ensure_list, _subelement
-from nisomix.utils import (change_history_order,
-                           image_processing_order,
-                           mix_root_order)
+from nisomix.utils import (
+    change_history_order,
+    image_processing_order,
+    mix_root_order,
+)
 
 __all__ = ['change_history',
            'image_processing',
@@ -24,18 +29,21 @@ __all__ = ['change_history',
            'processing_software']
 
 
-def change_history(child_elements=None):
+def change_history(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ChangeHistory element. The subelements are sorted
     according to the order as noted in the schema.
 
-    :child_elements: Child elements as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ChangeHistory>
-          <mix:ImageProcessing/>
-          <mix:PreviousImageMetadata/>
+            <mix:ImageProcessing/>
+            <mix:PreviousImageMetadata/>
         </mix:ChangeHistory>
 
     """
@@ -50,27 +58,34 @@ def change_history(child_elements=None):
 
 
 # pylint: disable=too-many-arguments
-def image_processing(datetime=None, source_data=None, agencies=None,
-                     rationale=None, actions=None, child_elements=None):
+def image_processing(
+    datetime: str | None = None,
+    source_data: str | None = None,
+    agencies: str | list[str] | None = None,
+    rationale: str | None = None,
+    actions: str | list[str] | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ImageProcessing element.
 
-    :datetime: The image processing datetime as a string
-    :source_data: The location of source image data as a string
-    :agencies: The processing agencies as a list (or string)
-    :rationale: The rationale for image processing as a string
-    :actions: The image processing steps as a list
-    :child_elements: Child elements as a list
+    :param datetime: The image processing datetime as a string
+    :param source_data: The location of source image data as a string
+    :param agencies: The processing agencies as a list (or string)
+    :param rationale: The rationale for image processing as a string
+    :param actions: The image processing steps as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:ImageProcessing>
-          <mix:dateTimeProcessed>2019</mix:dateTimeProcessed>
-          <mix:sourceData>foo</mix:sourceData>
-          <mix:processingAgency>acme</mix:processingAgency>
-          <mix:processingRationale>test</mix:processingRationale>
-          <mix:ProcessingSoftware>mysoftware</mix:ProcessingSoftware>
-          <mix:processingActions>rotate</mix:processingActions>
+            <mix:dateTimeProcessed>2019</mix:dateTimeProcessed>
+            <mix:sourceData>foo</mix:sourceData>
+            <mix:processingAgency>acme</mix:processingAgency>
+            <mix:processingRationale>test</mix:processingRationale>
+            <mix:ProcessingSoftware>mysoftware</mix:ProcessingSoftware>
+            <mix:processingActions>rotate</mix:processingActions>
         </mix:ImageProcessing>
 
     """
@@ -116,31 +131,36 @@ def image_processing(datetime=None, source_data=None, agencies=None,
     return container
 
 
-def processing_software(name=None, version=None, os_name=None,
-                        os_version=None):
+def processing_software(
+    name: str | None = None,
+    version: str | None = None,
+    os_name: str | None = None,
+    os_version: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX ProcessingSoftware element.
 
-    :name: The processing software name as a string
-    :version: The processing software version as a string
-    :os_name: The operating system name as a string
-    :os_version: The operating system version as a string
+    :param name: The processing software name as a string
+    :param version: The processing software version as a string
+    :param os_name: The operating system name as a string
+    :param os_version: The operating system version as a string
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:ProcessingSoftware>
-          <mix:processingSoftwareName>
-            my software
-          </mix:processingSoftwareName>
-          <mix:processingsoftwareversion>
-            1.0
-          </mix:processingsoftwareversion>
-          <mix:processingOperatingSystemName>
-            CentOS
-          </mix:processingOperatingSystemName>
-          <mix:processingOperatingSystemVersion>
-            7.0
-          </mix:processingOperatingSystemVersion>
+            <mix:processingSoftwareName>
+                my software
+            </mix:processingSoftwareName>
+            <mix:processingsoftwareversion>
+                1.0
+            </mix:processingsoftwareversion>
+            <mix:processingOperatingSystemName>
+                CentOS
+            </mix:processingOperatingSystemName>
+            <mix:processingOperatingSystemVersion>
+                7.0
+            </mix:processingOperatingSystemVersion>
         </mix:ProcessingSoftware>
 
     """
@@ -166,13 +186,16 @@ def processing_software(name=None, version=None, os_name=None,
     return container
 
 
-def previous_image_metadata(child_elements=None):
+def previous_image_metadata(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX PreviousImageMetadata element.
 
-    :child_elements: Child elements as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:PreviousImageMetadata>
             [child elements]

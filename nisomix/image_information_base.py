@@ -9,37 +9,56 @@ References:
                             (ANSI/NISO Z39.87-2006 (R2017))
                             Chapter 7: Basic Image Information
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
 
-from nisomix.base import _element, _subelement, _rationaltype_element
-from nisomix.constants import (DJVU_FORMATS, YCBCR_SUBSAMPLE_TYPES,
-                               YCBCR_POSITIONING_TYPES,
-                               COMPONENT_INTERPRETATION_TYPES)
-from nisomix.utils import (RestrictedElementError, image_information_order,
-                           photom_interpret_order)
+import lxml.etree as ET
+
+from nisomix.base import _element, _rationaltype_element, _subelement
+from nisomix.constants import (
+    COMPONENT_INTERPRETATION_TYPES,
+    DJVU_FORMATS,
+    YCBCR_POSITIONING_TYPES,
+    YCBCR_SUBSAMPLE_TYPES,
+)
+from nisomix.utils import (
+    RestrictedElementError,
+    image_information_order,
+    photom_interpret_order,
+)
+
+__all__ = [
+    "color_profile",
+    "component",
+    "djvu",
+    "format_characteristics",
+    "image_characteristics",
+    "image_information",
+    "jpeg2000",
+    "mrsid",
+    "photometric_interpretation",
+    "ref_black_white",
+    "ycbcr",
+]
 
 
-__all__ = ['image_information', 'image_characteristics',
-           'photometric_interpretation', 'color_profile', 'ycbcr',
-           'ref_black_white', 'component', 'format_characteristics',
-           'jpeg2000', 'mrsid', 'djvu']
-
-
-def image_information(child_elements=None):
+def image_information(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX BasicImageInformation element. The
     subelements are sorted according to the order as noted in the
     schema.
 
-    :child_elements: Child elements as a list
-
-    Returns the following sorted ElementTree structure::
+    :param child_elements: Child elements as a list
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:BasicImageInformation>
-          <mix:BasicImageCharacteristics/>
-          <mix:SpecialFormatCharacteristics/>
+            <mix:BasicImageCharacteristics/>
+            <mix:SpecialFormatCharacteristics/>
         </mix:BasicImageInformation>
 
     """
@@ -54,21 +73,25 @@ def image_information(child_elements=None):
     return container
 
 
-def image_characteristics(width=None, height=None,
-                          child_elements=None):
+def image_characteristics(
+    width: int | str | None = None,
+    height: int | str | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX BasicImageCharacteristics element.
 
-    :width: The image width in pixels as an integer
-    :height: The image height in pixels as an integer
-    :child_elements: Child elements as a list
+    :param width: The image width in pixels as an integer
+    :param height: The image height in pixels as an integer
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:BasicImageCharacteristics>
-          <mix:imageWidth>20</mix:imageWidth>
-          <mix:imageHeight>10</mix:imageHeight>
-          <mix:PhotometricInterpretation/>
+            <mix:imageWidth>20</mix:imageWidth>
+            <mix:imageHeight>10</mix:imageHeight>
+            <mix:PhotometricInterpretation/>
         </mix:BasicImageCharacteristics>
 
     """
@@ -87,20 +110,24 @@ def image_characteristics(width=None, height=None,
     return container
 
 
-def photometric_interpretation(color_space=None, child_elements=None):
+def photometric_interpretation(
+    color_space: str | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """"
     Returns the MIX PhotometricInterpretation element.
 
-    :color_space: The color space as a string
-    :child_elements: Child elements as a list
+    :param color_space: The color space as a string
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:PhotometricInterpretation>
-          <mix:colorSpace>RGB</mix:colorSpace>
-          <mix:ColorProfile/>
-          <mix:YCbCr/>
-          <mix:ReferenceBlackWhite/>
+            <mix:colorSpace>RGB</mix:colorSpace>
+            <mix:ColorProfile/>
+            <mix:YCbCr/>
+            <mix:ReferenceBlackWhite/>
         </mix:PhotometricInterpretation>
 
     """
@@ -118,33 +145,40 @@ def photometric_interpretation(color_space=None, child_elements=None):
 
 
 # pylint: disable=too-many-arguments
-def color_profile(icc_name=None, icc_version=None, icc_uri=None,
-                  local_name=None, local_url=None, embedded_profile=None):
+def color_profile(
+    icc_name: str | None = None,
+    icc_version: str | None = None,
+    icc_uri: str | None = None,
+    local_name: str | None = None,
+    local_url: str | None = None,
+    embedded_profile: str | bytes | None = None,
+) -> ET._Element:
     """
     Returns the MIX ColorProfile element and its subelements.
 
-    :icc_name: The name of the used ICC profile as a string
-    :icc_version: The version of the used ICC profile as a string
-    :icc_uri: The URL/URN of the used ICC profile as a string
-    :local_name: The name of the used local color profile as a string
-    :local_url: The URL/URN of the used local color profile as a string
-    :embedded_profile: The embedded color profile as base64-encoded data
+    :param icc_name: The name of the used ICC profile as a string
+    :param icc_version: The version of the used ICC profile as a string
+    :param icc_uri: The URL/URN of the used ICC profile as a string
+    :param local_name: The name of the used local color profile as a string
+    :param local_url: The URL/URN of the used local color profile as a string
+    :param embedded_profile: The embedded color profile as base64-encoded data
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ColorProfile>
-          <mix:IccProfile>
-            <mix:iccProfileName>sRGB</mix:iccProfileName>
-            <mix:iccProfileVersion>1</mix:iccProfileVersion>
-            <mix:iccProfileURI>http://...</mix:iccProfileURI>
-          </mix:IccProfile/>
-          <mix:LocalProfile>
-            <mix:localProfileName>local RGB</mix:localProfileName>
-            <mix:localProfileURL>http://...</mix:localProfileURL>
-          </mix:LocalProfile/>
-          <mix:embeddedProfile>
-            [Base64-encoded data]
-          </mix:embeddedProfile>
+            <mix:IccProfile>
+                <mix:iccProfileName>sRGB</mix:iccProfileName>
+                <mix:iccProfileVersion>1</mix:iccProfileVersion>
+                <mix:iccProfileURI>http://...</mix:iccProfileURI>
+            </mix:IccProfile/>
+            <mix:LocalProfile>
+                <mix:localProfileName>local RGB</mix:localProfileName>
+                <mix:localProfileURL>http://...</mix:localProfileURL>
+            </mix:LocalProfile/>
+            <mix:embeddedProfile>
+                [Base64-encoded data]
+            </mix:embeddedProfile>
         </mix:ColorProfile>
 
     """
@@ -179,40 +213,47 @@ def color_profile(icc_name=None, icc_version=None, icc_uri=None,
 
 
 # pylint: disable=too-many-arguments, too-many-branches
-def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
-          luma_red=None, luma_green=None, luma_blue=None):
+def ycbcr(
+    subsample_horiz: str | None = None,
+    subsample_vert: str | None = None,
+    positioning: str | None = None,
+    luma_red: int | list[int] | None = None,
+    luma_green: int | list[int] | None = None,
+    luma_blue: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns the MIX YCbCr element and its subelements.
 
-    :subsample_horiz: The horizontal subsample factor as a string
-    :subsample_vert: The vertical subsample factor as a string
-    :positioning: The positions of subsamples as a string
-    :luma_red: The red luminance value as a list (or integer)
-    :luma_green: The green luminane value as a list (or integer)
-    :luma_blue: The blue luminance value as a list (or integer)
+    :param subsample_horiz: The horizontal subsample factor as a string
+    :param subsample_vert: The vertical subsample factor as a string
+    :param positioning: The positions of subsamples as a string
+    :param luma_red: The red luminance value as a list (or integer)
+    :param luma_green: The green luminane value as a list (or integer)
+    :param luma_blue: The blue luminance value as a list (or integer)
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:YCbCr>
-          <mix:YCbCrSubSampling>
-            <mix:yCbCrSubsampleHoriz>1</mix:yCbCrSubsampleHoriz>
-            <mix:yCbCrSubsampleVert>2</mix:yCbCrSubsampleVert>
-          </mix:YCbCrSubSampling/>
-          <mix:yCbCrPositioning>1</mix:yCbCrPositioning>
-          <mix:YCbCrCoefficients>
-            <mix:lumaRed>
-              <mix:numerator>10</mix:numerator>
-              <mix:denominator>1</mix:denominator>
-            </mix:lumaRed>
-            <mix:lumaGreen>
-              <mix:numerator>20</mix:numerator>
-              <mix:denominator>1</mix:denominator>
-            </mix:lumaGreen>
-            <mix:lumaBlue>
-              <mix:numerator>30</mix:numerator>
-              <mix:denominator>1</mix:denominator>
-            </mix:lumaBlue>
-          </mix:YCbCrCoefficients/>
+            <mix:YCbCrSubSampling>
+                <mix:yCbCrSubsampleHoriz>1</mix:yCbCrSubsampleHoriz>
+                <mix:yCbCrSubsampleVert>2</mix:yCbCrSubsampleVert>
+            </mix:YCbCrSubSampling/>
+            <mix:yCbCrPositioning>1</mix:yCbCrPositioning>
+            <mix:YCbCrCoefficients>
+                <mix:lumaRed>
+                    <mix:numerator>10</mix:numerator>
+                    <mix:denominator>1</mix:denominator>
+                </mix:lumaRed>
+                <mix:lumaGreen>
+                    <mix:numerator>20</mix:numerator>
+                    <mix:denominator>1</mix:denominator>
+                </mix:lumaGreen>
+                <mix:lumaBlue>
+                    <mix:numerator>30</mix:numerator>
+                    <mix:denominator>1</mix:denominator>
+                </mix:lumaBlue>
+            </mix:YCbCrCoefficients/>
         </mix:YCbCr>
 
     """
@@ -260,16 +301,19 @@ def ycbcr(subsample_horiz=None, subsample_vert=None, positioning=None,
     return container
 
 
-def ref_black_white(child_elements=None):
+def ref_black_white(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ReferenceBlackWhite element.
 
-    :child_elements: Child elements as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:ReferenceBlackWhite>
-          <mix:Component/>
+            <mix:Component/>
         </mix:ReferenceBlackWhite>
 
     """
@@ -282,30 +326,33 @@ def ref_black_white(child_elements=None):
     return container
 
 
-def component(c_photometric_interpretation=None, footroom=None,
-              headroom=None):
+def component(
+    c_photometric_interpretation: str | None = None,
+    footroom: int | list[int] | None = None,
+    headroom: int | list[int] | None = None,
+) -> ET._Element:
     """
     Returns MIX Component element.
 
-    :c_photometric_interpretation: The component photometric
-                                   interpretation type as a string
-    :footroom: The footroom as a list (or integer)
-    :headroom: The headroom as a list (or integer)
+    :param c_photometric_interpretation: The component photometric
+        interpretation type as a string
+    :param footroom: The footroom as a list (or integer)
+    :param headroom: The headroom as a list (or integer)
 
     Returns the following ElementTree structure::
 
         <mix:Component>
-          <mix:componentPhotometricInterpretation>
-            R
-          </mix:componentPhotometricInterpretation>
-          <mix:footroom>
-            <mix:numerator>10</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:footroom>
-          <mix:headroom>
-            <mix:numerator>20</mix:numerator>
-            <mix:denominator>1</mix:denominator>
-          </mix:headroom>
+            <mix:componentPhotometricInterpretation>
+                R
+            </mix:componentPhotometricInterpretation>
+            <mix:footroom>
+                <mix:numerator>10</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:footroom>
+            <mix:headroom>
+                <mix:numerator>20</mix:numerator>
+                <mix:denominator>1</mix:denominator>
+            </mix:headroom>
         </mix:Component>
 
     """
@@ -331,18 +378,21 @@ def component(c_photometric_interpretation=None, footroom=None,
     return container
 
 
-def format_characteristics(child_elements=None):
+def format_characteristics(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX SpecialFormatCharacteristics element.
 
-    :child_elements: The child elements as a list
+    :param child_elements: The child elements as a list
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:SpecialFormatCharacteristics>
-          <mix:JPEG2000/>
-          <mix:MrSID/>
-          <mix:Djvu/>
+            <mix:JPEG2000/>
+            <mix:MrSID/>
+            <mix:Djvu/>
         </mix:SpecialFormatCharacteristics>
 
     """
@@ -356,39 +406,47 @@ def format_characteristics(child_elements=None):
 
 
 # pylint: disable=too-many-arguments, too-many-locals
-def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
-             compliance_class=None, tile_width=None, tile_height=None,
-             quality_layers=None, resolution_levels=None):
+def jpeg2000(
+    codec: str | None = None,
+    codec_version: str | None = None,
+    codestream_profile: str | None = None,
+    compliance_class: str | None = None,
+    tile_width: int | None = None,
+    tile_height: int | None = None,
+    quality_layers: int | None = None,
+    resolution_levels: int | None = None,
+) -> ET._Element:
     """
     Returns the MIX JPEG2000 element.
 
-    :codec: The codec name as a string
-    :codec_version: The codec version as a string
-    :codestream_profile: The codestream profile as a string
-    :compliance_class: The compliance class as a string
-    :tile_width: The width in pixels of the tiles as an integer
-    :tile_height: The height in pixels of the tiles as an integer
-    :quality_layers: The number of quality layers as an integer
-    :resolution_levels: The number of lower resolution levels as an
-                        integer
+    :param codec: The codec name as a string
+    :param codec_version: The codec version as a string
+    :param codestream_profile: The codestream profile as a string
+    :param compliance_class: The compliance class as a string
+    :param tile_width: The width in pixels of the tiles as an integer
+    :param tile_height: The height in pixels of the tiles as an integer
+    :param quality_layers: The number of quality layers as an integer
+    :param resolution_levels: The number of lower resolution levels as an
+        integer
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:JPEG2000>
-          <mix:CodecCompliance>
-            <mix:codec></mix:codec>
-            <mix:codecVersion></mix:codecVersion>
-            <mix:codestreamProfile></mix:codestreamProfile>
-            <mix:complianceClass></mix:complianceClass>
-          </mix:CodecCompliance>
-          <mix:EncodingOptions>
-            <mix:Tiles>
-              <mix:tileWidth>2</mix:tileWidth>
-              <mix:tileHeight>2</mix:tileHeight>
-            </mix:Tiles>
-            <mix:qualityLayers>10</mix:qualityLayers>
-            <mix:resolutionLevels>10</mix:resolutionLevels>
-          </mix:EncodingOptions>
+            <mix:CodecCompliance>
+                <mix:codec></mix:codec>
+                <mix:codecVersion></mix:codecVersion>
+                <mix:codestreamProfile></mix:codestreamProfile>
+                <mix:complianceClass></mix:complianceClass>
+            </mix:CodecCompliance>
+            <mix:EncodingOptions>
+                <mix:Tiles>
+                    <mix:tileWidth>2</mix:tileWidth>
+                    <mix:tileHeight>2</mix:tileHeight>
+                </mix:Tiles>
+                <mix:qualityLayers>10</mix:qualityLayers>
+                <mix:resolutionLevels>10</mix:resolutionLevels>
+            </mix:EncodingOptions>
         </mix:JPEG2000>
 
     """
@@ -437,16 +495,17 @@ def jpeg2000(codec=None, codec_version=None, codestream_profile=None,
     return container
 
 
-def mrsid(zoom_levels=None):
+def mrsid(zoom_levels: int | None = None) -> ET._Element:
     """
     Returns the MIX MrSID element.
 
-    :zoom_levels: The number of available zoom levels as an integer
+    :param zoom_levels: The number of available zoom levels as an integer
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:MrSID>
-          <mix:zoomLevels>3</mix:zoomLevels>
+            <mix:zoomLevels>3</mix:zoomLevels>
         </mix:MrSID>
 
     """
@@ -459,17 +518,17 @@ def mrsid(zoom_levels=None):
     return container
 
 
-def djvu(djvu_format=None):
+def djvu(djvu_format: str | None = None) -> ET._Element:
     """
     Returns the MIX Djvu element. Djvu format supports only a specific
     set of types.
 
-    :djvu_format: The DjVu file format as a string
+    :param djvu_format: The DjVu file format as a string
 
     Returns the following ElementTree structure::
 
         <mix:Djvu>
-          <mix:djvuFormat>indirect</mix:djvuFormat>
+            <mix:djvuFormat>indirect</mix:djvuFormat>
         </mix:Djvu>
 
     """

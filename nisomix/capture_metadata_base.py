@@ -10,44 +10,78 @@ References:
                             (ANSI/NISO Z39.87-2006 (R2017))
                             Chapter 8: Image Capture Metadata
     * ElementTree
-    https://docs.python.org/2.6/library/xml.etree.elementtree.html
+    https://docs.python.org/3.9/library/xml.etree.elementtree.html
 
 """
+from __future__ import annotations
 
-from nisomix.base import (_element, _ensure_list, _rationaltype_element,
-                          _subelement, mix_ns)
-from nisomix.constants import (CAMERA_SENSOR_TYPES, CAPTURE_DEVICE_TYPES,
-                               DIMENSION_UNITS, GPS_DATA_CONTENTS,
-                               IMAGE_DATA_CONTENTS, OPTICAL_RESOLUTION_UNITS,
-                               ORIENTATION_TYPES, SCANNER_SENSOR_TYPES)
-from nisomix.utils import (NAMESPACES, RestrictedElementError,
-                           camera_capture_order, camera_capture_settings_order,
-                           gps_data_order, image_capture_order,
-                           image_data_order, scanner_capture_order,
-                           source_information_order)
+import lxml.etree as ET
 
-__all__ = ['image_capture_metadata', 'source_information', 'source_id',
-           'source_size', 'capture_information', 'device_capture',
-           'device_model', 'max_optical_resolution', 'scanning_software',
-           'camera_capture_settings', 'image_data', 'gps_data',
-           'parse_datetime_created']
+from nisomix.base import (
+    _element,
+    _ensure_list,
+    _rationaltype_element,
+    _subelement,
+    mix_ns,
+)
+from nisomix.constants import (
+    CAMERA_SENSOR_TYPES,
+    CAPTURE_DEVICE_TYPES,
+    DIMENSION_UNITS,
+    GPS_DATA_CONTENTS,
+    IMAGE_DATA_CONTENTS,
+    OPTICAL_RESOLUTION_UNITS,
+    ORIENTATION_TYPES,
+    SCANNER_SENSOR_TYPES,
+)
+from nisomix.utils import (
+    NAMESPACES,
+    RestrictedElementError,
+    camera_capture_order,
+    camera_capture_settings_order,
+    gps_data_order,
+    image_capture_order,
+    image_data_order,
+    scanner_capture_order,
+    source_information_order,
+)
+
+__all__ = [
+    'camera_capture_settings',
+    'capture_information',
+    'device_capture',
+    'device_model',
+    'gps_data',
+    'image_capture_metadata',
+    'image_data',
+    'max_optical_resolution',
+    'parse_datetime_created',
+    'scanning_software',
+    'source_id',
+    'source_information',
+    'source_size',
+]
 
 
-def image_capture_metadata(orientation=None, methodology=None,
-                           child_elements=None):
+def image_capture_metadata(
+    orientation: str | None = None,
+    methodology: str | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX ImageCaptureMetadata element.
 
-    :orientation: The image orientation as a string
-    :methodology: The digitization methodology as a string
-    :child_elements: Child elements as a list
+    :param orientation: The image orientation as a string
+    :param methodology: The digitization methodology as a string
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ImageCaptureMetadata>
-          {{ Child elements }}
-          <mix:orientation>unknown</mix:orientation>
-          <mix:methodology>unknown</mix:methodology>
+            {{ Child elements }}
+            <mix:orientation>unknown</mix:orientation>
+            <mix:methodology>unknown</mix:methodology>
         </mix:ImageCaptureMetadata>
 
     """
@@ -77,19 +111,23 @@ def image_capture_metadata(orientation=None, methodology=None,
     return container
 
 
-def source_information(source_type=None, child_elements=None):
+def source_information(
+    source_type: str | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX SourceInformation element.
 
-    :source_type: The source type as a string
-    :child_elements: Child elements as a list
+    :param source_type: The source type as a string
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:SourceInformation>
-          <mix:sourceType>foo</mix:sourceType>
-          <mix:SourceID/>
-          <mix:SourceSize/>
+            <mix:sourceType>foo</mix:sourceType>
+            <mix:SourceID/>
+            <mix:SourceSize/>
         </mix:SourceInformation>
 
     """
@@ -110,14 +148,17 @@ def source_information(source_type=None, child_elements=None):
     return container
 
 
-def source_id(source_idtype=None, source_idvalue=None):
+def source_id(
+    source_idtype: str | None = None, source_idvalue: str | None = None
+) -> ET._Element:
     """
     Returns the MIX SourceID element.
 
-    :source_idtype: The source ID type as a string
-    :source_idvalue: The source ID value as a string
+    :param source_idtype: The source ID type as a string
+    :param source_idvalue: The source ID value as a string
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:SourceID>
           <mix:sourceIDType>local</mix:sourceIDType>
@@ -141,33 +182,40 @@ def source_id(source_idtype=None, source_idvalue=None):
 # pylint: disable=too-many-arguments, too-many-locals, too-many-branches
 # too-many-arguments: The element contains a lot of subelements
 # too-many-locals: The arguments are many, hence a lot of local variables
-def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
-                z_value=None, z_unit=None):
+def source_size(
+    x_value: str | None = None,
+    x_unit: str | None = None,
+    y_value: str | None = None,
+    y_unit: str | None = None,
+    z_value: str | None = None,
+    z_unit: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX SourceSize element.
 
-    :x_value: The source X value (width) as an integer
-    :x_unit: The unit of the source X value (width) as a string
-    :y_value: The source Y value (height) as an integer
-    :y_unit: The unit of the source Y value (height) as a string
-    :z_value: The source Z value (depth) as an integer
-    :z_unit: The unit of the source z value (depth) as a string
+    :param x_value: The source X value (width) as an integer
+    :param x_unit: The unit of the source X value (width) as a string
+    :param y_value: The source Y value (height) as an integer
+    :param y_unit: The unit of the source Y value (height) as a string
+    :param z_value: The source Z value (depth) as an integer
+    :param z_unit: The unit of the source z value (depth) as a string
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:SourceSize>
-          <mix:SourceXDimension>
-            <mix:sourceXDimensionValue>1.23</mix:sourceXDimensionValue>
-            <mix:sourceXDimensionUnit>mm.</mix:sourceXDimensionUnit>
-          </mix:SourceXDimension>
-          <mix:SourceYDimension>
-            <mix:sourceYDimensionValue>1.23</mix:sourceXDimensionValue>
-            <mix:sourceYDimensionUnit>mm.</mix:sourceXDimensionUnit>
-          </mix:SourceYDimension>
-          <mix:SourceZDimension>
-            <mix:sourceZDimensionValue>1.23</mix:sourceXDimensionValue>
-            <mix:sourceZDimensionUnit>mm.</mix:sourceXDimensionUnit>
-          </mix:SourceZDimension>
+            <mix:SourceXDimension>
+                <mix:sourceXDimensionValue>1.23</mix:sourceXDimensionValue>
+                <mix:sourceXDimensionUnit>mm.</mix:sourceXDimensionUnit>
+            </mix:SourceXDimension>
+            <mix:SourceYDimension>
+                <mix:sourceYDimensionValue>1.23</mix:sourceXDimensionValue>
+                <mix:sourceYDimensionUnit>mm.</mix:sourceXDimensionUnit>
+            </mix:SourceYDimension>
+            <mix:SourceZDimension>
+                <mix:sourceZDimensionValue>1.23</mix:sourceXDimensionValue>
+                <mix:sourceZDimensionUnit>mm.</mix:sourceXDimensionUnit>
+            </mix:SourceZDimension>
         </mix:SourceSize>
 
     """
@@ -215,20 +263,25 @@ def source_size(x_value=None, x_unit=None, y_value=None, y_unit=None,
     return container
 
 
-def capture_information(created=None, producer=None, device=None):
+def capture_information(
+    created: str | None = None,
+    producer: str | list[str] | None = None,
+    device: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX GeneralCaptureInformation element.
 
-    :created: The image datetime created as a string
-    :producer: The image producer as a string
-    :device: The image creation device classification as a string
+    :param created: The image datetime created as a string
+    :param producer: The image producer as a string or list of strings
+    :param device: The image creation device classification as a string
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:GeneralCaptureInformation>
-          <mix:dateTimeCreated>foo</mix:dateTimeCreated>
-          <mix:imageProducer>foo</mix:imageProducer>
-          <mix:captureDevice>foo</mix:captureDevice>
+            <mix:dateTimeCreated>foo</mix:dateTimeCreated>
+            <mix:imageProducer>foo</mix:imageProducer>
+            <mix:captureDevice>foo</mix:captureDevice>
         </mix:GeneralCaptureInformation>
 
     """
@@ -255,16 +308,20 @@ def capture_information(created=None, producer=None, device=None):
     return container
 
 
-def device_capture(device_type, manufacturer=None, sensor=None,
-                   child_elements=None):
+def device_capture(
+    device_type: str,
+    manufacturer: str | None = None,
+    sensor: str | None = None,
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns either the MIX ScannerCapture or the DigitalCameraCapture
     element depending on the device_type.
 
-    :device_type: The type of capture device, e.g. 'scanner' or 'camera'
-    :manufacturer: The manufacturer of the capture device as a string
-    :sensor: The type of image sensor of the capture device as a string
-    :child_elements: Child elements as a list
+    :param device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :param manufacturer: The manufacturer of the capture device as a string
+    :param sensor: The type of image sensor of the capture device as a string
+    :param child_elements: Child elements as a list
 
     """
     prefixes = {'scanner': 'scanner',
@@ -317,16 +374,20 @@ def device_capture(device_type, manufacturer=None, sensor=None,
     return container
 
 
-def device_model(device_type, name=None, number=None,
-                 serialno=None):
+def device_model(
+    device_type: str,
+    name: str | None = None,
+    number: str | None = None,
+    serialno: str | None = None,
+) -> ET._Element:
     """
     Returns either the MIX ScannerModel or the DigitalCameraModel element
     depending on the device_type.
 
-    :device_type: The type of capture device, e.g. 'scanner' or 'camera'
-    :name: The model name of the capture device as a string
-    :number: The model number of the capture device as a string
-    :serialno: The serial number of the capture device as a string
+    :param device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :param name: The model name of the capture device as a string
+    :param number: The model number of the capture device as a string
+    :param serialno: The serial number of the capture device as a string
 
     """
     prefixes = {'scanner': 'scanner',
@@ -359,20 +420,25 @@ def device_model(device_type, name=None, number=None,
     return container
 
 
-def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
+def max_optical_resolution(
+    x_resolution: int | str | None = None,
+    y_resolution: int | str | None = None,
+    unit: str | None = None,
+) -> ET._Element:
     """
     Returns the MIX MaximumOpticalResolution element.
 
-    :x_resolution: The x resolution of the scanning sensor as an integer
-    :y_resolution: The y resolution of the scanning sensor as an integer
-    :unit: The unit of the scanning sensor resolution as a string
+    :param x_resolution: The x resolution of the scanning sensor as an integer
+    :param y_resolution: The y resolution of the scanning sensor as an integer
+    :param unit: The unit of the scanning sensor resolution as a string
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:MaximumOpticalResolution>
-          <mix:xOpticalResolution>foo</mix:xOpticalResolution>
-          <mix:yOpticalResolution>foo</mix:yOpticalResolution>
-          <mix:opticalResolutionUnit>foo</mix:opticalResolutionUnit>
+            <mix:xOpticalResolution>foo</mix:xOpticalResolution>
+            <mix:yOpticalResolution>foo</mix:yOpticalResolution>
+            <mix:opticalResolutionUnit>foo</mix:opticalResolutionUnit>
         </mix:MaximumOpticalResolution>
 
     """
@@ -397,18 +463,21 @@ def max_optical_resolution(x_resolution=None, y_resolution=None, unit=None):
     return container
 
 
-def scanning_software(name=None, version=None):
+def scanning_software(
+    name: str | None = None, version: str | None = None
+) -> ET._Element:
     """
     Returns the MIX ScanningSystemSoftware element.
 
-    :name: The scanning software name as a string
+    :param name: The scanning software name as a string
     :version: The scanning software version as a string
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:ScanningSystemSoftware>
-          <mix:scanningSoftwareName>foo</mix:scanningSoftwareName>
-          <mix:scanningSoftwareVersionNo>foo</mix:scanningSoftwareVersionNo>
+            <mix:scanningSoftwareName>foo</mix:scanningSoftwareName>
+            <mix:scanningSoftwareVersionNo>foo</mix:scanningSoftwareVersionNo>
         </mix:ScanningSystemSoftware>
 
     """
@@ -425,16 +494,19 @@ def scanning_software(name=None, version=None):
     return container
 
 
-def camera_capture_settings(child_elements=None):
+def camera_capture_settings(
+    child_elements: list[ET._Element] | None = None,
+) -> ET._Element:
     """
     Returns the MIX CameraCaptureSettings element.
 
-    :child_elements: Child elements as a list
+    :param child_elements: Child elements as a list
 
-    Returns the following sorted ElementTree structure::
+    :returns:
+    The following sorted ElementTree structure::
 
         <mix:CameraCaptureSettings>
-          {{ Child elements }}
+            {{ Child elements }}
         </mix:CameraCaptureSettings>
 
     """
@@ -449,7 +521,7 @@ def camera_capture_settings(child_elements=None):
     return container
 
 
-def image_data(contents=None):
+def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     """
     Returns the MIX ImageData element. The function argument contents
     is a dict, that can be retrieved from nisomix.IMAGE_DATA_CONTENTS.
@@ -485,6 +557,9 @@ def image_data(contents=None):
                     "y_print_aspect_ratio": None}
 
     """
+    if contents is None:
+        contents = {}
+
     tags = {
         'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
         'exposure_program': 'exposureProgram',
@@ -564,7 +639,9 @@ def image_data(contents=None):
     return container
 
 
-def gps_data(contents=None):
+def gps_data(
+    contents: dict[str, str | int | None] | None = None,
+) -> ET._Element:
     """
     Returns the MIX GPSData element. The function argument contents
     is a dict, from nisomix.GPS_DATA_CONTENTS. The keys from the
@@ -613,6 +690,9 @@ def gps_data(contents=None):
                     "gps_groups": None}
 
     """
+    if contents is None:
+        contents = {}
+
     tags = {'version_id': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
             'long_ref': 'gpsLongitudeRef',
             'altitude_ref': 'gpsAltitudeRef',
@@ -651,7 +731,7 @@ def gps_data(contents=None):
     for key, value in contents.items():
         if key in tags and value:
             elem = _element(tags[key])
-            elem.text = value
+            elem.text = str(value)
             child_elements.append(elem)
 
         if key in rationals and value:
@@ -699,16 +779,22 @@ def gps_data(contents=None):
     return container
 
 
-def _gps_group(tag, degrees=None, minutes=None, seconds=None):
+def _gps_group(
+    tag: str,
+    degrees: int | str | list[int | str] | None = None,
+    minutes: int | str | list[int | str] | None = None,
+    seconds: int | str | list[int | str] | None = None,
+) -> ET._Element:
     """
     Returns the MIX gpsGroup type element.
 
-    :tag: the tag name of the container element
-    :degrees: The degrees of the coordinates as a list (or integer)
-    :minutes: The minutes of the coordinates as a list (or integer)
-    :seconds: The seconds of the coordinates as a list (or integer)
+    :param tag: the tag name of the container element
+    :param degrees: The degrees of the coordinates as a list (or integer)
+    :param minutes: The minutes of the coordinates as a list (or integer)
+    :param seconds: The seconds of the coordinates as a list (or integer)
 
-    Returns the following ElementTree structure::
+    :returns:
+    The following ElementTree structure::
 
         <mix:{{ tag }}>
             <mix:degrees>
@@ -743,12 +829,12 @@ def _gps_group(tag, degrees=None, minutes=None, seconds=None):
     return container
 
 
-def parse_datetime_created(elem):
+def parse_datetime_created(elem: ET._Element) -> str | None:
     """
     Returns the dateTimeCreated from a MIX metadata
     block in XML.
 
-    :elem: An ElementTree strucure
+    :param elem: An ElementTree strucure
     :returns: The datetime created as a string
     """
     created = None
@@ -756,8 +842,7 @@ def parse_datetime_created(elem):
     if elem.tag != (mix_ns, 'dateTimeCreated'):
         elem = elem.xpath('//mix:dateTimeCreated', namespaces=NAMESPACES)[0]
 
-    if elem is not None:
-        if elem.text:
-            created = elem.text
+    if elem is not None and elem.text:
+        created = elem.text
 
     return created
