@@ -15,6 +15,8 @@ References:
 """
 from __future__ import annotations
 
+from typing import Literal
+
 import lxml.etree as ET
 
 from nisomix.base import (
@@ -297,7 +299,7 @@ def capture_information(
 
 
 def device_capture(
-    device_type: str,
+    device_type: Literal["scanner", "camera"],
     manufacturer: str | None = None,
     sensor: str | None = None,
     child_elements: list[ET._Element] | None = None,
@@ -306,7 +308,8 @@ def device_capture(
     Returns either the MIX ScannerCapture or the DigitalCameraCapture
     element depending on the device_type.
 
-    :param device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :param device_type: The type of capture device, either 'scanner' or
+        'camera'
     :param manufacturer: The manufacturer of the capture device as a string
     :param sensor: The type of image sensor of the capture device as a string
     :param child_elements: Child elements as a list
@@ -333,21 +336,21 @@ def device_capture(
         manufacturer_el.text = manufacturer
         child_elements.append(manufacturer_el)
 
-    if sensor and device_type == 'scanner':
+    if device_type == 'scanner':
         if sensor in SCANNER_SENSOR_TYPES:
             sensor_el = _element('scannerSensor')
             sensor_el.text = sensor
             child_elements.append(sensor_el)
-        else:
+        elif sensor is not None:
             raise RestrictedElementError(
                 sensor, 'scannerSensor', SCANNER_SENSOR_TYPES)
 
-    if sensor and device_type == 'camera':
+    if device_type == 'camera':
         if sensor in CAMERA_SENSOR_TYPES:
             sensor_el = _element('cameraSensor')
             sensor_el.text = sensor
             child_elements.append(sensor_el)
-        else:
+        elif sensor is not None:
             raise RestrictedElementError(
                 sensor, 'cameraSensor', CAMERA_SENSOR_TYPES)
 
@@ -363,7 +366,7 @@ def device_capture(
 
 
 def device_model(
-    device_type: str,
+    device_type: Literal["scanner", "camera"],
     name: str | None = None,
     number: str | None = None,
     serialno: str | None = None,
@@ -372,7 +375,8 @@ def device_model(
     Returns either the MIX ScannerModel or the DigitalCameraModel element
     depending on the device_type.
 
-    :param device_type: The type of capture device, e.g. 'scanner' or 'camera'
+    :param device_type: The type of capture device, either 'scanner' or
+        'camera'
     :param name: The model name of the capture device as a string
     :param number: The model number of the capture device as a string
     :param serialno: The serial number of the capture device as a string
