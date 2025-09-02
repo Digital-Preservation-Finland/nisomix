@@ -193,11 +193,11 @@ def source_size(
     """
     Returns the MIX SourceSize element.
 
-    :param x_value: The source X value (width) as an integer
+    :param x_value: The source X value (width) as a string
     :param x_unit: The unit of the source X value (width) as a string
-    :param y_value: The source Y value (height) as an integer
+    :param y_value: The source Y value (height) as a string
     :param y_unit: The unit of the source Y value (height) as a string
-    :param z_value: The source Z value (depth) as an integer
+    :param z_value: The source Z value (depth) as a string
     :param z_unit: The unit of the source z value (depth) as a string
 
     :returns:
@@ -219,46 +219,34 @@ def source_size(
         </mix:SourceSize>
 
     """
-    container = _element('SourceSize')
 
-    if x_value or x_unit:
-        x_dimension = _subelement(container, 'SourceXDimension')
-        if x_value:
-            x_value_el = _subelement(x_dimension, 'sourceXDimensionValue')
-            x_value_el.text = x_value
-        if x_unit:
-            if x_unit in DIMENSION_UNITS:
-                x_unit_el = _subelement(x_dimension, 'sourceXDimensionUnit')
-                x_unit_el.text = x_unit
-            else:
-                raise RestrictedElementError(
-                    x_unit, 'sourceXDimensionUnit', DIMENSION_UNITS)
+    def _update_dimension(
+        value: str | None,
+        unit: str | None,
+        d: str,
+        container: ET._Element,
+    ) -> None:
+        if value or unit:
+            dimension = _subelement(container, f"Source{d}Dimension")
+            if value:
+                value_el = _subelement(dimension, f"source{d}DimensionValue")
+                value_el.text = value
+            if unit:
+                if unit in DIMENSION_UNITS:
+                    unit_el = _subelement(dimension, f"source{d}DimensionUnit")
+                    unit_el.text = unit
+                else:
+                    raise RestrictedElementError(
+                        unit, f"source{d}DimensionUnit", DIMENSION_UNITS
+                    )
 
-    if y_value or y_unit:
-        y_dimension = _subelement(container, 'SourceYDimension')
-        if y_value:
-            y_value_el = _subelement(y_dimension, 'sourceYDimensionValue')
-            y_value_el.text = y_value
-        if y_unit:
-            if y_unit in DIMENSION_UNITS:
-                y_unit_el = _subelement(y_dimension, 'sourceYDimensionUnit')
-                y_unit_el.text = y_unit
-            else:
-                raise RestrictedElementError(
-                    y_unit, 'sourceYDimensionUnit', DIMENSION_UNITS)
-
-    if z_value or z_unit:
-        z_dimension = _subelement(container, 'SourceZDimension')
-        if z_value:
-            z_value_el = _subelement(z_dimension, 'sourceZDimensionValue')
-            z_value_el.text = z_value
-        if z_unit:
-            if z_unit in DIMENSION_UNITS:
-                z_unit_el = _subelement(z_dimension, 'sourceZDimensionUnit')
-                z_unit_el.text = z_unit
-            else:
-                raise RestrictedElementError(
-                    z_unit, 'sourceZDimensionUnit', DIMENSION_UNITS)
+    container = _element("SourceSize")
+    for d, v in {
+        "X": (x_value, x_unit),
+        "Y": (y_value, y_unit),
+        "Z": (z_value, z_unit),
+    }.items():
+        _update_dimension(v[0], v[1], d, container)
 
     return container
 
