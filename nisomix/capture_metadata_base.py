@@ -15,7 +15,8 @@ References:
 """
 from __future__ import annotations
 
-from typing import Literal
+from collections.abc import Callable
+from typing import Any, Literal
 
 import lxml.etree as ET
 
@@ -513,6 +514,97 @@ def camera_capture_settings(
     return container
 
 
+def _validate_keys(
+    contents: dict[str, Any] | list[str],
+    valid: dict[str, Any] | list[str],
+    context: str,
+) -> None:
+    """Validate that `contents` does not have any keys that `valid` does not
+    have.
+
+    :param contents: List of keys or dictionary.
+    :param valid: List of valid keys of dictionary.
+    :param context: Context for the error message.
+    :raises ValueError: If there are invalid keys.
+    """
+    invalid_keys = set(contents) - set(valid)
+    if invalid_keys:
+        raise ValueError(f"Invalid keys in {context}: {invalid_keys}")
+
+
+def _add_simple_elements(
+    contents: dict[str, Any], tag_map: dict[str, str]
+) -> list[ET._Element]:
+    """Create a list of XML elements from `contents` using tag names in
+    `tag_map`.
+
+    :param contents: Dictionary of data to be converted into XML elements.
+    :param tag_map: Mapping of keys in `contents` to XML tag names.
+    :returns: List of XML elements.
+    """
+    elements = []
+    for key, tag in tag_map.items():
+        value = contents.get(key)
+        if value:
+            el = _element(tag)
+            el.text = str(value)
+            elements.append(el)
+    return elements
+
+
+def _add_rational_elements(
+    contents: dict[str, Any], tag_map: dict[str, str]
+) -> list[ET._Element]:
+    """Create a list rational-type of XML elements from `contents` using tag
+    names in `tag_map`.
+
+    :param contents: Dictionary of data to be converted into XML elements.
+    :param tag_map: Mapping of keys in `contents` to XML tag names.
+    :returns: List of XML elements.
+    """
+    elements = []
+    for key, tag in tag_map.items():
+        value = contents.get(key)
+        if value:
+            el = _rationaltype_element(tag, value)
+            elements.append(el)
+    return elements
+
+
+def _add_subelements(
+    contents: dict[str, Any], parent: ET._Element, tag_map: dict[str, str]
+) -> None:
+    """Add subelements to a parent XML element based on `contents` and
+    `tag_map`.
+
+    :param contents: Dictionary containing values to be added as subelements.
+    :param parent: XML element to add subelements to.
+    :param tag_map: Mapping of keys in `contents` to subelement tag names.
+    """
+    for key, tag in tag_map.items():
+        if value := contents.get(key):
+            el = _subelement(parent, tag)
+            el.text = value
+
+
+def _finalize_container(
+    container: ET._Element,
+    children: list[ET._Element],
+    sort_key: Callable[[ET._Element], int],
+) -> ET._Element:
+    """Sort and append child elements to a container element using a sort key.
+
+    :param container: XML container element to add childer to.
+    :param children: List of XML child elements.
+    :param sort_key: Callable that defines the sort order of child elements.
+    :returns: The container element with sorted and appended children.
+    """
+    children.sort(key=sort_key)
+    for el in children:
+        container.append(el)
+    return container
+
+
 def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     """
     Returns the MIX ImageData element. The function argument contents
@@ -520,115 +612,124 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     The keys from contents are matched to create the MIX element and its
     substructure. The dict should look like this::
 
-        contents = {"fnumber": None,
-                    "exposure_time": None,
-                    "exposure_program": None,
-                    "spectral_sensitivity": None,
-                    "isospeed_ratings": None,
-                    "oecf": None,
-                    "exif_version": None,
-                    "shutter_speed_value": None,
-                    "aperture_value": None,
-                    "brightness_value": None,
-                    "exposure_bias_value": None,
-                    "max_aperture_value": None,
-                    "distance": None,
-                    "min_distance": None,
-                    "max_distance": None,
-                    "metering_mode": None,
-                    "light_source": None,
-                    "flash": None,
-                    "focal_length": None,
-                    "flash_energy": None,
-                    "back_light": None,
-                    "exposure_index": None,
-                    "sensing_method": None,
-                    "cfa_pattern": None,
-                    "auto_focus": None,
-                    "x_print_aspect_ratio": None,
-                    "y_print_aspect_ratio": None}
+        contents = {
+            "fnumber": None,
+            "exposure_time": None,
+            "exposure_program": None,
+            "spectral_sensitivity": None,
+            "isospeed_ratings": None,
+            "oecf": None,
+            "exif_version": None,
+            "shutter_speed_value": None,
+            "aperture_value": None,
+            "brightness_value": None,
+            "exposure_bias_value": None,
+            "max_aperture_value": None,
+            "distance": None,
+            "min_distance": None,
+            "max_distance": None,
+            "metering_mode": None,
+            "light_source": None,
+            "flash": None,
+            "focal_length": None,
+            "flash_energy": None,
+            "back_light": None,
+            "exposure_index": None,
+            "sensing_method": None,
+            "cfa_pattern": None,
+            "auto_focus": None,
+            "x_print_aspect_ratio": None,
+            "y_print_aspect_ratio": None,
+        }
 
     """
     if contents is None:
         contents = {}
 
+    _validate_keys(contents, IMAGE_DATA_CONTENTS, "image_data")
+
+    def add_spectral_sensitivity() -> list[ET._Element]:
+        elements = []
+        if value := contents.get("spectral_sensitivity"):
+            spect_sens = _ensure_list(value)
+            for item in spect_sens:
+                spect_sens_el = _element("spectralSensitivity")
+                spect_sens_el.text = item
+                elements.append(spect_sens_el)
+        return elements
+
+    def add_subject_distance() -> list[ET._Element]:
+        elements = []
+        tags = ["distance", "min_distance", "max_distance"]
+        if any(contents.get(tag) for tag in tags):
+            subject_distance = _element("SubjectDistance")
+            elements.append(subject_distance)
+
+            _add_subelements(
+                contents, subject_distance, {"distance": "distance"}
+            )
+
+            if contents.get("min_distance") or contents.get("max_distance"):
+                min_max = _subelement(subject_distance, "MinMaxDistance")
+                dist_tags = {
+                    "min_distance": "minDistance",
+                    "max_distance": "maxDistance",
+                }
+                _add_subelements(contents, min_max, dist_tags)
+        return elements
+
+    def add_print_aspect_ratio() -> list[ET._Element]:
+        elements = []
+        tags = ["x_print_aspect_ratio", "y_print_aspect_ratio"]
+        if any(contents.get(tag) for tag in tags):
+            print_ratio = _element("PrintAspectRatio")
+            elements.append(print_ratio)
+            ratio_tags = {
+                "x_print_aspect_ratio": "xPrintAspectRatio",
+                "y_print_aspect_ratio": "yPrintAspectRatio",
+            }
+
+            _add_subelements(contents, print_ratio, ratio_tags)
+        return elements
+
     tags = {
-        'fnumber': 'fNumber', 'exposure_time': 'exposureTime',
-        'exposure_program': 'exposureProgram',
-        'isospeed_ratings': 'isoSpeedRatings',
-        'exif_version': 'exifVersion',
-        'metering_mode': 'meteringMode',
-        'light_source': 'lightSource', 'flash': 'flash',
-        'focal_length': 'focalLength',
-        'back_light': 'backLight', 'exposure_index': 'exposureIndex',
-        'sensing_method': 'sensingMethod', 'cfa_pattern': 'cfaPattern',
-        'auto_focus': 'autoFocus'}
+        "fnumber": "fNumber",
+        "exposure_time": "exposureTime",
+        "exposure_program": "exposureProgram",
+        "isospeed_ratings": "isoSpeedRatings",
+        "exif_version": "exifVersion",
+        "metering_mode": "meteringMode",
+        "light_source": "lightSource",
+        "flash": "flash",
+        "focal_length": "focalLength",
+        "back_light": "backLight",
+        "exposure_index": "exposureIndex",
+        "sensing_method": "sensingMethod",
+        "cfa_pattern": "cfaPattern",
+        "auto_focus": "autoFocus",
+    }
 
-    rationals = {'oecf': 'oECF', 'shutter_speed_value': 'shutterSpeedValue',
-                 'aperture_value': 'apertureValue',
-                 'brightness_value': 'brightnessValue',
-                 'exposure_bias_value': 'exposureBiasValue',
-                 'max_aperture_value': 'maxApertureValue',
-                 'flash_energy': 'flashEnergy'}
+    rationals = {
+        "oecf": "oECF",
+        "shutter_speed_value": "shutterSpeedValue",
+        "aperture_value": "apertureValue",
+        "brightness_value": "brightnessValue",
+        "exposure_bias_value": "exposureBiasValue",
+        "max_aperture_value": "maxApertureValue",
+        "flash_energy": "flashEnergy",
+    }
 
-    for key in contents:
-        if key not in IMAGE_DATA_CONTENTS:
-            raise ValueError('Key "%s" not in supported keys for '
-                             'image_data.' % key)
+    child_elements = [
+        *_add_simple_elements(contents, tags),
+        *_add_rational_elements(contents, rationals),
+        *add_spectral_sensitivity(),
+        *add_subject_distance(),
+        *add_print_aspect_ratio(),
+    ]
 
-    container = _element('ImageData')
-    child_elements = []
+    container = _element("ImageData")
 
-    for key, value in contents.items():
-        if key in tags and value:
-            elem = _element(tags[key])
-            elem.text = str(value)
-            child_elements.append(elem)
-
-        if key in rationals and value:
-            elem = _rationaltype_element(rationals[key], value)
-            child_elements.append(elem)
-
-    if contents.get("spectral_sensitivity"):
-        spect_sens = _ensure_list(contents["spectral_sensitivity"])
-        for item in spect_sens:
-            spect_sens_el = _element('spectralSensitivity')
-            spect_sens_el.text = item
-            child_elements.append(spect_sens_el)
-
-    if contents.get("distance") or contents.get("min_distance") \
-            or contents.get("max_distance"):
-        subject_distance = _element('SubjectDistance')
-        child_elements.append(subject_distance)
-    if contents.get("distance"):
-        distance_el = _subelement(subject_distance, 'distance')
-        distance_el.text = contents["distance"]
-    if contents.get("min_distance") or contents.get("max_distance"):
-        min_max_distance = _subelement(subject_distance, 'MinMaxDistance')
-    if contents.get("min_distance"):
-        min_distance_el = _subelement(min_max_distance, 'minDistance')
-        min_distance_el.text = contents["min_distance"]
-    if contents.get("max_distance"):
-        max_distance_el = _subelement(min_max_distance, 'maxDistance')
-        max_distance_el.text = contents["max_distance"]
-
-    if contents.get("x_print_aspect_ratio") or \
-            contents.get("y_print_aspect_ratio"):
-        print_ratio = _element('PrintAspectRatio')
-        child_elements.append(print_ratio)
-    if contents.get("x_print_aspect_ratio"):
-        x_print_aspect_ratio_el = _subelement(print_ratio, 'xPrintAspectRatio')
-        x_print_aspect_ratio_el.text = contents["x_print_aspect_ratio"]
-    if contents.get("y_print_aspect_ratio"):
-        y_print_aspect_ratio_el = _subelement(print_ratio, 'yPrintAspectRatio')
-        y_print_aspect_ratio_el.text = contents["y_print_aspect_ratio"]
-
-    child_elements.sort(key=image_data_order)
-
-    for element in child_elements:
-        container.append(element)
-
-    return container
+    return _finalize_container(container, child_elements, image_data_order)
 
 
 def gps_data(
@@ -640,135 +741,127 @@ def gps_data(
     contents dict are matched to create the MIX element and its
     substructure. The dict should look like this::
 
-        contents = {"version_id": None,
-                    "lat_ref": None,
-                    "lat_degrees": None,
-                    "lat_minutes": None,
-                    "lat_seconds": None,
-                    "long_ref": None,
-                    "long_degrees": None,
-                    "long_minutes": None,
-                    "long_seconds": None,
-                    "altitude_ref": None,
-                    "altitude": None,
-                    "timestamp": None,
-                    "satellites": None,
-                    "status": None,
-                    "measure_mode": None,
-                    "dop": None,
-                    "speed_ref": None,
-                    "speed": None,
-                    "track_ref": None,
-                    "track": None,
-                    "img_direction_ref": None,
-                    "direction": None,
-                    "map_datum": None,
-                    "dest_lat_ref": None,
-                    "dest_lat_degrees": None,
-                    "dest_lat_minutes": None,
-                    "dest_lat_seconds": None,
-                    "dest_long_ref": None,
-                    "dest_long_degrees": None,
-                    "dest_long_minutes": None,
-                    "dest_long_seconds": None,
-                    "dest_bearing_ref": None,
-                    "dest_bearing": None,
-                    "dest_distance_ref": None,
-                    "dest_distance": None,
-                    "processing_method": None,
-                    "area_information": None,
-                    "datestamp": None,
-                    "differential": None,
-                    "gps_groups": None}
+        contents = {
+            "version_id": None,
+            "lat_ref": None,
+            "lat_degrees": None,
+            "lat_minutes": None,
+            "lat_seconds": None,
+            "long_ref": None,
+            "long_degrees": None,
+            "long_minutes": None,
+            "long_seconds": None,
+            "altitude_ref": None,
+            "altitude": None,
+            "timestamp": None,
+            "satellites": None,
+            "status": None,
+            "measure_mode": None,
+            "dop": None,
+            "speed_ref": None,
+            "speed": None,
+            "track_ref": None,
+            "track": None,
+            "img_direction_ref": None,
+            "direction": None,
+            "map_datum": None,
+            "dest_lat_ref": None,
+            "dest_lat_degrees": None,
+            "dest_lat_minutes": None,
+            "dest_lat_seconds": None,
+            "dest_long_ref": None,
+            "dest_long_degrees": None,
+            "dest_long_minutes": None,
+            "dest_long_seconds": None,
+            "dest_bearing_ref": None,
+            "dest_bearing": None,
+            "dest_distance_ref": None,
+            "dest_distance": None,
+            "processing_method": None,
+            "area_information": None,
+            "datestamp": None,
+            "differential": None,
+            "gps_groups": None,
+        }
 
     """
     if contents is None:
         contents = {}
 
-    tags = {'version_id': 'gpsVersionID', 'lat_ref': 'gpsLatitudeRef',
-            'long_ref': 'gpsLongitudeRef',
-            'altitude_ref': 'gpsAltitudeRef',
-            'timestamp': 'gpsTimeStamp', 'satellites': 'gpsSatellites',
-            'status': 'gpsStatus',
-            'measure_mode': 'gpsMeasureMode',
-            'speed_ref': 'gpsSpeedRef',
-            'track_ref': 'gpsTrackRef',
-            'img_direction_ref': 'gpsImgDirectionRef',
-            'map_datum': 'gpsMapDatum',
-            'dest_lat_ref': 'gpsDestLatitudeRef',
-            'dest_long_ref': 'gpsDestLongitudeRef',
-            'dest_bearing_ref': 'gpsDestBearingRef',
-            'dest_distance_ref': 'gpsDestDistanceRef',
-            'processing_method': 'gpsProcessingMethod',
-            'area_information': 'gpsAreaInformation',
-            'datestamp': 'gpsDateStamp',
-            'differential': 'gpsDifferential'}
+    _validate_keys(contents, GPS_DATA_CONTENTS, "gps_data")
 
-    rationals = {'altitude': 'gpsAltitude',
-                 'dop': 'gpsDOP',
-                 'speed': 'gpsSpeed',
-                 'track': 'gpsTrack',
-                 'direction': 'gpsImgDirection',
-                 'dest_bearing': 'gpsDestBearing',
-                 'dest_distance': 'gpsDestDistance'}
+    def add_gps_elements(
+        group_tag: Literal[
+            "GPSLatitude",
+            "GPSLongitude",
+            "GPSDestLatitude",
+            "GPSDestLongitude",
+        ],
+    ) -> list[ET._Element]:
+        elements = []
+        prefix = {
+            "GPSLatitude": "lat",
+            "GPSLongitude": "long",
+            "GPSDestLatitude": "dest_lat",
+            "GPSDestLongitude": "dest_long",
+        }[group_tag]
+        if any(
+            contents.get(f"{prefix}_{unit}")
+            for unit in ["degrees", "minutes", "seconds"]
+        ):
+            lat_group = _gps_group(
+                group_tag,
+                degrees=contents[f"{prefix}_degrees"],
+                minutes=contents[f"{prefix}_minutes"],
+                seconds=contents[f"{prefix}_seconds"],
+            )
+            elements.append(lat_group)
+        return elements
 
-    for key in contents:
-        if key not in GPS_DATA_CONTENTS:
-            raise ValueError('Key "%s" not in supported keys '
-                             'for gps_data.' % key)
+    tags = {
+        "version_id": "gpsVersionID",
+        "lat_ref": "gpsLatitudeRef",
+        "long_ref": "gpsLongitudeRef",
+        "altitude_ref": "gpsAltitudeRef",
+        "timestamp": "gpsTimeStamp",
+        "satellites": "gpsSatellites",
+        "status": "gpsStatus",
+        "measure_mode": "gpsMeasureMode",
+        "speed_ref": "gpsSpeedRef",
+        "track_ref": "gpsTrackRef",
+        "img_direction_ref": "gpsImgDirectionRef",
+        "map_datum": "gpsMapDatum",
+        "dest_lat_ref": "gpsDestLatitudeRef",
+        "dest_long_ref": "gpsDestLongitudeRef",
+        "dest_bearing_ref": "gpsDestBearingRef",
+        "dest_distance_ref": "gpsDestDistanceRef",
+        "processing_method": "gpsProcessingMethod",
+        "area_information": "gpsAreaInformation",
+        "datestamp": "gpsDateStamp",
+        "differential": "gpsDifferential",
+    }
 
-    container = _element('GPSData')
-    child_elements = []
+    rationals = {
+        "altitude": "gpsAltitude",
+        "dop": "gpsDOP",
+        "speed": "gpsSpeed",
+        "track": "gpsTrack",
+        "direction": "gpsImgDirection",
+        "dest_bearing": "gpsDestBearing",
+        "dest_distance": "gpsDestDistance",
+    }
 
-    for key, value in contents.items():
-        if key in tags and value:
-            elem = _element(tags[key])
-            elem.text = str(value)
-            child_elements.append(elem)
+    container = _element("GPSData")
+    child_elements = [
+        *_add_simple_elements(contents, tags),
+        *_add_rational_elements(contents, rationals),
+        *add_gps_elements("GPSLatitude"),
+        *add_gps_elements("GPSLongitude"),
+        *add_gps_elements("GPSDestLatitude"),
+        *add_gps_elements("GPSDestLongitude"),
+    ]
 
-        if key in rationals and value:
-            elem = _rationaltype_element(rationals[key], value)
-            child_elements.append(elem)
-
-    if contents.get("lat_degrees") or contents.get("lat_minutes") or \
-            contents.get("lat_seconds"):
-        lat_group = _gps_group('GPSLatitude', degrees=contents["lat_degrees"],
-                               minutes=contents["lat_minutes"],
-                               seconds=contents["lat_seconds"])
-        child_elements.append(lat_group)
-
-    if contents.get("long_degrees") or contents.get("long_minutes") or \
-            contents.get("long_seconds"):
-        long_group = _gps_group('GPSLongitude',
-                                degrees=contents["long_degrees"],
-                                minutes=contents["long_minutes"],
-                                seconds=contents["long_seconds"])
-        child_elements.append(long_group)
-
-    if contents.get("dest_lat_degrees") or \
-            contents.get("dest_lat_minutes") or \
-            contents.get("dest_lat_seconds"):
-        dest_lat_group = _gps_group('GPSDestLatitude',
-                                    degrees=contents["dest_lat_degrees"],
-                                    minutes=contents["dest_lat_minutes"],
-                                    seconds=contents["dest_lat_seconds"])
-        child_elements.append(dest_lat_group)
-
-    if contents.get("dest_long_degrees") or \
-            contents.get("dest_long_minutes") or \
-            contents.get("dest_long_seconds"):
-        dest_long_group = _gps_group('GPSDestLongitude',
-                                     degrees=contents["dest_long_degrees"],
-                                     minutes=contents["dest_long_minutes"],
-                                     seconds=contents["dest_long_seconds"])
-        child_elements.append(dest_long_group)
-
-    child_elements.sort(key=gps_data_order)
-
-    for element in child_elements:
-        container.append(element)
-
-    return container
+    return _finalize_container(container, child_elements, gps_data_order)
 
 
 def _gps_group(
