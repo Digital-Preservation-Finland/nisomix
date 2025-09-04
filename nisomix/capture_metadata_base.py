@@ -15,8 +15,7 @@ References:
 """
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any, Literal
+from typing import Literal
 
 import lxml.etree as ET
 
@@ -25,7 +24,12 @@ from nisomix.base import (
     _ensure_list,
     _rationaltype_element,
     _subelement,
+    add_rational_elements,
+    add_simple_elements,
+    add_subelements,
+    finalize_container,
     mix_ns,
+    validate_keys,
 )
 from nisomix.constants import (
     CAMERA_SENSOR_TYPES,
@@ -514,97 +518,6 @@ def camera_capture_settings(
     return container
 
 
-def _validate_keys(
-    contents: dict[str, Any] | list[str],
-    valid: dict[str, Any] | list[str],
-    context: str,
-) -> None:
-    """Validate that `contents` does not have any keys that `valid` does not
-    have.
-
-    :param contents: List of keys or dictionary.
-    :param valid: List of valid keys of dictionary.
-    :param context: Context for the error message.
-    :raises ValueError: If there are invalid keys.
-    """
-    invalid_keys = set(contents) - set(valid)
-    if invalid_keys:
-        raise ValueError(f"Invalid keys in {context}: {invalid_keys}")
-
-
-def _add_simple_elements(
-    contents: dict[str, Any], tag_map: dict[str, str]
-) -> list[ET._Element]:
-    """Create a list of XML elements from `contents` using tag names in
-    `tag_map`.
-
-    :param contents: Dictionary of data to be converted into XML elements.
-    :param tag_map: Mapping of keys in `contents` to XML tag names.
-    :returns: List of XML elements.
-    """
-    elements = []
-    for key, tag in tag_map.items():
-        value = contents.get(key)
-        if value:
-            el = _element(tag)
-            el.text = str(value)
-            elements.append(el)
-    return elements
-
-
-def _add_rational_elements(
-    contents: dict[str, Any], tag_map: dict[str, str]
-) -> list[ET._Element]:
-    """Create a list rational-type of XML elements from `contents` using tag
-    names in `tag_map`.
-
-    :param contents: Dictionary of data to be converted into XML elements.
-    :param tag_map: Mapping of keys in `contents` to XML tag names.
-    :returns: List of XML elements.
-    """
-    elements = []
-    for key, tag in tag_map.items():
-        value = contents.get(key)
-        if value:
-            el = _rationaltype_element(tag, value)
-            elements.append(el)
-    return elements
-
-
-def _add_subelements(
-    contents: dict[str, Any], parent: ET._Element, tag_map: dict[str, str]
-) -> None:
-    """Add subelements to a parent XML element based on `contents` and
-    `tag_map`.
-
-    :param contents: Dictionary containing values to be added as subelements.
-    :param parent: XML element to add subelements to.
-    :param tag_map: Mapping of keys in `contents` to subelement tag names.
-    """
-    for key, tag in tag_map.items():
-        if value := contents.get(key):
-            el = _subelement(parent, tag)
-            el.text = value
-
-
-def _finalize_container(
-    container: ET._Element,
-    children: list[ET._Element],
-    sort_key: Callable[[ET._Element], int],
-) -> ET._Element:
-    """Sort and append child elements to a container element using a sort key.
-
-    :param container: XML container element to add childer to.
-    :param children: List of XML child elements.
-    :param sort_key: Callable that defines the sort order of child elements.
-    :returns: The container element with sorted and appended children.
-    """
-    children.sort(key=sort_key)
-    for el in children:
-        container.append(el)
-    return container
-
-
 def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     """
     Returns the MIX ImageData element. The function argument contents
@@ -646,7 +559,7 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     if contents is None:
         contents = {}
 
-    _validate_keys(contents, IMAGE_DATA_CONTENTS, "image_data")
+    validate_keys(contents, IMAGE_DATA_CONTENTS, "image_data")
 
     def add_spectral_sensitivity() -> list[ET._Element]:
         elements = []
@@ -665,7 +578,7 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
             subject_distance = _element("SubjectDistance")
             elements.append(subject_distance)
 
-            _add_subelements(
+            add_subelements(
                 contents, subject_distance, {"distance": "distance"}
             )
 
@@ -675,7 +588,7 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
                     "min_distance": "minDistance",
                     "max_distance": "maxDistance",
                 }
-                _add_subelements(contents, min_max, dist_tags)
+                add_subelements(contents, min_max, dist_tags)
         return elements
 
     def add_print_aspect_ratio() -> list[ET._Element]:
@@ -689,7 +602,7 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
                 "y_print_aspect_ratio": "yPrintAspectRatio",
             }
 
-            _add_subelements(contents, print_ratio, ratio_tags)
+            add_subelements(contents, print_ratio, ratio_tags)
         return elements
 
     tags = {
@@ -720,8 +633,8 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
     }
 
     child_elements = [
-        *_add_simple_elements(contents, tags),
-        *_add_rational_elements(contents, rationals),
+        *add_simple_elements(contents, tags),
+        *add_rational_elements(contents, rationals),
         *add_spectral_sensitivity(),
         *add_subject_distance(),
         *add_print_aspect_ratio(),
@@ -729,7 +642,7 @@ def image_data(contents: dict[str, str | None] | None = None) -> ET._Element:
 
     container = _element("ImageData")
 
-    return _finalize_container(container, child_elements, image_data_order)
+    return finalize_container(container, child_elements, image_data_order)
 
 
 def gps_data(
@@ -788,7 +701,7 @@ def gps_data(
     if contents is None:
         contents = {}
 
-    _validate_keys(contents, GPS_DATA_CONTENTS, "gps_data")
+    validate_keys(contents, GPS_DATA_CONTENTS, "gps_data")
 
     def add_gps_elements(
         group_tag: Literal[
@@ -853,15 +766,15 @@ def gps_data(
 
     container = _element("GPSData")
     child_elements = [
-        *_add_simple_elements(contents, tags),
-        *_add_rational_elements(contents, rationals),
+        *add_simple_elements(contents, tags),
+        *add_rational_elements(contents, rationals),
         *add_gps_elements("GPSLatitude"),
         *add_gps_elements("GPSLongitude"),
         *add_gps_elements("GPSDestLatitude"),
         *add_gps_elements("GPSDestLongitude"),
     ]
 
-    return _finalize_container(container, child_elements, gps_data_order)
+    return finalize_container(container, child_elements, gps_data_order)
 
 
 def _gps_group(

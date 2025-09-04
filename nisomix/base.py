@@ -14,8 +14,8 @@ References:
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TypeVar
+from collections.abc import Callable, Sequence
+from typing import Any, TypeVar
 
 import lxml.etree as ET
 from xml_helpers.utils import xsi_ns
@@ -177,3 +177,114 @@ def mix(
             mix_.append(element)
 
     return mix_
+
+
+def add_simple_elements(
+    contents: dict[str, Any], tag_map: dict[str, str] | None = None
+) -> list[ET._Element]:
+    """Create a list of XML elements from `contents` using tag names in
+    `tag_map`.
+
+    :param contents: Dictionary of data to be converted into XML elements.
+    :param tag_map: Mapping of keys in `contents` to XML tag names. Only keys
+        defined here will be added. If None, all keys in `contents` will be
+        used as tags.
+    :returns: List of XML elements.
+    """
+    elements = []
+    keys = tag_map.keys() if tag_map else contents.keys()
+
+    for key in keys:
+        value = contents.get(key)
+        if value is not None:
+            tag = tag_map[key] if tag_map else key
+            el = _element(tag)
+            el.text = str(value)
+            elements.append(el)
+
+    return elements
+
+
+def add_rational_elements(
+    contents: dict[str, Any], tag_map: dict[str, str] | None = None
+) -> list[ET._Element]:
+    """Create a list rational-type of XML elements from `contents` using tag
+    names in `tag_map`.
+
+    :param contents: Dictionary of data to be converted into XML elements.
+    :param tag_map: Mapping of keys in `contents` to XML tag names. Only keys
+        defined here will be added. If None, all keys in `contents` will be
+        used as tags.
+    :returns: List of XML elements.
+    """
+    elements = []
+    keys = tag_map.keys() if tag_map else contents.keys()
+
+    for key in keys:
+        value = contents.get(key)
+        if value is not None:
+            tag = tag_map[key] if tag_map else key
+            el = _rationaltype_element(tag, value)
+            elements.append(el)
+
+    return elements
+
+
+def add_subelements(
+    contents: dict[str, Any],
+    parent: ET._Element,
+    tag_map: dict[str, str] | None = None,
+) -> None:
+    """Add subelements to a parent XML element based on `contents` and
+    `tag_map`.
+
+    :param contents: Dictionary containing values to be added as subelements.
+    :param parent: XML element to add subelements to.
+    :param tag_map: Mapping of keys in `contents` to subelement tag names. Only
+        keys defined here will be added as subelements. If None, all keys in
+        `contents` will be used as tags.
+    """
+    keys = tag_map.keys() if tag_map else contents.keys()
+
+    for key in keys:
+        value = contents.get(key)
+        if value is not None:
+            tag = tag_map[key] if tag_map else key
+            el = _subelement(parent, tag)
+            el.text = str(value)
+
+
+def finalize_container(
+    container: ET._Element,
+    children: list[ET._Element],
+    sort_key: Callable[[ET._Element], int],
+) -> ET._Element:
+    """Sort and append child elements to a container element using a sort key.
+
+    :param container: XML container element to add childer to.
+    :param children: List of XML child elements.
+    :param sort_key: Callable that defines the sort order of child elements.
+    :returns: The container element with sorted and appended children.
+    """
+    children.sort(key=sort_key)
+    for el in children:
+        container.append(el)
+    return container
+
+
+def validate_keys(
+    contents: dict[str, Any] | list[str],
+    valid: dict[str, Any] | list[str],
+    context: str,
+) -> None:
+    """Validate that `contents` does not have any keys that `valid` does not
+    have.
+
+    :param contents: List of keys or dictionary.
+    :param valid: List of valid keys of dictionary.
+    :param context: Context for the error message.
+    :raises ValueError: If there are invalid keys.
+    """
+    invalid_keys = set(contents) - set(valid)
+    if invalid_keys:
+        raise ValueError(f"Invalid keys in {context}: {invalid_keys}")

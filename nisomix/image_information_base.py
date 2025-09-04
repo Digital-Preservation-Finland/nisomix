@@ -16,7 +16,13 @@ from __future__ import annotations
 
 import lxml.etree as ET
 
-from nisomix.base import _element, _rationaltype_element, _subelement
+from nisomix.base import (
+    _element,
+    _rationaltype_element,
+    _subelement,
+    add_rational_elements,
+    add_subelements,
+)
 from nisomix.constants import (
     COMPONENT_INTERPRETATION_TYPES,
     DJVU_FORMATS,
@@ -257,46 +263,38 @@ def ycbcr(
         </mix:YCbCr>
 
     """
-    container = _element('YCbCr')
+    container = _element("YCbCr")
 
     if subsample_horiz or subsample_vert:
-        subsample_container = _subelement(container, 'YCbCrSubSampling')
-        if subsample_horiz:
-            if subsample_horiz in YCBCR_SUBSAMPLE_TYPES:
-                subsample_horiz_el = _subelement(
-                    subsample_container, 'yCbCrSubsampleHoriz')
-                subsample_horiz_el.text = subsample_horiz
-            else:
-                raise RestrictedElementError(
-                    subsample_horiz, 'yCbCrSubsampleHoriz',
-                    YCBCR_SUBSAMPLE_TYPES)
-        if subsample_vert:
-            if subsample_vert in YCBCR_SUBSAMPLE_TYPES:
-                subsample_vert_el = _subelement(
-                    subsample_container, 'yCbCrSubsampleVert')
-                subsample_vert_el.text = subsample_vert
-            else:
-                raise RestrictedElementError(
-                    subsample_vert, 'yCbCrSubsampleVert',
-                    YCBCR_SUBSAMPLE_TYPES)
+        subsample_container = _subelement(container, "YCbCrSubSampling")
+        subsample_contents = {
+            "yCbCrSubsampleHoriz": subsample_horiz,
+            "yCbCrSubsampleVert": subsample_vert,
+        }
+        add_subelements(subsample_contents, subsample_container)
+
+        for key, value in subsample_contents.items():
+            if value and value not in YCBCR_SUBSAMPLE_TYPES:
+                raise RestrictedElementError(value, key, YCBCR_SUBSAMPLE_TYPES)
 
     if positioning:
         if positioning in YCBCR_POSITIONING_TYPES:
-            positioning_el = _subelement(container, 'yCbCrPositioning')
-            positioning_el.text = positioning
+            add_subelements({"yCbCrPositioning": positioning}, container)
         else:
             raise RestrictedElementError(
-                positioning, 'yCbCrPositioning', YCBCR_POSITIONING_TYPES)
+                positioning, "yCbCrPositioning", YCBCR_POSITIONING_TYPES
+            )
 
-    if luma_red or luma_green or luma_blue:
-        luma_container = _subelement(container, 'YCbCrCoefficients')
-        if luma_red:
-            _rationaltype_element('lumaRed', luma_red, parent=luma_container)
-        if luma_green:
-            _rationaltype_element('lumaGreen', luma_green,
-                                  parent=luma_container)
-        if luma_blue:
-            _rationaltype_element('lumaBlue', luma_blue, parent=luma_container)
+    luma_contents = {
+        "lumaRed": luma_red,
+        "lumaGreen": luma_green,
+        "lumaBlue": luma_blue,
+    }
+
+    if any(luma_contents.values()):
+        luma_container = _subelement(container, "YCbCrCoefficients")
+        for el in add_rational_elements(luma_contents):
+            luma_container.append(el)
 
     return container
 

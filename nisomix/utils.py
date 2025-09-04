@@ -1,7 +1,10 @@
 """Utility functions for nisomix."""
+from __future__ import annotations
+
 
 import lxml.etree as ET
 from xml_helpers.utils import XSI_NS
+
 
 MIX_NS = 'http://www.loc.gov/mix/v20'
 
