@@ -218,7 +218,7 @@ def color_profile(
     return container
 
 
-# pylint: disable=too-many-arguments, too-many-branches
+# pylint: disable=too-many-arguments
 def ycbcr(
     subsample_horiz: str | None = None,
     subsample_vert: str | None = None,
@@ -452,43 +452,32 @@ def jpeg2000(
 
     if codec or codec_version or codestream_profile or compliance_class:
         codec_container = _subelement(container, 'CodecCompliance')
-        if codec:
-            codec_el = _subelement(codec_container, 'codec')
-            codec_el.text = codec
-        if codec_version:
-            codec_version_el = _subelement(codec_container, 'codecVersion')
-            codec_version_el.text = codec_version
-        if codestream_profile:
-            codestream_profile_el = _subelement(
-                codec_container, 'codestreamProfile')
-            codestream_profile_el.text = codestream_profile
-        if compliance_class:
-            compliance_class_el = _subelement(
-                codec_container, 'complianceClass')
-            compliance_class_el.text = compliance_class
+        codec_contents = {
+            "codec": codec,
+            "codecVersion": codec_version,
+            "codestreamProfile": codestream_profile,
+            "complianceClass": compliance_class,
+        }
+        add_subelements(codec_contents, codec_container)
 
     tiles_container = None
     if tile_width or tile_height:
         tiles_container = _element('Tiles')
-        if tile_width:
-            tile_width_el = _subelement(tiles_container, 'tileWidth')
-            tile_width_el.text = str(tile_width)
-        if tile_height:
-            tile_height_el = _subelement(tiles_container, 'tileHeight')
-            tile_height_el.text = str(tile_height)
+        tile_contents = {
+            "tileWidth": tile_width,
+            "tileHeight": tile_height,
+        }
+        add_subelements(tile_contents, tiles_container)
 
     if tiles_container is not None or quality_layers or resolution_levels:
         encoding_options = _subelement(container, 'EncodingOptions')
         if tiles_container is not None:
             encoding_options.append(tiles_container)
-        if quality_layers:
-            quality_layers_el = _subelement(
-                encoding_options, 'qualityLayers')
-            quality_layers_el.text = str(quality_layers)
-        if resolution_levels:
-            resolution_levels_el = _subelement(
-                encoding_options, 'resolutionLevels')
-            resolution_levels_el.text = str(resolution_levels)
+        encoding_contents = {
+            "qualityLayers": quality_layers,
+            "resolutionLevels": resolution_levels,
+        }
+        add_subelements(encoding_contents, encoding_options)
 
     return container
 
