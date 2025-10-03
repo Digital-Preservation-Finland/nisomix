@@ -1,5 +1,5 @@
 """Import everything for making convenient use of the library possible"""
-__version__ = '0.17'
+__version__ = '1.0.0'
 
 # flake8 doesn't like these imports, but they are needed for other repos
 # flake8: noqa
